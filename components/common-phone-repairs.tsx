@@ -374,7 +374,6 @@ export function CommonPhoneRepairsSection({
             >
               <h2
                 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground"
-                style={{ fontFamily: "'Comic Sans MS', 'Comic Sans', cursive" }}
               >
                 Common Phone Repairs
               </h2>
