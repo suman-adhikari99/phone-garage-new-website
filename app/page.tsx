@@ -1,6 +1,7 @@
 import { Header } from "@/components/header"
 import { Hero } from "@/components/hero"
-import { Services } from "@/components/services"
+import { ServicesPreview } from "@/components/home/services-preview"
+import { CommonPhoneRepairsSection } from "@/components/common-phone-repairs"
 import { Stats } from "@/components/stats"
 import { About } from "@/components/about"
 import { Process } from "@/components/process"
@@ -16,7 +17,8 @@ export default function Home() {
       <Header />
       <main>
         <Hero />
-        <Services />
+        <ServicesPreview />
+        <CommonPhoneRepairsSection backgroundTheme="white" />
         <Stats />
         <About />
         <Process />
