@@ -264,10 +264,72 @@ const brandLogos: Record<string, React.FC<{ className?: string }>> = {
 
 /* ─── Device categories ─── */
 const deviceCategoryConfig = [
-  { id: "mobile" as DeviceCategory, label: "Mobile", icon: Smartphone, desc: "iPhone, Samsung, Google & more" },
-  { id: "tablet" as DeviceCategory, label: "Tablet / iPad", icon: Tablet, desc: "iPad, Samsung Tab & more" },
-  { id: "laptop" as DeviceCategory, label: "Laptop", icon: Laptop, desc: "MacBook, Dell, HP & more" },
+  {
+    id: "mobile" as DeviceCategory,
+    label: "Mobile",
+    icon: Smartphone,
+    desc: "iPhone, Samsung, Google & more",
+  },
+  {
+    id: "tablet" as DeviceCategory,
+    label: "Tablet / iPad",
+    icon: Tablet,
+    desc: "iPad, Samsung Tab & more",
+  },
+  {
+    id: "laptop" as DeviceCategory,
+    label: "Laptop",
+    icon: Laptop,
+    desc: "MacBook, Dell, HP & more",
+  },
 ]
+
+function DeviceLineDrawing({ type, className }: { type: DeviceCategory; className?: string }) {
+  if (type === "mobile") {
+    return (
+      <svg viewBox="0 0 120 120" fill="none" className={className} aria-hidden="true">
+        <rect x="32" y="10" width="56" height="100" rx="14" stroke="currentColor" strokeWidth="3" />
+        <rect x="38" y="22" width="44" height="72" rx="6" stroke="currentColor" strokeWidth="2.2" opacity="0.9" />
+        <rect x="52" y="15" width="16" height="2.8" rx="1.4" fill="currentColor" />
+        <circle cx="60" cy="102" r="4.5" stroke="currentColor" strokeWidth="2.2" />
+      </svg>
+    )
+  }
+
+  if (type === "tablet") {
+    return (
+      <svg viewBox="0 0 160 120" fill="none" className={className} aria-hidden="true">
+        <rect x="10" y="16" width="140" height="88" rx="14" stroke="currentColor" strokeWidth="3" />
+        <rect x="20" y="24" width="120" height="72" rx="8" stroke="currentColor" strokeWidth="2.2" opacity="0.9" />
+        <circle cx="145" cy="60" r="2.5" fill="currentColor" />
+      </svg>
+    )
+  }
+
+  return (
+    <svg viewBox="0 0 170 120" fill="none" className={className} aria-hidden="true">
+      <rect x="32" y="14" width="106" height="64" rx="6" stroke="currentColor" strokeWidth="3" />
+      <rect x="39" y="21" width="92" height="48" rx="4" stroke="currentColor" strokeWidth="2.2" opacity="0.9" />
+      <path d="M14 90h142l-14 14H28L14 90Z" stroke="currentColor" strokeWidth="3" />
+      <rect x="73" y="93" width="24" height="3" rx="1.5" fill="currentColor" />
+    </svg>
+  )
+}
+
+function OtherDeviceDrawing({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 170 120" fill="none" className={className} aria-hidden="true">
+      <path d="M20 96h130" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" opacity="0.7" />
+      <rect x="24" y="16" width="122" height="74" rx="6" stroke="currentColor" strokeWidth="3" />
+      <rect x="31" y="24" width="108" height="58" rx="4" stroke="currentColor" strokeWidth="2.3" />
+      <path d="M31 78c10 2 21 1 33 2 13 1 26-1 40 0 13 1 24-1 35 0" stroke="currentColor" strokeWidth="2" opacity="0.55" />
+      <path d="M76 90h20l3 14H73l3-14Z" stroke="currentColor" strokeWidth="3" />
+      <path d="M58 108h56" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <path d="M83 42c2-4 6-6 10-6 5 0 9 3 9 8 0 5-3 7-6 9-3 2-5 4-5 8" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" />
+      <circle cx="91" cy="72" r="2" fill="currentColor" />
+    </svg>
+  )
+}
 
 /* ─── Custom dropdown with search + "not listed" custom entry ─── */
 function SelectDropdown({
@@ -558,7 +620,6 @@ export function ServicesPreview() {
             )
           })}
         </div>
-
         {/* ─── Back + breadcrumb ─── */}
         {step > 1 && (
           <div className="mt-4 flex items-center gap-2">
@@ -581,25 +642,41 @@ export function ServicesPreview() {
             <p className="mb-6 text-center text-base font-semibold text-foreground sm:mb-7 sm:text-lg">
               What type of device do you have?
             </p>
-            <div className="mx-auto grid max-w-3xl grid-cols-1 gap-5 sm:grid-cols-3">
+
+            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {deviceCategoryConfig.map((dc) => {
-                const Icon = dc.icon
                 return (
                   <button
                     key={dc.id}
                     onClick={() => handleDeviceSelect(dc.id)}
-                    className="group flex flex-col items-center gap-4 rounded-2xl border-2 border-border bg-card p-8 transition-all duration-200 hover:border-primary hover:shadow-lg"
+                    className="group px-3 pb-4 pt-3 text-center transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary/10 transition-colors group-hover:bg-primary/15">
-                      <Icon className="h-10 w-10 text-primary" />
+                    <div className="flex h-52 items-center justify-center rounded-2xl bg-transparent transition-colors duration-200 group-hover:bg-zinc-100 sm:h-60">
+                      <DeviceLineDrawing
+                        type={dc.id}
+                        className="h-44 w-44 text-zinc-900 transition-transform duration-200 group-hover:scale-105 sm:h-52 sm:w-52"
+                      />
                     </div>
-                    <div className="text-center">
-                      <span className="block text-lg font-bold text-card-foreground">{dc.label}</span>
-                      <span className="mt-1 block text-xs text-muted-foreground">{dc.desc}</span>
+                    <div className="mt-2">
+                      <span className="block text-xl font-semibold tracking-tight text-foreground">{dc.label}</span>
+                      <span className="mt-1 block text-sm leading-snug text-muted-foreground">{dc.desc}</span>
                     </div>
                   </button>
                 )
               })}
+
+              <Link
+                href="/quote"
+                className="group px-3 pb-4 pt-3 text-center transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                <div className="flex h-52 items-center justify-center rounded-2xl bg-transparent transition-colors duration-200 group-hover:bg-zinc-100 sm:h-60">
+                  <OtherDeviceDrawing className="h-44 w-44 text-zinc-900 transition-transform duration-200 group-hover:scale-105 sm:h-52 sm:w-52" />
+                </div>
+                <div className="mt-2">
+                  <span className="block text-xl font-semibold tracking-tight text-foreground">Other</span>
+                  <span className="mt-1 block text-sm leading-snug text-muted-foreground">Smartwatch, desktop, console & more</span>
+                </div>
+              </Link>
             </div>
           </div>
         )}
@@ -690,7 +767,7 @@ export function ServicesPreview() {
             <p className="mb-6 text-center text-base font-semibold text-foreground sm:mb-7 sm:text-lg">
               Choose the service you need
             </p>
-            <div className="mx-auto grid max-w-5xl grid-cols-3 justify-items-center gap-x-3 gap-y-5 sm:grid-cols-4 sm:gap-x-4 sm:gap-y-6 lg:grid-cols-5 lg:gap-x-5 lg:gap-y-7">
+            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
               {serviceCategories.slice(0, 8).map((cat, i) => {
                 const Icon = serviceIconMap[cat.icon] || Settings
                 const isSelected = selectedServiceSlug === cat.slug
@@ -701,20 +778,27 @@ export function ServicesPreview() {
                       type="button"
                       title={cat.name}
                       aria-label={cat.name}
-                      className="group flex w-full max-w-[140px] flex-col items-center text-center transition-transform duration-150 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/25 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                    >
-                      <div className={`flex h-[104px] w-[104px] items-center justify-center rounded-2xl border-2 transition-colors duration-150 sm:h-[116px] sm:w-[116px] ${
+                      className={`group flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition-all duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-4 ${
                         isSelected
-                          ? "border-primary bg-primary/10"
-                          : "border-foreground/55 bg-background group-hover:border-foreground/80 group-hover:bg-secondary/30"
+                          ? "border-primary bg-primary/10 shadow-sm"
+                          : "border-border bg-card hover:border-primary/50 hover:bg-secondary/40"
+                      }`}
+                    >
+                      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border transition-colors duration-200 ${
+                        isSelected
+                          ? "border-primary/40 bg-primary/15 text-primary"
+                          : "border-border bg-background text-foreground/80 group-hover:border-primary/40 group-hover:text-primary"
                       }`}>
-                        {FeaturedServiceGlyph({ slug: cat.slug, className: "h-14 w-14 text-foreground sm:h-16 sm:w-16" }) ?? (
-                          <Icon className="h-14 w-14 text-foreground sm:h-16 sm:w-16" />
-                        )}
+                        <Icon className="h-6 w-6" />
                       </div>
-                      <span className="mt-2.5 text-balance text-[12px] font-medium leading-snug text-foreground/80 line-clamp-2 sm:text-[13px]">
-                        {cat.name}
-                      </span>
+                      <div className="min-w-0">
+                        <p className={`text-sm font-semibold leading-tight ${isSelected ? "text-primary" : "text-card-foreground"}`}>
+                          {cat.name}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                          Fast diagnostics, quality parts, and warranty-backed repair.
+                        </p>
+                      </div>
                     </button>
                   </AnimatedSection>
                 )
@@ -811,6 +895,16 @@ export function ServicesPreview() {
             )}
           </div>
         )}
+
+        <div className="mt-8 text-center sm:mt-10">
+          <Link
+            href="/services"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-background px-5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+          >
+            View All Services
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
       </div>
     </section>
   )
