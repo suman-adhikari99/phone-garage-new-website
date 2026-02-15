@@ -1,8 +1,6 @@
 "use client"
 
-import React from "react"
-
-import { useState } from "react"
+import { useState, type FormEvent } from "react"
 import {
   Phone,
   Mail,
@@ -48,14 +46,14 @@ export function Contact() {
   const { ref: infoRef, isVisible: infoVisible } = useScrollAnimation()
   const [submitted, setSubmitted] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     setSubmitted(true)
     setTimeout(() => setSubmitted(false), 3000)
   }
 
   return (
-    <section id="contact" className="relative bg-background py-20 lg:py-28">
+    <section id="contact-section" className="relative bg-background py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="flex flex-col gap-16 lg:flex-row lg:gap-20">
           {/* Left - Contact form */}

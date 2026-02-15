@@ -104,20 +104,78 @@ export function Testimonials() {
         <div className="absolute -left-32 top-0 h-full w-[42%] rounded-r-[220px] bg-gradient-to-b from-[#1f8f45] via-[#23934a] to-[#2fa355]" />
         <div className="absolute left-[42%] top-1/2 h-[820px] w-[820px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1f8f45]/25 blur-2xl" />
         <svg
-          className="absolute bottom-0 left-0 h-24 w-full sm:h-28 lg:h-32"
-          viewBox="0 0 1440 160"
+          className="absolute -top-8 left-0 h-28 w-full sm:h-32 lg:h-36"
+          viewBox="0 0 1440 180"
           preserveAspectRatio="none"
         >
           <defs>
-            <linearGradient id="testimonialWave" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#1f8f45" stopOpacity="0.15" />
-              <stop offset="60%" stopColor="#2fa355" stopOpacity="0.18" />
+            <linearGradient id="testimonialWaveTop" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#1f8f45" stopOpacity="0.08" />
+              <stop offset="50%" stopColor="#2fa355" stopOpacity="0.16" />
               <stop offset="100%" stopColor="#2fa355" stopOpacity="0.22" />
             </linearGradient>
           </defs>
           <path
-            d="M0,96 C240,160 480,160 720,120 C960,80 1200,0 1440,24 L1440,160 L0,160 Z"
-            fill="url(#testimonialWave)"
+            d="M0,40 C220,120 480,150 720,110 C960,70 1200,10 1440,36 L1440,0 L0,0 Z"
+            fill="url(#testimonialWaveTop)"
+          />
+        </svg>
+        <svg
+          className="absolute left-0 top-[55%] h-20 w-full -translate-y-1/2 opacity-70"
+          viewBox="0 0 1440 120"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient
+              id="testimonialRibbon"
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="0"
+            >
+              <stop offset="0%" stopColor="#1f8f45" stopOpacity="0.1" />
+              <stop offset="55%" stopColor="#2fa355" stopOpacity="0.28" />
+              <stop offset="100%" stopColor="#2fa355" stopOpacity="0.12" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,70 C240,10 520,10 760,60 C1000,110 1240,120 1440,80"
+            stroke="url(#testimonialRibbon)"
+            strokeWidth="8"
+            strokeLinecap="round"
+            fill="none"
+            opacity="0.35"
+          />
+          <path
+            d="M0,70 C240,10 520,10 760,60 C1000,110 1240,120 1440,80"
+            stroke="url(#testimonialRibbon)"
+            strokeWidth="2"
+            strokeLinecap="round"
+            fill="none"
+            opacity="0.7"
+          />
+        </svg>
+        <svg
+          className="absolute bottom-0 left-0 h-28 w-full sm:h-32 lg:h-40"
+          viewBox="0 0 1440 180"
+          preserveAspectRatio="none"
+        >
+          <defs>
+            <linearGradient
+              id="testimonialWaveBottom"
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="0"
+            >
+              <stop offset="0%" stopColor="#1f8f45" stopOpacity="0.16" />
+              <stop offset="60%" stopColor="#2fa355" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#2fa355" stopOpacity="0.28" />
+            </linearGradient>
+          </defs>
+          <path
+            d="M0,96 C240,168 520,170 760,124 C1000,78 1240,0 1440,24 L1440,180 L0,180 Z"
+            fill="url(#testimonialWaveBottom)"
           />
         </svg>
       </div>
@@ -129,30 +187,22 @@ export function Testimonials() {
             isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
+          <div className="mb-8 max-w-3xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#2f9f53]">
+              Business-ready, customer-first
+            </p>
+            <h2 className="mt-2 text-2xl font-semibold text-slate-900 sm:text-3xl">
+              Transparent quotes. Fast turnaround. Warranty-backed parts.
+            </h2>
+            <p className="mt-3 text-base text-slate-600">
+              We keep your team productive with honest pricing, same-day repairs
+              where possible, and service you can trust.
+            </p>
+          </div>
           <div className="relative overflow-hidden rounded-[18px] border border-[#e3e8f0] bg-white p-8 shadow-[0_35px_90px_-50px_rgba(15,23,42,0.35)] md:p-12 lg:p-16">
-            <svg
-              className="pointer-events-none absolute top-0 left-0 h-24 w-full sm:h-28 lg:h-32"
-              viewBox="0 0 1440 160"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M0,120 C220,160 520,140 760,80 C1000,20 1240,0 1440,60 L1440,0 L0,0 Z"
-                fill="rgba(46,163,85,0.22)"
-              />
-            </svg>
-            <svg
-              className="pointer-events-none absolute bottom-0 left-0 h-24 w-full sm:h-28 lg:h-32"
-              viewBox="0 0 1440 160"
-              preserveAspectRatio="none"
-            >
-              <path
-                d="M0,120 C220,160 520,140 760,80 C1000,20 1240,0 1440,60 L1440,160 L0,160 Z"
-                fill="rgba(46,163,85,0.22)"
-              />
-            </svg>
             <div className="mb-10">
               <span className="block h-[3px] w-9 rounded-full bg-[#2f9f53]" />
-              <p className="mt-3 text-sm font-semibold text-slate-700">
+              <p className="mt-4 text-sm font-semibold text-slate-700">
                 Customer Reviews
               </p>
             </div>

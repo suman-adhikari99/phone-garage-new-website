@@ -30,7 +30,10 @@ const footerLinks = {
 
 export function Footer() {
   return (
-    <footer className="bg-[#0a0a0a] text-[#9ca3af]">
+    <footer
+      id="site-footer"
+      className="fixed inset-x-0 bottom-0 z-0 bg-[#0a0a0a] text-[#9ca3af]"
+    >
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         {/* Main footer */}
         <div className="grid gap-12 py-16 sm:grid-cols-2 lg:grid-cols-4">

@@ -50,9 +50,6 @@ export function Process() {
               : "translate-y-8 opacity-0"
           }`}
         >
-          <span className="mb-4 inline-block rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
-            How It Works
-          </span>
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl text-balance">
             Simple <span className="text-primary">4-Step</span> Repair Process
           </h2>

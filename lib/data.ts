@@ -643,12 +643,46 @@ export const reviews = [
 ]
 
 export const faqs = [
-  { question: "How long does a typical repair take?", answer: "Most repairs are completed within 30-60 minutes while you wait. More complex repairs like water damage or data recovery may take 1-3 hours. We'll give you an accurate estimate before starting any work." },
-  { question: "Do you use genuine parts?", answer: "We use premium quality parts that meet or exceed OEM specifications. All our parts come with a warranty, and we're transparent about the parts we use for every repair." },
-  { question: "Is there a warranty on repairs?", answer: "Yes, all our repairs come with a minimum 6-month warranty. Screen repairs and battery replacements include a 12-month warranty. If anything goes wrong, bring it back and we'll fix it at no extra cost." },
-  { question: "Do I need an appointment?", answer: "Walk-ins are welcome at all our locations. However, booking online ensures we have the right parts ready for your device and reduces your wait time. We recommend booking for the fastest experience." },
-  { question: "How much does a screen repair cost?", answer: "Screen repair costs vary depending on your device model. Use our booking tool or get a quote for an instant estimate. We pride ourselves on transparent, competitive pricing with no hidden fees." },
-  { question: "Can you recover data from a broken phone?", answer: "In most cases, yes. Our data recovery specialists can retrieve photos, contacts, and files from devices with screen damage, water damage, or software issues. Contact us for a free assessment." },
+  {
+    question: "What types of devices do you repair?",
+    answer:
+      "Mobile Pitstop repairs phones, tablets, laptops, MacBooks, and game consoles including PlayStation, Xbox, and Nintendo Switch.",
+  },
+  {
+    question: "How long does a typical repair take?",
+    answer:
+      "Most repairs are completed on the spot while you shop. Some complex repairs or rare parts may require a few days.",
+  },
+  {
+    question: "Do you offer a warranty on repairs?",
+    answer:
+      "Yes, all our repairs come with a six-month warranty for your peace of mind.",
+  },
+  {
+    question: "Can I get a free quote before approving repairs?",
+    answer:
+      "Absolutely! We provide free quotes for all devices, and you will only pay if you decide to proceed with the repair.",
+  },
+  {
+    question: "Do you use original parts for repairs?",
+    answer:
+      "We stock both OEM (original) and high-quality aftermarket parts to suit your needs and budget.",
+  },
+  {
+    question: "Do I need an appointment, or can I walk in?",
+    answer:
+      "No appointment necessary—walk-ins are welcome. You can also mail in your device for repair if you can't visit in person.",
+  },
+  {
+    question: "Are your technicians qualified and experienced?",
+    answer:
+      "Our team has over 10 years of experience and consistently upholds high standards in all repair services.",
+  },
+  {
+    question: "Is my data safe during repair?",
+    answer:
+      "We treat customer privacy seriously, but recommend backing up your device before bringing it in for service.",
+  },
 ]
 
 export function getModelsByBrand(brandId: string): Model[] {
