@@ -1,10 +1,10 @@
 "use client"
 
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense } from "react"
 import { AnimatedSection } from "../animated-section"
 import { BookingModule } from "../booking-module"
-import { Shield, Clock, Award, Phone, Mail, MapPin, CheckCircle } from "lucide-react"
+import { Shield, Clock, Award, Phone, Mail, MapPin, CheckCircle, ArrowLeft } from "lucide-react"
 
 const benefits = [
   { icon: Clock, text: "Same-day repairs available" },
@@ -14,6 +14,7 @@ const benefits = [
 
 function BookRepairContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
 
   const brand = searchParams.get("brand") || undefined
   const model = searchParams.get("model") || undefined
@@ -26,12 +27,30 @@ function BookRepairContent() {
 
   const hasPreselection = !!(brand && model && serviceName)
 
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+    router.push("/")
+  }
+
   return (
     <div>
       {/* Hero strip */}
       <section className="border-b border-border py-8 lg:py-14">
         <div className="mx-auto max-w-5xl px-5 sm:px-6 lg:px-8 text-center">
           <AnimatedSection>
+            <div className="mb-4 flex justify-start sm:mb-5">
+              <button
+                type="button"
+                onClick={handleGoBack}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Go Back
+              </button>
+            </div>
             <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
               {hasPreselection ? "Complete Your Booking" : "Book a Repair"}
             </h1>

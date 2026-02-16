@@ -237,7 +237,6 @@ export function CommonPhoneRepairsSection({
   backgroundTheme = "white",
   customAccentColor,
 }: CommonPhoneRepairsSectionProps) {
-  const [modelLoaded, setModelLoaded] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
   const bgRef = useRef<HTMLDivElement>(null)
   const [sectionVisible, setSectionVisible] = useState(false)
@@ -294,8 +293,7 @@ export function CommonPhoneRepairsSection({
       <Script
         src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.5.0/model-viewer.min.js"
         type="module"
-        strategy="lazyOnload"
-        onLoad={() => setModelLoaded(true)}
+        strategy="afterInteractive"
       />
 
       <section
@@ -309,7 +307,7 @@ export function CommonPhoneRepairsSection({
             THE BOX — framed container with parallax gradient ground
         ═══════════════════════════════════════════ */}
         <div className="relative rounded-2xl border border-border overflow-hidden">
-          {/* Animated background -- Mobile Pitstop style video */}
+          {/* Animated background -- Phone Garage style video */}
           <HeroBackgroundVideo />
 
           {/* ═══ PARALLAX GROUND TEXTURE — inside box, moves on scroll only ═══ */}
@@ -416,38 +414,25 @@ export function CommonPhoneRepairsSection({
                     style={{ background: "radial-gradient(ellipse at center, rgba(60,176,67,0.12) 0%, transparent 70%)" }}
                   />
 
-                  {modelLoaded ? (
-                    <div
-                      className="w-full h-full"
-                      dangerouslySetInnerHTML={{
-                        __html: `
-                          <model-viewer
-                            src="/models/iphone.glb"
-                            auto-rotate
-                            camera-controls
-                            rotation-per-second="30deg"
-                            interaction-prompt="none"
-                            camera-orbit="0deg 75deg 105%"
-                            min-camera-orbit="auto auto auto"
-                            max-camera-orbit="auto auto 200%"
-                            field-of-view="30deg"
-                            ar
-                            tone-mapping="commerce"
-                            shadow-intensity="1.2"
-                            shadow-softness="0.8"
-                            exposure="1.0"
-                            environment-image="neutral"
-                            style="width:100%;height:100%;cursor:grab;--poster-color:transparent;"
-                          >
-                          </model-viewer>
-                        `,
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <div className="w-10 h-10 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-                    </div>
-                  )}
+                  {React.createElement("model-viewer", {
+                    src: "/models/iphone.glb",
+                    "loading": "eager",
+                    "auto-rotate": true,
+                    "camera-controls": true,
+                    "rotation-per-second": "30deg",
+                    "interaction-prompt": "none",
+                    "camera-orbit": "0deg 75deg 105%",
+                    "min-camera-orbit": "auto auto auto",
+                    "max-camera-orbit": "auto auto 200%",
+                    "field-of-view": "30deg",
+                    ar: true,
+                    "tone-mapping": "commerce",
+                    "shadow-intensity": "1.2",
+                    "shadow-softness": "0.8",
+                    exposure: "1.0",
+                    "environment-image": "neutral",
+                    style: { width: "100%", height: "100%", cursor: "grab", ["--poster-color" as string]: "transparent" },
+                  } as React.HTMLAttributes<HTMLElement>)}
                 </div>
               </div>
 

@@ -646,7 +646,7 @@ export const faqs = [
   {
     question: "What types of devices do you repair?",
     answer:
-      "Mobile Pitstop repairs phones, tablets, laptops, MacBooks, and game consoles including PlayStation, Xbox, and Nintendo Switch.",
+      "Phone Garage repairs phones, tablets, laptops, MacBooks, and game consoles including PlayStation, Xbox, and Nintendo Switch.",
   },
   {
     question: "How long does a typical repair take?",

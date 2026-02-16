@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils"
 
 /**
- * Mobile Pitstop style hero background.
+ * Phone Garage style hero background.
  * Large, soft, white/off-white shapes drifting slowly on a white background.
  * Uses inline @keyframes via style tag to guarantee animations work
  * regardless of globals.css loading order.

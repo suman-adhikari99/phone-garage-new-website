@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { AnimatedSection } from "../animated-section"
 import { serviceCategories, brands } from "../../lib/data"
 import {
@@ -9,7 +10,7 @@ import {
   Volume2, Mic, Headphones, Power, Fingerprint, Vibrate, ScanFace, Monitor, Hand,
   Wifi, Signal, CreditCard, ArrowLeftRight, ShieldAlert, Shield, Unlock,
   Keyboard, CircuitBoard, FlipVertical, Thermometer, MemoryStick, MousePointer,
-  Search, Clock, DollarSign, Star, Phone, Wrench, ChevronRight, X,
+  Search, Clock, DollarSign, Star, Phone, Wrench, ChevronRight, X, ArrowLeft,
 } from "lucide-react"
 
 const iconMap: Record<string, React.ElementType> = {
@@ -129,11 +130,20 @@ const startingPrices: Record<string, string> = {
 }
 
 export function ServicesPage() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [activeGroup, setActiveGroup] = useState<string | null>(null)
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const tabsRef = useRef<HTMLDivElement>(null)
   const [isSticky, setIsSticky] = useState(false)
+
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+    router.push("/")
+  }
 
   /* Track when tabs become sticky */
   useEffect(() => {
@@ -199,6 +209,16 @@ export function ServicesPage() {
       <section className="border-b border-border bg-background-secondary py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <AnimatedSection>
+            <div className="mb-5">
+              <button
+                type="button"
+                onClick={handleGoBack}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </button>
+            </div>
             <p className="text-sm font-semibold uppercase tracking-wider text-primary">Services</p>
             <h1 className="mt-3 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
               What can we fix for you?
@@ -320,7 +340,7 @@ export function ServicesPage() {
                   {group.slugs.map((slug, si) => {
                     const cat = serviceCategories.find((c) => c.slug === slug)
                     if (!cat) return null
-                    const Icon = iconMap[cat.icon] || Settings
+                    const Icon = (iconMap[cat.icon] || Settings) as React.ComponentType<{ className?: string }>
                     const isPopular = popularSlugs.has(slug)
                     const price = startingPrices[slug]
 

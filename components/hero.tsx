@@ -1,7 +1,5 @@
 "use client"
 
-import React from "react"
-
 import { useEffect, useState, useRef, useCallback } from "react"
 import {
   ArrowRight,
@@ -11,24 +9,22 @@ import {
   Star,
   PhoneCall,
   Smartphone,
+  SmartphoneNfc,
+  Search,
+  ChevronRight,
+  Laptop,
+  Tablet,
+  Watch,
   Monitor,
   Battery,
   Camera,
   Cpu,
   Wifi,
-  Volume2,
-  Zap,
-  Settings,
-  HardDrive,
-  FolderOpen,
   Droplets,
-  CircuitBoard,
   Wrench,
   CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  Loader2,
-  ShieldCheck,
+  CircleAlert,
+  type LucideIcon,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion, useInView, AnimatePresence } from "framer-motion"
@@ -147,371 +143,545 @@ const fadeUp = {
 
 /* ================================================================== */
 /*                                                                      */
-/*  REPAIR SCENARIOS + DIAGNOSTIC ENGINE                                */
+/*  REPAIR TRACKER STEPS (inside the phone)                             */
 /*                                                                      */
 /* ================================================================== */
-type ComponentStatus = "ok" | "issue" | "warning"
+const TRACKING_STEPS = [
+  { id: 0, label: "Select", icon: Smartphone, duration: 3000 },
+  { id: 1, label: "Diagnose", icon: Search, duration: 7000 },
+  { id: 2, label: "Repair", icon: Wrench, duration: 7600 },
+  { id: 3, label: "Done", icon: CheckCircle2, duration: 5200 },
+]
 
-type IconProps = {
-  className?: string
-  style?: React.CSSProperties
-}
-
-interface DiagComponent {
+type TrackingDevice = {
   name: string
-  Icon: React.ComponentType<IconProps>
-  status: ComponentStatus
+  kind: string
+  note: string
+  color: string
+  icon: LucideIcon
+  logoGif?: string
 }
 
-interface RepairScenario {
-  device: string
-  DeviceIcon: React.ComponentType<IconProps>
-  issue: string
-  repairLabel: string
-  components: DiagComponent[]
-}
-
-const SCENARIOS: RepairScenario[] = [
+const TRACKING_DEVICES: TrackingDevice[] = [
   {
-    device: "iPhone 15 Pro",
-    DeviceIcon: Smartphone,
-    issue: "Cracked Display",
-    repairLabel: "Screen Replacement",
-    components: [
-      { name: "Display", Icon: Monitor, status: "issue" },
-      { name: "Touch IC", Icon: Cpu, status: "warning" },
-      { name: "Battery", Icon: Battery, status: "ok" },
-      { name: "Camera", Icon: Camera, status: "ok" },
-    ],
+    name: "Android",
+    kind: "Phone",
+    note: "Display, charging, battery",
+    color: "#34A853",
+    icon: SmartphoneNfc,
+    logoGif: "https://img.icons8.com/cotton/64/iphone-x--v2.png",
   },
   {
-    device: "Samsung S24 Ultra",
-    DeviceIcon: Smartphone,
-    issue: "Water Damage",
-    repairLabel: "Water Recovery",
-    components: [
-      { name: "Logic Board", Icon: CircuitBoard, status: "issue" },
-      { name: "Speaker", Icon: Volume2, status: "issue" },
-      { name: "Battery", Icon: Battery, status: "warning" },
-      { name: "Display", Icon: Monitor, status: "ok" },
-    ],
+    name: "iPhone",
+    kind: "Phone",
+    note: "Screen, camera, back glass",
+    color: "#2563eb",
+    icon: Smartphone,
+    logoGif: "https://img.icons8.com/dotty/80/iphone17-pro.png",
   },
   {
-    device: "Google Pixel 8",
-    DeviceIcon: Smartphone,
-    issue: "Software Failure",
-    repairLabel: "Software Recovery",
-    components: [
-      { name: "System OS", Icon: Settings, status: "issue" },
-      { name: "Firmware", Icon: HardDrive, status: "issue" },
-      { name: "User Data", Icon: FolderOpen, status: "warning" },
-      { name: "Wi-Fi", Icon: Wifi, status: "ok" },
-    ],
+    name: "Laptop",
+    kind: "Laptop",
+    note: "Logic board, keyboard, SSD",
+    color: "#0ea5e9",
+    icon: Laptop,
+    logoGif: "https://img.icons8.com/glyph-neue/64/mac-book-air.png",
   },
   {
-    device: "iPad Pro M2",
-    DeviceIcon: Smartphone,
-    issue: "Charging Failure",
-    repairLabel: "Port Replacement",
-    components: [
-      { name: "Charge Port", Icon: Zap, status: "issue" },
-      { name: "Power IC", Icon: Cpu, status: "warning" },
-      { name: "Battery", Icon: Battery, status: "warning" },
-      { name: "Display", Icon: Monitor, status: "ok" },
-    ],
+    name: "Tablet",
+    kind: "Tablet",
+    note: "Touch panel, battery, charge",
+    color: "#8b5cf6",
+    icon: Tablet,
+    logoGif: "https://img.icons8.com/ios/50/ipad.png",
+  },
+  {
+    name: "Smart Watch",
+    kind: "Watch",
+    note: "Screen, battery, side crown",
+    color: "#f59e0b",
+    icon: Watch,
+    logoGif: "https://img.icons8.com/glyph-neue/64/apple-watch.png",
   },
 ]
 
-const STAGE_MS = [2200, 2000, 2800, 2600]
+const TRACKING_DIAG_ITEMS = [
+  { label: "Display Module", icon: Monitor, status: "issue", detail: "Cracked OLED panel" },
+  { label: "Battery Health", icon: Battery, status: "good", detail: "92% capacity" },
+  { label: "Camera System", icon: Camera, status: "good", detail: "All lenses functional" },
+  { label: "Water Indicators", icon: Droplets, status: "good", detail: "No water damage" },
+  { label: "Logic Board", icon: Cpu, status: "good", detail: "All circuits normal" },
+] as const
 
-/* ------------------------------------------------------------------ */
-/*  Status helpers                                                      */
-/* ------------------------------------------------------------------ */
-function getStatusDisplay(
-  comp: DiagComponent,
-  stage: number,
-  scanIdx: number,
-  rowIdx: number
-): { label: string; color: string; BgIcon: React.ComponentType<IconProps> | null } {
-  if (stage === 0) {
-    if (rowIdx <= scanIdx) return { label: "Scanned", color: "rgba(255,255,255,0.35)", BgIcon: null }
-    return { label: "Queued", color: "rgba(255,255,255,0.15)", BgIcon: null }
-  }
-  if (stage === 3) {
-    if (comp.status === "ok") return { label: "Passed", color: "#3CB043", BgIcon: CheckCircle2 }
-    return { label: "Repaired", color: "#3CB043", BgIcon: CheckCircle2 }
-  }
-  if (comp.status === "ok") return { label: "Healthy", color: "#3CB043", BgIcon: CheckCircle2 }
-  if (comp.status === "issue") {
-    if (stage >= 2) return { label: "Repairing", color: "#3CB043", BgIcon: Wrench }
-    return { label: "Failed", color: "#ef4444", BgIcon: XCircle }
-  }
-  if (stage >= 2) return { label: "Verified", color: "#3CB043", BgIcon: CheckCircle2 }
-  return { label: "Warning", color: "#f59e0b", BgIcon: AlertTriangle }
-}
-
-function stageBorderColor(comp: DiagComponent, stage: number, isScanning: boolean): string {
-  if (isScanning) return "rgba(60,176,67,0.3)"
-  if (stage === 0) return "#e5e5e5"
-  if (stage === 3) return "rgba(60,176,67,0.25)"
-  if (comp.status === "issue") return stage >= 2 ? "rgba(60,176,67,0.25)" : "rgba(239,68,68,0.3)"
-  if (comp.status === "warning") return stage >= 2 ? "rgba(60,176,67,0.2)" : "rgba(245,158,11,0.3)"
-  return "rgba(60,176,67,0.15)"
-  }
-  
-function stageBgColor(comp: DiagComponent, stage: number, isScanning: boolean): string {
-  if (isScanning) return "rgba(60,176,67,0.06)"
-  if (stage === 0) return "#ffffff"
-  if (stage === 3) return "rgba(60,176,67,0.04)"
-  if (comp.status === "issue") return stage >= 2 ? "rgba(60,176,67,0.04)" : "rgba(239,68,68,0.04)"
-  if (comp.status === "warning") return stage >= 2 ? "rgba(60,176,67,0.03)" : "rgba(245,158,11,0.04)"
-  return "#ffffff"
-  }
-
-/* ================================================================== */
-/*                                                                      */
-/*  SCREEN STATUS CARD (inside the phone)                               */
-/*                                                                      */
-/* ================================================================== */
 function ScreenStatusCard() {
-  const [scenarioIdx, setScenarioIdx] = useState(0)
-  const [stage, setStage] = useState(0)
-  const [scanIdx, setScanIdx] = useState(-1)
+  const [step, setStep] = useState(0)
+  const [cycleKey, setCycleKey] = useState(0)
+  const [progress, setProgress] = useState(0)
+  const [selectRevealIdx, setSelectRevealIdx] = useState(0)
+  const [diagnosisIdx, setDiagnosisIdx] = useState(0)
+  const [selectedDevice, setSelectedDevice] = useState(-1)
+  const [repairPercent, setRepairPercent] = useState(0)
 
-  const scenario = SCENARIOS[scenarioIdx]
+  const runCycle = useCallback(() => {
+    setStep(0)
+    setProgress(0)
+    setSelectRevealIdx(0)
+    setDiagnosisIdx(0)
+    setSelectedDevice(-1)
+    setRepairPercent(0)
 
-  const advance = useCallback(() => {
-    setScenarioIdx((p) => (p + 1) % SCENARIOS.length)
-    setStage(0)
-    setScanIdx(-1)
+    const selectTimers: ReturnType<typeof setTimeout>[] = []
+    for (let i = 0; i < TRACKING_DEVICES.length; i++) {
+      selectTimers.push(setTimeout(() => setSelectRevealIdx(i + 1), 320 + i * 450))
+    }
+    const t0 = setTimeout(() => setSelectedDevice(0), 800)
+    const t0b = setTimeout(() => setStep(1), TRACKING_STEPS[0].duration)
+
+    const diagTimers: ReturnType<typeof setTimeout>[] = []
+    const diagStart = TRACKING_STEPS[0].duration
+    for (let i = 0; i < TRACKING_DIAG_ITEMS.length; i++) {
+      diagTimers.push(setTimeout(() => setDiagnosisIdx(i + 1), diagStart + 700 + i * 850))
+    }
+    const t1 = setTimeout(() => setStep(2), diagStart + TRACKING_STEPS[1].duration)
+
+    const repairStart = diagStart + TRACKING_STEPS[1].duration
+    const repairTicks: ReturnType<typeof setTimeout>[] = []
+    const totalTicks = 30
+    for (let i = 0; i <= totalTicks; i++) {
+      repairTicks.push(
+        setTimeout(
+          () => setRepairPercent(Math.round((i / totalTicks) * 100)),
+          repairStart + (i / totalTicks) * (TRACKING_STEPS[2].duration - 600)
+        )
+      )
+    }
+    const t2 = setTimeout(() => setStep(3), repairStart + TRACKING_STEPS[2].duration)
+
+    const completeStart = repairStart + TRACKING_STEPS[2].duration
+    const tReset = setTimeout(() => setCycleKey((k) => k + 1), completeStart + TRACKING_STEPS[3].duration)
+
+    return () => {
+      clearTimeout(t0)
+      clearTimeout(t0b)
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(tReset)
+      selectTimers.forEach(clearTimeout)
+      diagTimers.forEach(clearTimeout)
+      repairTicks.forEach(clearTimeout)
+    }
   }, [])
 
   useEffect(() => {
-    let dead = false
-    const timers: ReturnType<typeof setTimeout>[] = []
+    const cleanup = runCycle()
+    return cleanup
+  }, [cycleKey, runCycle])
 
-    // Scan each row
-    for (let i = 0; i < scenario.components.length; i++) {
-      timers.push(setTimeout(() => { if (!dead) setScanIdx(i) }, 300 * (i + 1)))
-    }
+  useEffect(() => {
+    setProgress(step)
+  }, [step])
 
-    // Stage transitions
-    let acc = 0
-    for (let s = 1; s <= 3; s++) {
-      acc += STAGE_MS[s - 1]
-      const ns = s
-      timers.push(setTimeout(() => { if (!dead) setStage(ns) }, acc))
-    }
-
-    acc += STAGE_MS[3]
-    timers.push(setTimeout(() => { if (!dead) advance() }, acc))
-
-    return () => { dead = true; timers.forEach(clearTimeout) }
-  }, [scenarioIdx, scenario.components.length, advance])
-
-  const stageLabel = [
-    "Diagnosing components\u2026",
-    `Found: ${scenario.issue}`,
-    `${scenario.repairLabel}\u2026`,
-    "All systems operational",
-  ][stage]
-
-  const stageColor = [
-    "#3CB043",
-    stage === 1 ? "#f59e0b" : "#3CB043",
-    "#3CB043",
-    "#3CB043",
-  ][stage]
-
-  const pct = [20, 50, 82, 100][stage]
-
-  const issueCount = scenario.components.filter((c) => c.status !== "ok").length
-  const passedCount = stage === 3 ? scenario.components.length : scenario.components.filter((c) => c.status === "ok").length
+  const activeDeviceName = TRACKING_DEVICES[Math.max(selectedDevice, 0)]?.name ?? TRACKING_DEVICES[0].name
 
   return (
-    <div className="flex flex-col gap-2">
-      {/* ------ Device header ------ */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={scenarioIdx}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          className="flex items-center gap-3 rounded-xl bg-white border border-[#e5e5e5] px-4 py-3 shadow-sm"
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#3CB043]/10">
-            <scenario.DeviceIcon className="h-5 w-5 text-[#3CB043]" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold text-[#1c1c1e] leading-tight">{scenario.device}</p>
-            <p className="text-[11px] text-[#8e8e93] leading-tight mt-0.5">{scenario.issue}</p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-50" style={{ backgroundColor: stageColor }} />
-              <span className="relative inline-flex h-2 w-2 rounded-full" style={{ backgroundColor: stageColor }} />
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: stageColor }}>
-              {stage === 3 ? "Done" : "Live"}
-            </span>
-          </div>
-        </motion.div>
-      </AnimatePresence>
-
-      {/* ------ Progress ------ */}
-      <div className="rounded-xl bg-white border border-[#e5e5e5] px-4 py-3 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={`${scenarioIdx}-${stage}`}
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              className="text-[12px] font-semibold leading-none"
-              style={{ color: stageColor }}
-            >
-              {stageLabel}
-            </motion.span>
-          </AnimatePresence>
-          <span className="text-[11px] text-[#8e8e93] font-mono tabular-nums">{pct}%</span>
+    <div className="h-full px-3.5 py-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[15px] font-bold text-[#1c1c1e] leading-none">Repair Tracker</p>
+          <p className="mt-0.5 text-[12px] text-[#8e8e93]">Live repair status</p>
         </div>
-        <div className="h-[6px] w-full overflow-hidden rounded-full bg-[#e5e5ea]">
-          <motion.div
-            className="h-full rounded-full"
-            style={{ backgroundColor: stageColor }}
-            animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.8, ease: [0.33, 1, 0.68, 1] }}
-          />
-        </div>
-        {/* Mini stats row */}
-        <div className="mt-2 flex items-center gap-4">
-          <span className="text-[10px] text-[#8e8e93]">
-            <span className="font-semibold text-[#3CB043]">{passedCount}</span> passed
+        <div className="flex items-center gap-1">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3CB043] opacity-70" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#3CB043]" />
           </span>
-          {stage >= 1 && stage < 3 && (
-            <span className="text-[10px] text-[#8e8e93]">
-              <span className="font-semibold text-[#ef4444]">{issueCount}</span> {issueCount === 1 ? "issue" : "issues"}
-            </span>
-          )}
-          {stage === 3 && (
-            <span className="text-[10px] text-[#8e8e93]">
-              <span className="font-semibold text-[#3CB043]">{issueCount}</span> repaired
-            </span>
-          )}
+          <span className="text-[12px] font-semibold text-[#3CB043]">Live</span>
         </div>
       </div>
 
-      {/* ------ Component rows ------ */}
-      <div className="flex flex-col gap-1.5">
-        {scenario.components.map((comp, i) => {
-          const isScanning = stage === 0 && i === scanIdx
-          const sd = getStatusDisplay(comp, stage, scanIdx, i)
+      <div className="mt-2 flex items-center justify-between gap-1.5">
+        {TRACKING_STEPS.map((s, i) => {
+          const Icon = s.icon
+          const isActive = step === i
+          const isDone = step > i
           return (
-            <motion.div
-              key={`${scenarioIdx}-${comp.name}`}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{
-                opacity: 1,
-                x: 0,
-                backgroundColor: stageBgColor(comp, stage, isScanning),
-                borderColor: stageBorderColor(comp, stage, isScanning),
-              }}
-              transition={{ duration: 0.3, delay: i * 0.05 }}
-              className="flex items-center justify-between rounded-xl bg-white px-3.5 py-2.5"
-              style={{ border: "1px solid #e5e5e5" }}
-            >
-              {/* Left: icon + name */}
-              <div className="flex items-center gap-2.5">
-                <div
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-                  style={{
-                    backgroundColor: isScanning
-                      ? "rgba(60,176,67,0.12)"
-                      : comp.status === "issue" && stage >= 1 && stage < 3
-                        ? "rgba(239,68,68,0.1)"
-                        : comp.status === "warning" && stage >= 1 && stage < 3
-                          ? "rgba(245,158,11,0.1)"
-                          : stage === 3
-                            ? "rgba(60,176,67,0.1)"
-                            : "#f2f2f7",
+            <div key={s.id} className="flex items-center gap-1.5">
+              <div className="flex flex-col items-center">
+                <motion.div
+                  className="flex h-7 w-7 items-center justify-center rounded-full border"
+                  animate={{
+                    borderColor: isDone || isActive ? "#3CB043" : "#d1d5db",
+                    backgroundColor: isDone ? "#3CB043" : "rgba(0,0,0,0)",
                   }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <comp.Icon
-                    className="h-4 w-4"
-                    style={{
-                      color: isScanning
-                        ? "#3CB043"
-                        : comp.status === "issue" && stage >= 1 && stage < 3
-                          ? "#ef4444"
-                          : comp.status === "warning" && stage >= 1 && stage < 3
-                            ? "#f59e0b"
-                            : stage === 3
-                              ? "#3CB043"
-                              : "#8e8e93",
-                    }}
+                  {isDone ? (
+                    <CheckCircle2 className="h-4.5 w-4.5 text-white" />
+                  ) : (
+                    <Icon className="h-4.5 w-4.5" style={{ color: isActive ? "#3CB043" : "#9ca3af" }} />
+                  )}
+                </motion.div>
+                <span
+                  className="mt-1 text-[10px] font-semibold leading-none"
+                  style={{ color: isDone || isActive ? "#3CB043" : "#9ca3af" }}
+                >
+                  {s.label}
+                </span>
+              </div>
+              {i < TRACKING_STEPS.length - 1 && (
+                <div className="relative h-[2px] w-5 overflow-hidden rounded-full bg-[#e5e7eb]">
+                  <motion.div
+                    className="absolute inset-y-0 left-0 rounded-full bg-[#3CB043]"
+                    animate={{ width: progress > i ? "100%" : "0%" }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
                   />
                 </div>
-                <span className="text-[12px] font-medium text-[#3a3a3c]">{comp.name}</span>
-              </div>
-
-              {/* Right: status badge */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`${scenarioIdx}-${comp.name}-${sd.label}`}
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.2 }}
-                  className="flex items-center gap-1.5 rounded-lg px-2 py-1"
-                  style={{
-                    backgroundColor: sd.BgIcon
-                      ? sd.color === "#3CB043"
-                        ? "rgba(60,176,67,0.08)"
-                        : sd.color === "#ef4444"
-                          ? "rgba(239,68,68,0.08)"
-                          : sd.color === "#f59e0b"
-                            ? "rgba(245,158,11,0.08)"
-                            : "transparent"
-                      : "transparent",
-                  }}
-                >
-                  {sd.BgIcon && (
-                    <sd.BgIcon className="h-3 w-3" style={{ color: sd.color }} />
-                  )}
-                  {stage === 0 && isScanning && (
-                    <Loader2 className="h-3 w-3 animate-spin" style={{ color: "#3CB043" }} />
-                  )}
-                  <span className="text-[10px] font-bold" style={{ color: sd.color }}>
-                    {sd.label}
-                  </span>
-                </motion.div>
-              </AnimatePresence>
-            </motion.div>
+              )}
+            </div>
           )
         })}
       </div>
 
-      {/* ------ Completion banner ------ */}
-      <AnimatePresence>
-        {stage === 3 && (
-          <motion.div
-            initial={{ opacity: 0, y: 8, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 200, damping: 18 }}
-            className="flex items-center gap-3 rounded-xl bg-[#3CB043]/[0.08] border border-[#3CB043]/25 px-4 py-3"
-          >
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#3CB043]/20">
-              <ShieldCheck className="h-5 w-5 text-[#3CB043]" />
-            </div>
-            <div>
-              <p className="text-[12px] font-bold text-[#3CB043] leading-tight">All systems verified</p>
-              <p className="text-[10px] text-[#3CB043]/50 leading-tight mt-0.5">6 month warranty activated</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div className="relative mt-2 min-h-[268px]">
+        <AnimatePresence mode="wait">
+          {step === 0 && (
+            <motion.div
+              key="select"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ type: "spring", stiffness: 120, damping: 18 }}
+            >
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">
+                Select your device
+              </p>
+              <div className="grid grid-cols-1 gap-1.5">
+                {TRACKING_DEVICES.map((d, i) => {
+                  const isSelected = selectedDevice === i
+                  const revealed = i < selectRevealIdx
+                  const DeviceIcon = d.icon
+                  const hasLogoGif = Boolean(d.logoGif)
+                  return (
+                    <motion.div
+                      key={d.name}
+                      className="relative flex items-center gap-2.5 rounded-lg border px-2 py-1.5"
+                      initial={{ opacity: 0, x: 14 }}
+                      animate={
+                        revealed
+                          ? {
+                              opacity: 1,
+                              x: 0,
+                              borderColor: isSelected ? "#3CB043" : "#e5e7eb",
+                              backgroundColor: "rgba(0,0,0,0)",
+                            }
+                          : {
+                              opacity: 0.22,
+                              x: 0,
+                              borderColor: "#e5e7eb",
+                              backgroundColor: "rgba(0,0,0,0)",
+                            }
+                      }
+                      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+                    >
+                      <motion.div
+                        className="absolute left-0 top-1/2 h-8 w-[2px] -translate-y-1/2 rounded-r-full"
+                        style={{ backgroundColor: d.color }}
+                        animate={{ opacity: isSelected ? 1 : 0 }}
+                        transition={{ duration: 0.25 }}
+                      />
+                      <div
+                        className="relative flex h-[52px] w-[68px] shrink-0 items-center justify-center overflow-hidden rounded-[13px] border border-white/80"
+                        style={{
+                          backgroundColor: "rgba(60,176,67,0.1)",
+                        }}
+                      >
+                        <div className="pointer-events-none absolute inset-[1px] rounded-[11px] border border-white/70" />
+                        <div className="relative z-10 flex h-full w-full items-center justify-center">
+                          {hasLogoGif ? (
+                            <img
+                              src={d.logoGif}
+                              alt={`${d.name} logo`}
+                              className="h-7 w-7 object-contain"
+                              loading="lazy"
+                            />
+                          ) : (
+                            <>
+                              <DeviceIcon
+                                className="absolute h-9 w-9 opacity-[0.16]"
+                                style={{ color: d.color }}
+                                strokeWidth={1.7}
+                              />
+                              <DeviceIcon
+                                className="relative h-7 w-7"
+                                style={{ color: isSelected ? d.color : "#64748b" }}
+                                strokeWidth={2.1}
+                              />
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="line-clamp-1 text-[11px] font-semibold text-[#111827]">{d.name}</p>
+                        <p className="line-clamp-1 text-[8px] font-medium text-[#64748b]">{d.note}</p>
+                      </div>
+                      <div className="ml-auto flex items-center gap-1">
+                        <span
+                          className="rounded-full border px-1.5 py-0.5 text-[7px] font-semibold uppercase tracking-[0.08em]"
+                          style={{
+                            color: isSelected ? d.color : "#94a3b8",
+                            borderColor: isSelected ? `${d.color}3d` : "#dbe1ea",
+                            backgroundColor: isSelected ? `${d.color}12` : "rgba(255,255,255,0.8)",
+                          }}
+                        >
+                          {d.kind}
+                        </span>
+                        <span
+                          className="flex h-4.5 w-4.5 items-center justify-center rounded-full border"
+                          style={{
+                            borderColor: isSelected ? `${d.color}6e` : "#d1d5db",
+                            backgroundColor: isSelected ? `${d.color}1a` : "rgba(255,255,255,0.75)",
+                          }}
+                        >
+                          {isSelected ? (
+                            <CheckCircle2 className="h-3.5 w-3.5" style={{ color: d.color }} />
+                          ) : (
+                            <span className="h-1.5 w-1.5 rounded-full bg-[#d1d5db]" />
+                          )}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+              {selectedDevice >= 0 && (
+                <motion.div
+                  className="mt-2.5 flex items-center justify-end gap-1 text-[11px] font-semibold text-[#3CB043]"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2 }}
+                >
+                  Proceeding
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+
+          {step === 1 && (
+            <motion.div
+              key="diagnosis"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ type: "spring", stiffness: 120, damping: 18 }}
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">Running diagnostics</p>
+                <span className="text-[11px] font-bold text-[#111827]">{activeDeviceName}</span>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                {TRACKING_DIAG_ITEMS.map((item, i) => {
+                  const Icon = item.icon
+                  const revealed = i < diagnosisIdx
+                  const isIssue = item.status === "issue"
+
+                  return (
+                    <motion.div
+                      key={item.label}
+                      className="flex items-center gap-2 rounded-lg border px-2 py-1.5"
+                      initial={{ opacity: 0, x: 14 }}
+                      animate={
+                        revealed
+                          ? {
+                              opacity: 1,
+                              x: 0,
+                              borderColor: isIssue ? "#ef444440" : "#e5e7eb",
+                              backgroundColor: "rgba(0,0,0,0)",
+                            }
+                          : {
+                              opacity: 0.22,
+                              x: 0,
+                              borderColor: "#e5e7eb",
+                              backgroundColor: "rgba(0,0,0,0)",
+                            }
+                      }
+                      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+                    >
+                      <div
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md"
+                        style={{
+                          backgroundColor: revealed
+                            ? isIssue
+                              ? "rgba(239,68,68,0.1)"
+                              : "rgba(60,176,67,0.1)"
+                            : "rgba(156,163,175,0.1)",
+                        }}
+                      >
+                        {revealed && isIssue ? (
+                          <CircleAlert className="h-4 w-4 text-[#ef4444]" />
+                        ) : (
+                          <Icon className="h-4 w-4" style={{ color: revealed ? "#3CB043" : "#9ca3af" }} />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[11px] font-semibold text-[#111827]">{item.label}</p>
+                        {revealed && (
+                          <p className="truncate text-[10px]" style={{ color: isIssue ? "#ef4444" : "#6b7280" }}>
+                            {item.detail}
+                          </p>
+                        )}
+                      </div>
+                      {revealed &&
+                        (isIssue ? (
+                          <span className="rounded-full bg-[#ef4444]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#ef4444]">
+                            ISSUE
+                          </span>
+                        ) : (
+                          <CheckCircle2 className="h-4 w-4 text-[#3CB043]" />
+                        ))}
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {step === 2 && (
+            <motion.div
+              key="repairing"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ type: "spring", stiffness: 120, damping: 18 }}
+              className="flex h-full flex-col items-center justify-center"
+            >
+              <p className="mb-3 text-[11px] font-semibold uppercase tracking-wider text-[#6b7280]">Repair in progress</p>
+
+              <div className="relative mb-3">
+                <svg width="112" height="112" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" fill="none" stroke="#e5e7eb" strokeWidth="5" />
+                  <motion.circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    fill="none"
+                    stroke="#3CB043"
+                    strokeWidth="5"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 42}
+                    strokeDashoffset={2 * Math.PI * 42}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 42 * (1 - repairPercent / 100) }}
+                    transition={{ duration: 0.15, ease: "linear" }}
+                    style={{ transformOrigin: "50px 50px", rotate: "-90deg" }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-extrabold leading-none text-[#111827]">{repairPercent}%</span>
+                  <span className="mt-0.5 text-[10px] text-[#6b7280]">Complete</span>
+                </div>
+              </div>
+
+              <div className="flex w-full items-center justify-between rounded-xl border border-[#d1d5db] bg-[#f3f4f6] px-3 py-2.5">
+                <div>
+                  <p className="text-[12px] font-semibold text-[#111827]">Replacing Display Module</p>
+                  <p className="text-[10px] text-[#6b7280]">{activeDeviceName} Service</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[12px] font-bold text-[#3CB043]">~25 min</p>
+                  <p className="text-[10px] text-[#6b7280]">remaining</p>
+                </div>
+              </div>
+              <p className="mt-5 text-center text-[11px] font-semibold leading-snug text-[#334155]">
+                We know this device holds your memories, so we repair it with heart.
+              </p>
+            </motion.div>
+          )}
+
+          {step === 3 && (
+            <motion.div
+              key="complete"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 120, damping: 18 }}
+              className="flex h-full flex-col items-center justify-center"
+            >
+              <div className="relative mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-[#3CB043]/10">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3CB043]/20" />
+                <motion.div
+                  className="relative flex h-16 w-16 items-center justify-center rounded-full border border-[#3CB043]/30"
+                  animate={{ scale: [1, 1.04, 1] }}
+                  transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+                >
+                  <svg viewBox="0 0 52 52" className="h-10 w-10" aria-hidden="true">
+                    <motion.circle
+                      cx="26"
+                      cy="26"
+                      r="20"
+                      fill="none"
+                      stroke="#3CB043"
+                      strokeWidth="2.75"
+                      strokeLinecap="round"
+                      initial={{ pathLength: 0, opacity: 0.4 }}
+                      animate={{ pathLength: [0, 1, 1], opacity: [0.4, 1, 1] }}
+                      transition={{ duration: 1.6, ease: "easeInOut", repeat: Infinity, repeatDelay: 0.2, times: [0, 0.65, 1] }}
+                    />
+                    <motion.path
+                      d="M16 27.5L23.5 35L37 19"
+                      fill="none"
+                      stroke="#3CB043"
+                      strokeWidth="3.25"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: [0, 1, 1], opacity: [0, 1, 1] }}
+                      transition={{ duration: 1.6, ease: "easeInOut", repeat: Infinity, repeatDelay: 0.2, times: [0.05, 0.75, 1] }}
+                    />
+                  </svg>
+                </motion.div>
+              </div>
+              <div className="mb-1 flex items-center rounded-full bg-[#3CB043]/10 px-2 py-0.5">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3CB043] opacity-70" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-[#3CB043]" />
+                </span>
+              </div>
+              <p className="text-xl font-extrabold text-[#111827]">Repair Complete!</p>
+              <p className="mt-0.5 text-[11px] text-[#6b7280]">Ready for pickup</p>
+
+              <div className="mt-3 w-full rounded-lg border border-[#3CB043]/20 p-2.5">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6b7280]">Repair Summary</span>
+                  <span className="rounded-full bg-[#3CB043]/10 px-1.5 py-0.5 text-[9px] font-bold text-[#3CB043]">
+                    WARRANTY
+                  </span>
+                </div>
+                <div className="space-y-1 text-[11px]">
+                  <div className="flex justify-between">
+                    <span className="text-[#6b7280]">Service</span>
+                    <span className="font-semibold text-[#111827]">Screen Replacement</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-[#6b7280]">Warranty</span>
+                    <span className="font-semibold text-[#3CB043]">6 Months</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-2 grid w-full grid-cols-2 gap-1.5 text-[10px]">
+                <div className="rounded-lg border border-[#e5e7eb] px-2 py-1.5">
+                  <p className="text-[#6b7280]">Pickup Slot</p>
+                  <p className="font-semibold text-[#111827]">Today, 5:30 PM</p>
+                </div>
+                <div className="rounded-lg border border-[#e5e7eb] px-2 py-1.5 text-right">
+                  <p className="text-[#6b7280]">Need Help?</p>
+                  <p className="font-semibold text-[#111827]">Call Front Desk</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
@@ -718,7 +888,7 @@ function HeroVisual() {
                         />
                       </motion.div>
 
-                      {/* Diagnostics label */}
+                      {/* Repair tracker label */}
                       <motion.p
                         className="text-center text-[9px] font-bold uppercase tracking-[0.25em] text-[#3CB043]/70 mb-3"
                         initial={{ opacity: 0, y: 6 }}
@@ -728,7 +898,7 @@ function HeroVisual() {
                         Diagnostic Centre
                       </motion.p>
 
-                      {/* Diagnostic engine */}
+                      {/* Repair tracker steps */}
                       <motion.div
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -822,7 +992,7 @@ export function Hero() {
   className="relative min-h-[auto] overflow-hidden lg:min-h-[100dvh]"
   style={{ backgroundColor: "transparent" }}
   >
-      {/* Animated background -- Mobile Pitstop style video */}
+      {/* Animated background -- Phone Garage style video */}
       <HeroBackgroundVideo />
 
       {/* Content */}

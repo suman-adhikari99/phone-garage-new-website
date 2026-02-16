@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { Menu, X, Phone, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -15,6 +16,9 @@ const navLinks = [
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const isHomeRoute = pathname === "/"
+  const getNavHref = (hashLink: string) => (isHomeRoute ? hashLink : `/${hashLink}`)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -64,7 +68,7 @@ export function Header() {
 
       {/* Main nav */}
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
-        <a href="#" className="flex items-center gap-2 shrink-0">
+        <a href="/" className="flex items-center gap-2 shrink-0">
           <img
             src="https://www.phonegarage.com.au/headerTop.png"
             alt="Phone Garage logo"
@@ -77,7 +81,7 @@ export function Header() {
           {navLinks.map((link) => (
             <a
               key={link.label}
-              href={link.href}
+              href={getNavHref(link.href)}
               className={`text-sm font-medium transition-colors hover:text-primary ${
                 isScrolled ? "text-foreground" : "text-foreground"
               }`}
@@ -104,7 +108,7 @@ export function Header() {
             className="bg-primary text-primary-foreground hover:bg-[#2d8a34]"
             asChild
           >
-            <a href="#contact">Get a Quote</a>
+            <a href={getNavHref("#contact")}>Get a Quote</a>
           </Button>
         </div>
 
@@ -133,7 +137,7 @@ export function Header() {
             {navLinks.map((link) => (
               <a
                 key={link.label}
-                href={link.href}
+                href={getNavHref(link.href)}
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="rounded-lg px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
               >
@@ -155,7 +159,7 @@ export function Header() {
                 className="bg-primary text-primary-foreground hover:bg-[#2d8a34] w-full"
                 asChild
               >
-                <a href="#contact">Get a Quote</a>
+                <a href={getNavHref("#contact")}>Get a Quote</a>
               </Button>
             </div>
           </div>

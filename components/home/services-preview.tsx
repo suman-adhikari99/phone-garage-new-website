@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
+import React, { useState, useRef } from "react"
 import Link from "next/link"
 import { AnimatedSection } from "../animated-section"
 import {
@@ -24,7 +24,6 @@ import {
   Laptop,
   ArrowRight,
   ArrowLeft,
-  ChevronDown,
   Clock,
   DollarSign,
   CheckCircle,
@@ -331,142 +330,114 @@ function OtherDeviceDrawing({ className }: { className?: string }) {
   )
 }
 
-/* ─── Custom dropdown with search + "not listed" custom entry ─── */
-function SelectDropdown({
-  label, value, onChange, options, placeholder, allowCustom = false, customLabel = "My model is not listed",
+/* ─── Model picker with searchable cards + custom entry ─── */
+function ModelCardPicker({
+  value,
+  onChange,
+  options,
+  customLabel = "My model is not listed",
+  emptyStateMessage = "No models match your search",
 }: {
-  label: string
   value: string
   onChange: (val: string) => void
   options: { value: string; label: string; sub?: string }[]
-  placeholder: string
-  allowCustom?: boolean
   customLabel?: string
+  emptyStateMessage?: string
 }) {
-  const [open, setOpen] = useState(false)
   const [search, setSearch] = useState("")
-  const [customMode, setCustomMode] = useState(false)
   const [customValue, setCustomValue] = useState("")
-  const ref = useRef<HTMLDivElement>(null)
-  const searchRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) { setOpen(false); setSearch("") }
-    }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [])
-
-  useEffect(() => {
-    if (open && searchRef.current) searchRef.current.focus()
-  }, [open])
-
-  const selected = options.find((o) => o.value === value)
-  const isCustomSelected = value.startsWith("custom:")
-  const displayLabel = selected?.label || (isCustomSelected ? value.replace("custom:", "") : "")
 
   const filtered = search
     ? options.filter((o) => o.label.toLowerCase().includes(search.toLowerCase()))
     : options
 
-  return (
-    <div className="space-y-1.5">
-      <label className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</label>
+  const selectedCustomModel = value.startsWith("custom:") ? value.replace("custom:", "") : ""
 
-      {/* Custom entry mode */}
-      {customMode ? (
-        <div className="flex gap-2">
+  return (
+    <div className="space-y-4">
+      <div className="space-y-1.5">
+        <label className="text-[13px] font-semibold uppercase tracking-wider text-muted-foreground">Model</label>
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search your model..."
+          className="w-full rounded-xl border border-border bg-background px-4 py-3.5 text-[15px] text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+        />
+      </div>
+
+      <div className="grid max-h-80 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
+        {filtered.map((opt) => {
+          const isSelected = value === opt.value
+
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className={`flex items-center justify-between rounded-xl border p-3 text-left transition-all duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                isSelected
+                  ? "border-primary bg-primary/10 shadow-sm"
+                  : "border-border bg-background hover:border-primary/40 hover:bg-secondary/50"
+              }`}
+            >
+              <div className="min-w-0">
+                <p className={`truncate text-sm font-semibold ${isSelected ? "text-primary" : "text-foreground"}`}>
+                  {opt.label}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {opt.sub ? `Release year ${opt.sub}` : "Model option"}
+                </p>
+              </div>
+              {isSelected ? (
+                <CheckCircle className="h-4 w-4 shrink-0 text-primary" />
+              ) : (
+                <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
+                  {opt.sub || "Select"}
+                </span>
+              )}
+            </button>
+          )
+        })}
+
+        {filtered.length === 0 && (
+          <p className="col-span-full rounded-xl border border-dashed border-border bg-background px-4 py-5 text-center text-sm text-muted-foreground">
+            {emptyStateMessage}
+          </p>
+        )}
+      </div>
+
+      <div className="rounded-xl border border-dashed border-border bg-background p-4">
+        <p className="text-sm font-semibold text-foreground">{customLabel}</p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Enter your exact model name if it is not listed above.
+        </p>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
           <input
             type="text"
             value={customValue}
             onChange={(e) => setCustomValue(e.target.value)}
             placeholder="Type your model name..."
-            className="flex-1 rounded-xl border border-border bg-background px-4 py-3.5 text-[15px] text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            autoFocus
+            className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <button
             type="button"
             onClick={() => {
-              if (customValue.trim()) {
-                onChange("custom:" + customValue.trim())
-              }
-              setCustomMode(false)
+              const customModel = customValue.trim()
+              if (customModel) onChange("custom:" + customModel)
             }}
-            className="rounded-xl bg-primary px-5 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110"
+            disabled={!customValue.trim()}
+            className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            OK
-          </button>
-          <button
-            type="button"
-            onClick={() => { setCustomMode(false); setCustomValue("") }}
-            className="rounded-xl border border-border px-4 py-3.5 text-sm font-semibold text-muted-foreground transition-all hover:bg-secondary"
-          >
-            Cancel
+            Use this model
           </button>
         </div>
-      ) : (
-        <div className="relative" ref={ref}>
-          <button
-            type="button"
-            onClick={() => { setOpen(!open); setSearch("") }}
-            className={`flex w-full items-center justify-between rounded-xl border px-4 py-3.5 text-[15px] transition-all ${
-              open ? "border-primary bg-background ring-2 ring-primary/20" : "border-border bg-background hover:border-primary/30"
-            }`}
-          >
-            <span className={displayLabel ? "font-medium text-foreground" : "text-muted-foreground"}>
-              {displayLabel || placeholder}
-            </span>
-            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
-          </button>
-          {open && (
-            <div className="absolute left-0 right-0 top-full z-30 mt-1 rounded-xl border border-border bg-card shadow-xl">
-              {/* Search input */}
-              {options.length > 5 && (
-                <div className="border-b border-border p-2">
-                  <input
-                    ref={searchRef}
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search..."
-                    className="w-full rounded-lg bg-secondary/50 px-3 py-3 text-[15px] text-foreground outline-none placeholder:text-muted-foreground"
-                  />
-                </div>
-              )}
-              {/* Options */}
-              <div className="max-h-52 overflow-y-auto">
-                {filtered.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => { onChange(opt.value); setOpen(false); setSearch("") }}
-                    className={`flex w-full items-center justify-between px-4 py-3 text-left text-[15px] transition-colors active:bg-primary/5 ${
-                      value === opt.value ? "bg-primary/10 font-semibold text-primary" : "text-foreground"
-                    }`}
-                  >
-                    <span>{opt.label}</span>
-                    {opt.sub && <span className="text-xs text-muted-foreground">{opt.sub}</span>}
-                  </button>
-                ))}
-                {filtered.length === 0 && (
-                  <p className="px-4 py-3 text-sm text-muted-foreground">No results found</p>
-                )}
-              </div>
-              {/* Custom entry option */}
-              {allowCustom && (
-                <button
-                  type="button"
-                  onClick={() => { setOpen(false); setSearch(""); setCustomMode(true); setCustomValue(search) }}
-                  className="flex w-full items-center gap-2 border-t border-border px-4 py-3.5 text-left text-[15px] font-medium text-primary transition-colors active:bg-primary/5"
-                >
-                  <span>+ {customLabel}</span>
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      )}
+        {selectedCustomModel && (
+          <p className="mt-2 text-xs font-medium text-primary">
+            Selected custom model: {selectedCustomModel}
+          </p>
+        )}
+      </div>
     </div>
   )
 }
@@ -475,6 +446,15 @@ function SelectDropdown({
    Main Component
 ═══════════════════ */
 type Step = 1 | 2 | 3 | 4
+const OTHER_DEVICE_BRAND_ID = "other-device-custom"
+const OTHER_DEVICE_OPTIONS = [
+  { value: "custom:Smart Watch", label: "Smart Watch", sub: "Other device" },
+  { value: "custom:Smart TV", label: "TV", sub: "Other device" },
+  { value: "custom:Computer Monitor", label: "Monitor", sub: "Other device" },
+  { value: "custom:Desktop Computer", label: "Desktop Computer", sub: "Other device" },
+  { value: "custom:Gaming Console", label: "Gaming Console", sub: "Other device" },
+  { value: "custom:Audio Device", label: "Audio Device", sub: "Other device" },
+]
 
 export function ServicesPreview() {
   const [step, setStep] = useState<Step>(1)
@@ -514,6 +494,15 @@ export function ServicesPreview() {
     setTimeout(scrollToSection, 50)
   }
 
+  const handleOtherDeviceSelect = () => {
+    setSelectedDevice(null)
+    setSelectedBrand(OTHER_DEVICE_BRAND_ID)
+    setSelectedModel("")
+    setSelectedServiceSlug(null)
+    setStep(3)
+    setTimeout(scrollToSection, 50)
+  }
+
   const handleModelSelect = (modelId: string) => {
     setSelectedModel(modelId)
     setSelectedServiceSlug(null)
@@ -523,7 +512,16 @@ export function ServicesPreview() {
 
   const goBack = () => {
     if (step === 4) { setSelectedServiceSlug(null); setStep(3) }
-    else if (step === 3) { setSelectedModel(""); setSelectedServiceSlug(null); setStep(2) }
+    else if (step === 3) {
+      setSelectedModel("")
+      setSelectedServiceSlug(null)
+      if (selectedBrand === OTHER_DEVICE_BRAND_ID) {
+        setSelectedBrand(null)
+        setStep(1)
+      } else {
+        setStep(2)
+      }
+    }
     else if (step === 2) { setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null); setStep(1) }
   }
 
@@ -531,12 +529,16 @@ export function ServicesPreview() {
   const currentServiceCat = serviceCategories.find((c) => c.slug === selectedServiceSlug)
   const currentBrands = selectedDevice ? getBrandsByCategory(selectedDevice) : []
   const currentBrand = brands.find((b) => b.id === selectedBrand)
+  const isOtherDeviceBrand = selectedBrand === OTHER_DEVICE_BRAND_ID
+  const brandDisplayName = isOtherDeviceBrand ? "Other Device" : currentBrand?.name || ""
   const currentModels = selectedBrand ? models.filter((m) => m.brandId === selectedBrand) : []
   const isCustomModel = selectedModel.startsWith("custom:")
   const customModelName = isCustomModel ? selectedModel.replace("custom:", "") : ""
   const currentModel = isCustomModel ? null : models.find((m) => m.id === selectedModel)
   const modelDisplayName = isCustomModel ? customModelName : currentModel?.name || ""
-  const modelOptions = currentModels.map((m) => ({ value: m.id, label: m.name, sub: m.year }))
+  const modelOptions = isOtherDeviceBrand
+    ? OTHER_DEVICE_OPTIONS
+    : currentModels.map((m) => ({ value: m.id, label: m.name, sub: m.year }))
 
   const matchedRepair =
     selectedModel && currentServiceCat
@@ -550,7 +552,7 @@ export function ServicesPreview() {
   // Breadcrumb
   const crumbs = [
     selectedDevice && deviceCategoryConfig.find((d) => d.id === selectedDevice)?.label,
-    currentBrand?.name,
+    brandDisplayName || undefined,
     modelDisplayName || undefined,
     currentServiceCat?.name,
   ].filter(Boolean)
@@ -558,7 +560,7 @@ export function ServicesPreview() {
   const stepLabels = ["Device", "Brand", "Model", "Services"]
 
   return (
-    <section className="bg-background py-12 sm:py-14 lg:py-16" ref={sectionRef}>
+    <section className="bg-zinc-200 py-12 sm:py-14 lg:py-16" ref={sectionRef}>
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         {/* ─── Header ─── */}
         <AnimatedSection>
@@ -591,7 +593,17 @@ export function ServicesPreview() {
                   onClick={() => {
                     if (s < step) {
                       if (s === 1) { setSelectedDevice(null); setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null) }
-                      else if (s === 2) { setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null) }
+                      else if (s === 2) {
+                        if (isOtherDeviceBrand) {
+                          setSelectedDevice(null)
+                          setSelectedBrand(null)
+                          setSelectedModel("")
+                          setSelectedServiceSlug(null)
+                          setStep(1)
+                          return
+                        }
+                        setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null)
+                      }
                       else if (s === 3) { setSelectedServiceSlug(null) }
                       setStep(s)
                     }
@@ -665,8 +677,9 @@ export function ServicesPreview() {
                 )
               })}
 
-              <Link
-                href="/quote"
+              <button
+                type="button"
+                onClick={handleOtherDeviceSelect}
                 className="group px-3 pb-4 pt-3 text-center transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <div className="flex h-52 items-center justify-center rounded-2xl bg-transparent transition-colors duration-200 group-hover:bg-zinc-100 sm:h-60">
@@ -674,9 +687,9 @@ export function ServicesPreview() {
                 </div>
                 <div className="mt-2">
                   <span className="block text-xl font-semibold tracking-tight text-foreground">Other</span>
-                  <span className="mt-1 block text-sm leading-snug text-muted-foreground">Smartwatch, desktop, console & more</span>
+                  <span className="mt-1 block text-sm leading-snug text-muted-foreground">Smart Watch, TV, Monitor, Desktop Computer & more</span>
                 </div>
-              </Link>
+              </button>
             </div>
           </div>
         )}
@@ -731,27 +744,31 @@ export function ServicesPreview() {
                     {brandLogos[selectedBrand || ""] ? (
                       React.createElement(brandLogos[selectedBrand || ""], { className: "h-6 w-6 text-primary" })
                     ) : (
-                      <span className="text-lg font-extrabold text-primary">{currentBrand?.name.charAt(0)}</span>
+                      <span className="text-lg font-extrabold text-primary">{(brandDisplayName || "Other").charAt(0)}</span>
                     )}
                   </div>
                   <div>
                     <h3 className="text-lg font-bold text-foreground">
-                      {currentBrand?.name}
+                      {brandDisplayName || "Select model"}
                     </h3>
-                    <p className="text-sm text-muted-foreground">Select your model to continue</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isOtherDeviceBrand ? "Choose your device type or enter the exact model to continue" : "Select your model to continue"}
+                    </p>
                   </div>
                 </div>
 
-                {/* Model dropdown */}
+                {/* Model cards */}
                 <div className="mt-6">
-                  <SelectDropdown
-                    label="Model"
+                  <ModelCardPicker
                     value={selectedModel}
                     onChange={handleModelSelect}
                     options={modelOptions}
-                    placeholder="Choose your model..."
-                    allowCustom
                     customLabel="My model is not listed — enter manually"
+                    emptyStateMessage={
+                      isOtherDeviceBrand
+                        ? "No matching device type found. Enter your model below."
+                        : "No models match your search"
+                    }
                   />
                 </div>
               </div>
@@ -769,7 +786,7 @@ export function ServicesPreview() {
             </p>
             <div className="mx-auto grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
               {serviceCategories.slice(0, 8).map((cat, i) => {
-                const Icon = serviceIconMap[cat.icon] || Settings
+                const Icon = (serviceIconMap[cat.icon] || Settings) as React.ComponentType<{ className?: string }>
                 const isSelected = selectedServiceSlug === cat.slug
                 return (
                   <AnimatedSection key={cat.id} delay={i * 60}>
@@ -825,7 +842,7 @@ export function ServicesPreview() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Device</span>
-                      <span className="text-sm font-semibold text-foreground">{currentBrand?.name} {modelDisplayName}</span>
+                      <span className="text-sm font-semibold text-foreground">{`${brandDisplayName || "Device"} ${modelDisplayName}`.trim()}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -855,7 +872,7 @@ export function ServicesPreview() {
                         if (matchedRepair) params.set("serviceId", matchedRepair.id)
                         if (selectedServiceSlug) params.set("serviceSlug", selectedServiceSlug)
                         if (modelDisplayName) params.set("modelName", modelDisplayName)
-                        if (currentBrand?.name) params.set("brandName", currentBrand.name)
+                        if (brandDisplayName) params.set("brandName", brandDisplayName)
                         if (currentServiceCat?.name) params.set("serviceName", currentServiceCat.name)
                         if (matchedRepair) {
                           params.set("cost", String(matchedRepair.estimateCost))

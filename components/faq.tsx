@@ -1,109 +1,75 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import { faqs } from "@/lib/data"
 import { cn } from "@/lib/utils"
 
+const FAQ_FOOTER_SPACER_EXTRA = 0
+
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState(0)
-  const faqRef = useRef<HTMLElement>(null)
-  const rafIdRef = useRef<number | null>(null)
-  const [faqLift, setFaqLift] = useState(0)
-  const [maxFaqLift, setMaxFaqLift] = useState(0)
+  const [footerSpacer, setFooterSpacer] = useState(0)
 
   useEffect(() => {
-    const updateMaxLift = () => {
-      if (window.innerWidth < 1024) {
-        setMaxFaqLift(0)
-        return
-      }
-
+    const updateFooterSpacer = () => {
       const footer = document.getElementById("site-footer")
-      setMaxFaqLift(footer ? footer.getBoundingClientRect().height : 0)
+      setFooterSpacer(footer ? footer.getBoundingClientRect().height + FAQ_FOOTER_SPACER_EXTRA : FAQ_FOOTER_SPACER_EXTRA)
     }
 
-    updateMaxLift()
-    window.addEventListener("resize", updateMaxLift)
+    updateFooterSpacer()
+    window.addEventListener("resize", updateFooterSpacer)
 
     const footer = document.getElementById("site-footer")
-    const observer = footer ? new ResizeObserver(updateMaxLift) : null
+    const observer = footer ? new ResizeObserver(updateFooterSpacer) : null
     if (footer && observer) {
       observer.observe(footer)
     }
 
     return () => {
-      window.removeEventListener("resize", updateMaxLift)
+      window.removeEventListener("resize", updateFooterSpacer)
       if (observer) {
         observer.disconnect()
       }
     }
   }, [])
 
-  useEffect(() => {
-    const updateFaqLift = () => {
-      const node = faqRef.current
-      if (!node || maxFaqLift <= 0) {
-        setFaqLift(0)
-        return
-      }
-
-      const rect = node.getBoundingClientRect()
-      const viewport = window.innerHeight
-      const start = viewport * 0.5
-      const end = -Math.max(viewport * 0.35, 240)
-      const raw = (start - rect.top) / Math.max(start - end, 1)
-      const progress = Math.min(Math.max(raw, 0), 1)
-
-      setFaqLift(progress * maxFaqLift)
-    }
-
-    const onScrollOrResize = () => {
-      if (rafIdRef.current !== null) return
-      rafIdRef.current = window.requestAnimationFrame(() => {
-        rafIdRef.current = null
-        updateFaqLift()
-      })
-    }
-
-    updateFaqLift()
-    window.addEventListener("scroll", onScrollOrResize, { passive: true })
-    window.addEventListener("resize", onScrollOrResize)
-
-    return () => {
-      window.removeEventListener("scroll", onScrollOrResize)
-      window.removeEventListener("resize", onScrollOrResize)
-      if (rafIdRef.current !== null) {
-        window.cancelAnimationFrame(rafIdRef.current)
-      }
-    }
-  }, [maxFaqLift])
-
   return (
     <div className="relative z-10">
-      <section
-        id="faq"
-        ref={faqRef}
-        className="relative will-change-transform"
-        style={{ transform: `translate3d(0, -${faqLift}px, 0)` }}
-      >
-      <div className="bg-[#040404] pt-[120px] pb-20 max-[999px]:pt-20 max-[689px]:hidden">
+      <section id="faq" className="relative">
+      <div className="bg-[#040404] pt-[120px] pb-20 max-[999px]:pt-20">
         <div className="mx-auto w-full max-w-[1200px] px-4 lg:px-8">
+          <div className="mb-12 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-white sm:text-sm">
+              FAQ
+            </p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl text-balance">
+              Frequently Asked Questions
+            </h2>
+          </div>
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index
             return (
-              <div key={faq.question} className="mb-[25px]">
+              <div
+                key={faq.question}
+                className={cn(
+                  "mb-[18px] rounded-2xl border p-5 transition-all duration-300 sm:p-6",
+                  isOpen
+                    ? "border-[#3a3a3a]/70 bg-[#111111] shadow-[0_18px_40px_-30px_rgba(0,0,0,0.7)]"
+                    : "border-[#262626] bg-[#0b0b0b] hover:border-[#4a4a4a]"
+                )}
+              >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? -1 : index)}
                   className={cn(
                     "group flex w-full items-center justify-between text-left transition-all duration-300",
                     isOpen
-                      ? "text-[#FD5320]"
-                      : "text-white hover:text-[#FD5320]"
+                      ? "text-white"
+                      : "text-white hover:text-[#d9d9d9]"
                   )}
                   aria-expanded={isOpen}
                 >
-                  <span className="text-[20px] font-semibold leading-tight">
+                  <span className="text-[19px] font-semibold leading-tight">
                     {faq.question}
                   </span>
                   <span className="relative ml-[15px] inline-block h-[14px] w-[14px] shrink-0">
@@ -111,16 +77,16 @@ export function FAQ() {
                       className={cn(
                         "absolute top-[6px] left-0 h-[2px] w-[14px] rounded-[2px] transition-colors duration-300",
                         isOpen
-                          ? "bg-[#FD5320]"
-                          : "bg-white group-hover:bg-[#FD5320]"
+                          ? "bg-white"
+                          : "bg-white group-hover:bg-white"
                       )}
                     />
                     <span
                       className={cn(
                         "absolute top-[6px] left-0 h-[2px] w-[14px] rounded-[2px] transition-all duration-300",
                         isOpen
-                          ? "rotate-0 bg-[#FD5320]"
-                          : "rotate-90 bg-white group-hover:bg-[#FD5320]"
+                          ? "rotate-0 bg-white"
+                          : "rotate-90 bg-white group-hover:bg-white"
                       )}
                     />
                   </span>
@@ -133,9 +99,11 @@ export function FAQ() {
                       : "max-h-0 opacity-0"
                   )}
                 >
-                  <p className="pt-5 text-[18px] leading-relaxed text-[#ffffffd1]">
-                    {faq.answer}
-                  </p>
+                  <div className="mt-4 rounded-xl border border-[#3a3a3a] bg-[#111111] px-4 py-4 sm:px-5">
+                    <p className="text-[17px] leading-relaxed text-[#e5e5e5]">
+                      {faq.answer}
+                    </p>
+                  </div>
                 </div>
               </div>
             )
@@ -149,7 +117,7 @@ export function FAQ() {
       >
         <div className="mx-auto w-full max-w-[1200px] px-4 lg:px-8">
           <div className="grid gap-[50px] lg:grid-cols-2 lg:gap-[25px]">
-            <div className="rounded-[30px] border-[3px] border-dashed border-[#37373d] p-[35px] max-[689px]:p-[30px]">
+            <div className="rounded-[30px] border-[3px] border-dashed border-[#3a3a3a] p-[35px] max-[689px]:p-[30px]">
               <h2 className="mb-5 max-w-[500px] text-[36px] font-semibold text-white max-[999px]:text-[30px] max-[689px]:text-center max-[689px]:text-[25px]">
                 Contact us at :
               </h2>
@@ -171,7 +139,7 @@ export function FAQ() {
                   </h5>
                   <a
                     href="tel:0295252986"
-                    className="font-bold text-white transition-colors hover:text-[#fc4747]"
+                    className="font-bold text-white transition-colors hover:text-[#d9d9d9]"
                   >
                     (02) 9525 2986
                   </a>
@@ -194,10 +162,10 @@ export function FAQ() {
                     Email:
                   </h5>
                   <a
-                    href="mailto:info@mobilepitstop.com.au"
-                    className="font-bold text-white transition-colors hover:text-[#fc4747]"
+                    href="mailto:info@phonegarage.com.au"
+                    className="font-bold text-white transition-colors hover:text-[#d9d9d9]"
                   >
-                    info@mobilepitstop.com.au
+                    info@phonegarage.com.au
                   </a>
                 </div>
               </div>
@@ -211,9 +179,9 @@ export function FAQ() {
                 Feel free to write to us or just call for more information.
               </p>
               <a
-                href="https://mobilepitstop.com.au/form/1564/"
+                href="https://phonegarage.com.au/form/1564/"
                 rel="noopener"
-                className="inline-flex items-center gap-[15px] self-start text-base text-white underline transition-colors hover:text-[#fc4747] max-[689px]:self-center"
+                className="inline-flex items-center gap-[15px] self-start text-base text-white underline transition-colors hover:text-[#d9d9d9] max-[689px]:self-center"
               >
                 <span>Write to us</span>
                 <svg
@@ -230,7 +198,7 @@ export function FAQ() {
         </div>
       </div>
       </section>
-      <div aria-hidden style={{ height: `${maxFaqLift}px` }} />
+      <div aria-hidden style={{ height: `${footerSpacer}px` }} />
     </div>
   )
 }

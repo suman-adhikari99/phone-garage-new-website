@@ -32,7 +32,7 @@ export function Footer() {
   return (
     <footer
       id="site-footer"
-      className="fixed inset-x-0 bottom-0 z-0 bg-[#0a0a0a] text-[#9ca3af]"
+      className="fixed inset-x-0 bottom-0 z-0 bg-white text-[#4b5563]"
     >
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         {/* Main footer */}
@@ -42,7 +42,7 @@ export function Footer() {
             <img
               src="https://www.phonegarage.com.au/headerTop.png"
               alt="Phone Garage logo"
-              className="mb-4 h-10 w-auto brightness-0 invert"
+              className="mb-4 h-10 w-auto"
             />
             <p className="mb-6 text-sm leading-relaxed">
               Your trusted mobile phone repair specialists in Australia.
@@ -72,7 +72,7 @@ export function Footer() {
 
           {/* Services */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#f8f9fa]">
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#0f172a]">
               Services
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -91,7 +91,7 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#f8f9fa]">
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#0f172a]">
               Quick Links
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -110,7 +110,7 @@ export function Footer() {
 
           {/* Brands */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#f8f9fa]">
+            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#0f172a]">
               Brands We Repair
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -124,7 +124,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-[#1f1f1f] py-6">
+        <div className="border-t border-[#e5e7eb] py-6">
           <div className="flex flex-col items-center justify-between gap-4 text-xs sm:flex-row">
             <p>
               &copy; {new Date().getFullYear()} Phone Garage. All rights

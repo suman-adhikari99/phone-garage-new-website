@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { BookRepairPage } from "../../components/pages/book-repair-page"
+import { Header } from "@/components/header"
 
 export const metadata: Metadata = {
   title: "Book a Repair",
@@ -7,5 +8,12 @@ export const metadata: Metadata = {
 }
 
 export default function BookRepair() {
-  return <BookRepairPage />
+  return (
+    <>
+      <Header />
+      <main className="relative z-10 pt-28 sm:pt-32">
+        <BookRepairPage />
+      </main>
+    </>
+  )
 }
