@@ -1,16 +1,23 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense } from "react"
+import { Suspense, useState, type CSSProperties, type FormEvent } from "react"
 import { AnimatedSection } from "../animated-section"
-import { BookingModule } from "../booking-module"
-import { Shield, Clock, Award, Phone, Mail, MapPin, CheckCircle, ArrowLeft } from "lucide-react"
+import { Shield, Clock, Award, Phone, Mail, MapPin, ArrowLeft, CalendarDays, Building2, User, ChevronUp, ChevronDown } from "lucide-react"
+import { Calendar } from "../ui/calendar"
+import { Input } from "../ui/input"
+import { Label } from "../ui/label"
+import { Textarea } from "../ui/textarea"
+import { Button } from "../ui/button"
 
 const benefits = [
   { icon: Clock, text: "Same-day repairs available" },
   { icon: Shield, text: "12-month warranty on all repairs" },
   { icon: Award, text: "Premium quality parts guaranteed" },
 ]
+
+const hourOptions = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
+const minuteOptions = ["00", "15", "30", "45"]
 
 function BookRepairContent() {
   const searchParams = useSearchParams()
@@ -26,6 +33,19 @@ function BookRepairContent() {
   const time = searchParams.get("time") || undefined
 
   const hasPreselection = !!(brand && model && serviceName)
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [hour, setHour] = useState("09")
+  const [minute, setMinute] = useState("30")
+  const [meridiem, setMeridiem] = useState<"am" | "pm">("am")
+  const [fullName, setFullName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [email, setEmail] = useState("")
+  const [company, setCompany] = useState("")
+  const [storeLocation, setStoreLocation] = useState("")
+  const [issueNotes, setIssueNotes] = useState("")
+  const [submitted, setSubmitted] = useState(false)
+  const [formError, setFormError] = useState("")
+  const selectedTime = `${hour}:${minute} ${meridiem}`
 
   const handleGoBack = () => {
     if (window.history.length > 1) {
@@ -33,6 +53,37 @@ function BookRepairContent() {
       return
     }
     router.push("/")
+  }
+
+  const shiftOption = (
+    options: string[],
+    value: string,
+    setter: (val: string) => void,
+    direction: 1 | -1
+  ) => {
+    const idx = options.indexOf(value)
+    const next = (idx + direction + options.length) % options.length
+    setter(options[next])
+  }
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!selectedDate) {
+      setFormError("Please choose an appointment date.")
+      return
+    }
+    setFormError("")
+    setSubmitted(true)
+  }
+
+  const formattedDate = selectedDate
+    ? selectedDate.toLocaleDateString("en-AU", { weekday: "short", day: "numeric", month: "short", year: "numeric" })
+    : "Not selected"
+  const sketchFont = { fontFamily: "'Lugrasimo', cursive" }
+  const detailsNotebookStyle: CSSProperties = {
+    backgroundColor: "#fcfcfd",
+    backgroundImage:
+      "repeating-linear-gradient(to bottom, transparent 0, transparent 35px, rgba(100,116,139,0.12) 35px, rgba(100,116,139,0.12) 36px)",
   }
 
   return (
@@ -74,87 +125,272 @@ function BookRepairContent() {
         </div>
       </section>
 
-      {/* Main content — booking module centred */}
+      {/* Main content — appointment layout */}
       <section className="py-8 lg:py-16">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
-            {/* Booking module — takes the lead */}
-            <div className="flex-1 min-w-0">
-              <AnimatedSection>
-                <BookingModule
-                  preselectedBrand={brand}
-                  preselectedModel={model}
-                  preselectedService={serviceId}
-                  preselectedBrandName={brandName}
-                  preselectedModelName={modelName}
-                  preselectedServiceName={serviceName}
-                  preselectedCost={cost}
-                  preselectedTime={time}
-                />
-              </AnimatedSection>
-            </div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <AnimatedSection>
+            <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+              <div className="overflow-hidden rounded-2xl border border-border bg-card">
+                <div className="bg-[#e7e7e7] px-5 py-2.5 text-[2.15rem] font-semibold leading-none text-black sm:text-[2.6rem]" style={sketchFont}>
+                  Booking summary
+                </div>
+                <div className="space-y-4 p-4.5 sm:p-5">
+                  <p className="text-[0.95rem] font-medium text-foreground sm:text-[1.1rem]" style={sketchFont}>Review and confirm your booking below</p>
 
-            {/* Sidebar — help & trust */}
-            <div className="w-full lg:w-[280px] lg:shrink-0">
-              <AnimatedSection delay={120}>
-                <div className="rounded-2xl border border-border bg-card p-5">
-                  <h3 className="text-sm font-semibold text-foreground">How it works</h3>
-                  <div className="mt-4 space-y-4">
-                    {[
-                      { step: "1", text: "Select your service and device" },
-                      { step: "2", text: "Choose a convenient store" },
-                      { step: "3", text: "Enter your details to confirm" },
-                    ].map((item) => (
-                      <div key={item.step} className="flex items-start gap-3">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
-                          {item.step}
+                  <div className="grid gap-2.5 sm:grid-cols-2">
+                    <div className="rounded-xl border-2 border-[#222222] bg-background px-3 py-2.5">
+                      <p className="text-[0.95rem] text-[#111111] sm:text-[1.05rem]" style={sketchFont}>Brand :</p>
+                      <p className="mt-0.5 text-[0.98rem] font-semibold text-foreground sm:text-[1.1rem]" style={sketchFont}>{brandName || "Device"}</p>
+                    </div>
+                    <div className="rounded-xl border-2 border-[#222222] bg-background px-3 py-2.5">
+                      <p className="text-[0.95rem] text-[#111111] sm:text-[1.05rem]" style={sketchFont}>Model :</p>
+                      <p className="mt-0.5 text-[0.98rem] font-semibold text-foreground sm:text-[1.1rem]" style={sketchFont}>{modelName || "Not selected"}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2.5 sm:grid-cols-[1fr_auto]">
+                    <div className="rounded-xl border-2 border-[#222222] bg-background px-3 py-2.5">
+                      <p className="text-[0.95rem] text-[#111111] sm:text-[1.05rem]" style={sketchFont}>Service Required :</p>
+                      <p className="mt-0.5 text-[0.98rem] font-semibold text-foreground sm:text-[1.1rem]" style={sketchFont}>{serviceName || "General Repair"}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2.5 sm:w-[300px]">
+                      <div className="rounded-xl bg-[#ececec] px-2.5 py-2.5 text-center">
+                        <p className="text-sm text-[#111111]" style={sketchFont}>estimated time</p>
+                        <p className="mt-1 text-lg font-semibold text-[#111111]" style={sketchFont}>{time || "call"}</p>
+                      </div>
+                      <div className="rounded-xl bg-[#e7e7e7] px-2.5 py-2.5 text-center">
+                        <p className="text-sm text-black/90" style={sketchFont}>estimated cost</p>
+                        <p className="mt-1 text-lg font-semibold text-black" style={sketchFont}>call</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 className="text-center text-[1.1rem] font-semibold text-[#111111] sm:text-[1.35rem]" style={sketchFont}>Select date and time</h3>
+
+                  <div className="rounded-md border border-[#dddddd] bg-[#f7f7f7] p-0">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
+                      className="mx-auto w-full p-0 [--cell-size:2.05rem] sm:[--cell-size:2.95rem]"
+                      classNames={{
+                        root: "w-full",
+                        months: "relative w-full",
+                        month: "w-full min-w-0 gap-0",
+                        month_grid: "w-full",
+                        table: "w-full table-fixed border-collapse",
+                        month_caption:
+                          "relative z-10 flex h-[2.35rem] items-center justify-center rounded-none bg-[#ececec] px-8 sm:h-[3.2rem]",
+                        caption_label:
+                          "w-full text-center text-[0.98rem] font-semibold text-[#111111] sm:text-[1.1rem]",
+                        nav: "absolute inset-x-0 top-0 z-20 flex h-[2.35rem] items-center justify-between px-2 sm:h-[3.2rem] sm:px-4",
+                        button_previous:
+                          "pointer-events-auto h-9 w-9 rounded-none border-0 bg-transparent p-0 text-[#444444] hover:bg-transparent hover:text-[#111111] [&>svg]:size-8 [&>svg]:stroke-[2.2] sm:h-12 sm:w-12 sm:[&>svg]:size-12",
+                        button_next:
+                          "pointer-events-auto h-9 w-9 rounded-none border-0 bg-transparent p-0 text-[#444444] hover:bg-transparent hover:text-[#111111] [&>svg]:size-8 [&>svg]:stroke-[2.2] sm:h-12 sm:w-12 sm:[&>svg]:size-12",
+                        weekday:
+                          "flex h-9 items-center justify-center text-center text-[0.85rem] font-semibold text-[#222222] sm:h-12 sm:text-[1.15rem]",
+                        day_button:
+                          "h-[var(--cell-size)] min-w-0 w-full rounded-none text-[0.88rem] font-medium text-[#222222] hover:bg-[#efefef] data-[selected-single=true]:bg-[#ececec] data-[selected-single=true]:text-[#111111] sm:text-[1.15rem]",
+                        selected:
+                          "relative overflow-hidden rounded-[0.6rem] bg-[#dcdcdc] text-black after:absolute after:bottom-[2px] after:right-[2px] after:h-0 after:w-0 after:border-l-[0.65rem] after:border-l-transparent after:border-b-[0.65rem] after:border-b-black/80 after:content-['']",
+                        today: "bg-transparent text-[#111111]",
+                        day: "p-0",
+                        weekdays: "mt-0 grid w-full grid-cols-7 border-b border-[#dddddd] bg-[#f7f7f7]",
+                        weeks: "w-full",
+                        week: "mt-0 grid w-full grid-cols-7",
+                      }}
+                    />
+                  </div>
+
+                  <div className="mx-auto w-full max-w-[19rem] rounded-md border border-[#dddddd] bg-[#f7f7f7] p-3">
+                    <div className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-3">
+                      <div className="flex flex-col items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => shiftOption(hourOptions, hour, setHour, 1)}
+                          className="rounded-md p-1 text-[#444444] hover:bg-[#efefef]"
+                          aria-label="Increase hour"
+                        >
+                          <ChevronUp className="h-5 w-5" />
+                        </button>
+                        <div className="w-full rounded-[0.85rem] bg-[#ececec] px-3 py-2.5 text-center text-[1.95rem] font-semibold leading-none text-[#111111] sm:text-[2.25rem]">
+                          {hour}
                         </div>
-                        <p className="text-sm text-muted-foreground pt-0.5">{item.text}</p>
+                        <button
+                          type="button"
+                          onClick={() => shiftOption(hourOptions, hour, setHour, -1)}
+                          className="rounded-md p-1 text-[#444444] hover:bg-[#efefef]"
+                          aria-label="Decrease hour"
+                        >
+                          <ChevronDown className="h-5 w-5" />
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </AnimatedSection>
 
-              <AnimatedSection delay={180}>
-                <div className="mt-4 rounded-2xl border border-border bg-card p-5">
-                  <h3 className="text-sm font-semibold text-foreground">Need help?</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">Our team is ready to assist you.</p>
-                  <div className="mt-4 flex flex-col gap-3">
-                    <a href="tel:0297451234" className="flex items-center gap-2.5 rounded-lg py-1 text-[15px] font-medium text-foreground transition-colors active:text-primary hover:text-primary">
-                      <Phone className="h-4 w-4 text-primary shrink-0" />(02) 9745 1234
-                    </a>
-                    <a href="mailto:hello@phonegarage.com.au" className="flex items-center gap-2.5 rounded-lg py-1 text-[15px] font-medium text-foreground transition-colors active:text-primary hover:text-primary">
-                      <Mail className="h-4 w-4 text-primary shrink-0" />hello@phonegarage.com.au
-                    </a>
-                    <a href="/locations" className="flex items-center gap-2.5 rounded-lg py-1 text-[15px] font-medium text-foreground transition-colors active:text-primary hover:text-primary">
-                      <MapPin className="h-4 w-4 text-primary shrink-0" />Find a store near you
-                    </a>
-                  </div>
-                </div>
-              </AnimatedSection>
+                      <div className="text-[1.95rem] font-semibold leading-none text-[#111111] sm:text-[2.25rem]">:</div>
 
-              <AnimatedSection delay={240}>
-                <div className="mt-4 rounded-2xl border border-border bg-card p-5">
-                  <h3 className="text-sm font-semibold text-foreground">Why choose us?</h3>
-                  <div className="mt-3 space-y-2.5">
-                    {[
-                      "Certified technicians",
-                      "OEM-quality parts",
-                      "Free diagnostic assessment",
-                      "No fix, no fee guarantee",
-                      "4 convenient locations",
-                    ].map((text) => (
-                      <div key={text} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <CheckCircle className="h-3.5 w-3.5 text-green-500 shrink-0" />
-                        {text}
+                      <div className="flex flex-col items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => shiftOption(minuteOptions, minute, setMinute, 1)}
+                          className="rounded-md p-1 text-[#444444] hover:bg-[#efefef]"
+                          aria-label="Increase minute"
+                        >
+                          <ChevronUp className="h-5 w-5" />
+                        </button>
+                        <div className="w-full rounded-[0.85rem] bg-[#ececec] px-3 py-2.5 text-center text-[1.95rem] font-semibold leading-none text-[#111111] sm:text-[2.25rem]">
+                          {minute}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => shiftOption(minuteOptions, minute, setMinute, -1)}
+                          className="rounded-md p-1 text-[#444444] hover:bg-[#efefef]"
+                          aria-label="Decrease minute"
+                        >
+                          <ChevronDown className="h-5 w-5" />
+                        </button>
                       </div>
-                    ))}
+
+                      <button
+                        type="button"
+                        onClick={() => setMeridiem((p) => (p === "am" ? "pm" : "am"))}
+                        className="rounded-[0.85rem] bg-[#e0e0e0] px-3 py-2.5 text-[1.35rem] font-semibold lowercase leading-none text-black sm:text-[1.7rem]"
+                      >
+                        {meridiem}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl bg-secondary/50 p-3">
+                    <p className="flex items-center gap-2 text-sm text-foreground">
+                      <CalendarDays className="h-4 w-4 text-[#111111]" />
+                      {formattedDate}
+                    </p>
+                    <p className="mt-1 flex items-center gap-2 text-sm text-foreground">
+                      <Clock className="h-4 w-4 text-[#111111]" />
+                      {selectedTime || "Select time slot"}
+                    </p>
                   </div>
                 </div>
-              </AnimatedSection>
-            </div>
-          </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="overflow-hidden rounded-2xl border border-[#d7dce2] bg-[#fcfcfd] shadow-[0_12px_32px_-24px_rgba(15,23,42,0.45)]">
+                  <div className="border-b border-[#cfd5dd] bg-[#e7e7e7] px-5 py-2.5 text-[2.15rem] font-semibold leading-none text-black sm:text-[2.6rem]" style={sketchFont}>
+                    Details
+                  </div>
+                  <div className="space-y-3.5 p-4 pl-11 sm:p-4.5 sm:pl-12" style={detailsNotebookStyle}>
+                  <p className="text-[1.3rem] font-semibold text-[#374151] sm:text-[1.55rem]" style={sketchFont}>Fill your Details</p>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="storeLocation" className="sr-only">Store location</Label>
+                    <div className="flex items-center gap-3 rounded-lg border border-[#6b7280]/60 bg-white/80 px-3 py-1">
+                      <MapPin className="h-5 w-5 text-[#4b5563]" />
+                      <Input
+                        id="storeLocation"
+                        value={storeLocation}
+                        onChange={(e) => setStoreLocation(e.target.value)}
+                        placeholder="STORE LOCATION"
+                        className="h-9 border-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]"
+                        style={sketchFont}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fullName" className="sr-only">Full name</Label>
+                    <div className="flex items-center gap-3 border-b border-[#6b7280]/60 px-1 pb-2">
+                      <User className="h-5 w-5 text-[#4b5563]" />
+                      <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} required />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="phone" className="sr-only">Phone number</Label>
+                    <div className="flex items-center gap-3 border-b border-[#6b7280]/60 px-1 pb-2">
+                      <Phone className="h-5 w-5 text-[#4b5563]" />
+                      <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone Number" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} required />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="company" className="sr-only">Company</Label>
+                    <div className="flex items-center gap-3 border-b border-[#6b7280]/60 px-1 pb-2">
+                      <Building2 className="h-5 w-5 text-[#4b5563]" />
+                      <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="email" className="sr-only">Email</Label>
+                    <div className="flex items-center gap-3 border-b border-[#6b7280]/60 px-1 pb-2">
+                      <Mail className="h-5 w-5 text-[#4b5563]" />
+                      <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} required />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="issueNotes" className="sr-only">Comments</Label>
+                    <Textarea
+                      id="issueNotes"
+                      rows={8}
+                      placeholder="Comments / Remarks"
+                      value={issueNotes}
+                      onChange={(e) => setIssueNotes(e.target.value)}
+                      className="border-[#6b7280]/60 bg-white/80 text-[0.95rem] sm:text-[1rem]"
+                      style={sketchFont}
+                    />
+                  </div>
+
+                  {formError && (
+                    <p className="text-sm font-medium text-destructive">{formError}</p>
+                  )}
+
+                  <Button type="submit" className="h-9 w-full rounded-lg border border-[#cfd5dd] bg-[#e7e7e7] text-sm text-black hover:bg-[#dcdcdc]">
+                    BOOK NOW
+                  </Button>
+
+                  {submitted && (
+                    <div className="rounded-xl border border-[#6b7280]/30 bg-[#6b7280]/10 p-4">
+                      <p className="text-sm text-muted-foreground">
+                        Thanks {fullName || "there"}, we have your request for {formattedDate} at {selectedTime}. Our team will confirm shortly.
+                      </p>
+                    </div>
+                  )}
+
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="mb-2.5 text-base font-semibold text-[#111111] sm:text-[1.1rem]" style={sketchFont}>
+                    A simple promise for every repair.
+                  </h4>
+                  <div className="relative overflow-hidden rounded-2xl border border-[#d8dee8] bg-gradient-to-br from-white via-[#f8f9fc] to-[#eef2f7] p-4 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.65)] sm:p-5">
+                    <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#6b7280]/12 blur-2xl" />
+                    <div className="pointer-events-none absolute -bottom-10 -left-10 h-28 w-28 rounded-full bg-[#9ca3af]/12 blur-2xl" />
+
+                    <div className="relative grid gap-2.5 sm:grid-cols-2">
+                      <div className="flex items-center gap-2.5 rounded-xl border border-[#cfd6e2] bg-white/75 px-3 py-2.5">
+                        <Shield className="h-4.5 w-4.5 text-[#4b5563]" />
+                        <p className="text-[0.9rem] font-semibold text-[#111111]" style={sketchFont}>No fix, no fee guarantee</p>
+                      </div>
+                      <div className="flex items-center gap-2.5 rounded-xl border border-[#cfd6e2] bg-white/75 px-3 py-2.5">
+                        <Award className="h-4.5 w-4.5 text-[#4b5563]" />
+                        <p className="text-[0.9rem] font-semibold text-[#111111]" style={sketchFont}>6-month warranty on all repairs</p>
+                      </div>
+                    </div>
+
+                    <p className="relative mt-3.5 rounded-xl border border-[#d6dbe5] bg-white/70 px-3.5 py-3 text-sm leading-relaxed text-[#4b5563]" style={sketchFont}>
+                      We know this device holds your memories, so we repair it with heart.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </AnimatedSection>
         </div>
       </section>
     </div>
