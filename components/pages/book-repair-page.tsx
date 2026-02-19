@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation"
 import { Suspense, useState, type CSSProperties, type FormEvent } from "react"
 import { AnimatedSection } from "../animated-section"
-import { Shield, Clock, Award, Phone, Mail, MapPin, ArrowLeft, CalendarDays, Building2, User, ChevronUp, ChevronDown } from "lucide-react"
+import { Shield, Clock, Award, Phone, Mail, MapPin, ArrowLeft, Building2, User, ChevronUp, ChevronDown, CalendarDays } from "lucide-react"
 import { Calendar } from "../ui/calendar"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
@@ -137,36 +137,36 @@ function BookRepairContent() {
                 <div className="space-y-4 p-4.5 sm:p-5">
                   <p className="text-[0.95rem] font-medium text-foreground sm:text-[1.1rem]" style={sketchFont}>Review and confirm your booking below</p>
 
-                  <div className="grid gap-2.5 sm:grid-cols-2">
-                    <div className="rounded-xl border-2 border-[#222222] bg-background px-3 py-2.5">
-                      <p className="text-[0.95rem] text-[#111111] sm:text-[1.05rem]" style={sketchFont}>Brand :</p>
-                      <p className="mt-0.5 text-[0.98rem] font-semibold text-foreground sm:text-[1.1rem]" style={sketchFont}>{brandName || "Device"}</p>
+                  <div className="grid gap-1.5 sm:grid-cols-2">
+                    <div className="rounded-lg border-2 border-[#222222] bg-background px-2 py-1.5">
+                      <p className="text-[0.74rem] text-[#111111] sm:text-[0.82rem]" style={sketchFont}>Brand :</p>
+                      <p className="mt-0.5 text-[0.78rem] font-semibold text-foreground sm:text-[0.86rem]" style={sketchFont}>{brandName || "Device"}</p>
                     </div>
-                    <div className="rounded-xl border-2 border-[#222222] bg-background px-3 py-2.5">
-                      <p className="text-[0.95rem] text-[#111111] sm:text-[1.05rem]" style={sketchFont}>Model :</p>
-                      <p className="mt-0.5 text-[0.98rem] font-semibold text-foreground sm:text-[1.1rem]" style={sketchFont}>{modelName || "Not selected"}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid gap-2.5 sm:grid-cols-[1fr_auto]">
-                    <div className="rounded-xl border-2 border-[#222222] bg-background px-3 py-2.5">
-                      <p className="text-[0.95rem] text-[#111111] sm:text-[1.05rem]" style={sketchFont}>Service Required :</p>
-                      <p className="mt-0.5 text-[0.98rem] font-semibold text-foreground sm:text-[1.1rem]" style={sketchFont}>{serviceName || "General Repair"}</p>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2.5 sm:w-[300px]">
-                      <div className="rounded-xl bg-[#ececec] px-2.5 py-2.5 text-center">
-                        <p className="text-sm text-[#111111]" style={sketchFont}>estimated time</p>
-                        <p className="mt-1 text-lg font-semibold text-[#111111]" style={sketchFont}>{time || "call"}</p>
-                      </div>
-                      <div className="rounded-xl bg-[#e7e7e7] px-2.5 py-2.5 text-center">
-                        <p className="text-sm text-black/90" style={sketchFont}>estimated cost</p>
-                        <p className="mt-1 text-lg font-semibold text-black" style={sketchFont}>call</p>
-                      </div>
+                    <div className="rounded-lg border-2 border-[#222222] bg-background px-2 py-1.5">
+                      <p className="text-[0.74rem] text-[#111111] sm:text-[0.82rem]" style={sketchFont}>Model :</p>
+                      <p className="mt-0.5 text-[0.78rem] font-semibold text-foreground sm:text-[0.86rem]" style={sketchFont}>{modelName || "Not selected"}</p>
                     </div>
                   </div>
 
-                  <h3 className="text-center text-[1.1rem] font-semibold text-[#111111] sm:text-[1.35rem]" style={sketchFont}>Select date and time</h3>
+                  <div className="grid gap-1.5 sm:grid-cols-[1fr_auto]">
+                    <div className="rounded-lg border-2 border-[#222222] bg-background px-2 py-1.5">
+                      <p className="text-[0.74rem] text-[#111111] sm:text-[0.82rem]" style={sketchFont}>Service Required :</p>
+                      <p className="mt-0.5 text-[0.78rem] font-semibold text-foreground sm:text-[0.86rem]" style={sketchFont}>{serviceName || "General Repair"}</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1.5 sm:w-[228px]">
+                      <div className="rounded-lg bg-[#ececec] px-1.5 py-1.5 text-center">
+                        <p className="text-[0.72rem] text-[#111111]" style={sketchFont}>estimated time</p>
+                        <p className="mt-0.5 text-[0.9rem] font-semibold text-[#111111]" style={sketchFont}>{time || "call"}</p>
+                      </div>
+                      <div className="rounded-lg bg-[#e7e7e7] px-1.5 py-1.5 text-center">
+                        <p className="text-[0.72rem] text-black/90" style={sketchFont}>estimated cost</p>
+                        <p className="mt-0.5 text-[0.9rem] font-semibold text-black" style={sketchFont}>call</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <h3 className="text-center text-[0.95rem] font-semibold text-[#111111] sm:text-[1.1rem]" style={sketchFont}>Select date and time</h3>
 
                   <div className="rounded-md border border-[#dddddd] bg-[#f7f7f7] p-0">
                     <Calendar
@@ -174,7 +174,7 @@ function BookRepairContent() {
                       selected={selectedDate}
                       onSelect={setSelectedDate}
                       disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
-                      className="mx-auto w-full p-0 [--cell-size:2.05rem] sm:[--cell-size:2.95rem]"
+                      className="mx-auto w-full p-0 [--cell-size:1.75rem] sm:[--cell-size:2.45rem]"
                       classNames={{
                         root: "w-full",
                         months: "relative w-full",
@@ -182,18 +182,18 @@ function BookRepairContent() {
                         month_grid: "w-full",
                         table: "w-full table-fixed border-collapse",
                         month_caption:
-                          "relative z-10 flex h-[2.35rem] items-center justify-center rounded-none bg-[#ececec] px-8 sm:h-[3.2rem]",
+                          "relative z-10 flex h-[2rem] items-center justify-center rounded-none bg-[#ececec] px-8 sm:h-[2.75rem]",
                         caption_label:
-                          "w-full text-center text-[0.98rem] font-semibold text-[#111111] sm:text-[1.1rem]",
-                        nav: "absolute inset-x-0 top-0 z-20 flex h-[2.35rem] items-center justify-between px-2 sm:h-[3.2rem] sm:px-4",
+                          "w-full text-center text-[0.9rem] font-semibold text-[#111111] sm:text-[1rem]",
+                        nav: "absolute inset-x-0 top-0 z-20 flex h-[2rem] items-center justify-between px-2 sm:h-[2.75rem] sm:px-4",
                         button_previous:
-                          "pointer-events-auto h-9 w-9 rounded-none border-0 bg-transparent p-0 text-[#444444] hover:bg-transparent hover:text-[#111111] [&>svg]:size-8 [&>svg]:stroke-[2.2] sm:h-12 sm:w-12 sm:[&>svg]:size-12",
+                          "pointer-events-auto h-8 w-8 rounded-none border-0 bg-transparent p-0 text-[#444444] hover:bg-transparent hover:text-[#111111] [&>svg]:size-7 [&>svg]:stroke-[2.2] sm:h-10 sm:w-10 sm:[&>svg]:size-10",
                         button_next:
-                          "pointer-events-auto h-9 w-9 rounded-none border-0 bg-transparent p-0 text-[#444444] hover:bg-transparent hover:text-[#111111] [&>svg]:size-8 [&>svg]:stroke-[2.2] sm:h-12 sm:w-12 sm:[&>svg]:size-12",
+                          "pointer-events-auto h-8 w-8 rounded-none border-0 bg-transparent p-0 text-[#444444] hover:bg-transparent hover:text-[#111111] [&>svg]:size-7 [&>svg]:stroke-[2.2] sm:h-10 sm:w-10 sm:[&>svg]:size-10",
                         weekday:
-                          "flex h-9 items-center justify-center text-center text-[0.85rem] font-semibold text-[#222222] sm:h-12 sm:text-[1.15rem]",
+                          "flex h-8 items-center justify-center text-center text-[0.78rem] font-semibold text-[#222222] sm:h-10 sm:text-[0.98rem]",
                         day_button:
-                          "h-[var(--cell-size)] min-w-0 w-full rounded-none text-[0.88rem] font-medium text-[#222222] hover:bg-[#efefef] data-[selected-single=true]:bg-[#ececec] data-[selected-single=true]:text-[#111111] sm:text-[1.15rem]",
+                          "h-[var(--cell-size)] min-w-0 w-full rounded-none text-[0.78rem] font-medium text-[#222222] hover:bg-[#efefef] data-[selected-single=true]:bg-[#ececec] data-[selected-single=true]:text-[#111111] sm:text-[0.95rem]",
                         selected:
                           "relative overflow-hidden rounded-[0.6rem] bg-[#dcdcdc] text-black after:absolute after:bottom-[2px] after:right-[2px] after:h-0 after:w-0 after:border-l-[0.65rem] after:border-l-transparent after:border-b-[0.65rem] after:border-b-black/80 after:content-['']",
                         today: "bg-transparent text-[#111111]",
@@ -205,73 +205,75 @@ function BookRepairContent() {
                     />
                   </div>
 
-                  <div className="mx-auto w-full max-w-[19rem] rounded-md border border-[#dddddd] bg-[#f7f7f7] p-3">
-                    <div className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-3">
-                      <div className="flex flex-col items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => shiftOption(hourOptions, hour, setHour, 1)}
-                          className="rounded-md p-1 text-[#444444] hover:bg-[#efefef]"
-                          aria-label="Increase hour"
-                        >
-                          <ChevronUp className="h-5 w-5" />
-                        </button>
-                        <div className="w-full rounded-[0.85rem] bg-[#ececec] px-3 py-2.5 text-center text-[1.95rem] font-semibold leading-none text-[#111111] sm:text-[2.25rem]">
-                          {hour}
+                  <div className="mx-auto flex w-full max-w-[27rem] flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4">
+                    <div className="w-full max-w-[15rem] shrink-0 rounded-md border border-[#dddddd] bg-[#f7f7f7] p-1.5">
+                      <div className="grid grid-cols-[1fr_auto_1fr_auto] items-center gap-2">
+                        <div className="flex flex-col items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => shiftOption(hourOptions, hour, setHour, 1)}
+                            className="rounded-md p-0.5 text-[#444444] hover:bg-[#efefef]"
+                            aria-label="Increase hour"
+                          >
+                            <ChevronUp className="h-4 w-4" />
+                          </button>
+                          <div className="w-full rounded-[0.75rem] bg-[#ececec] px-2.5 py-1.5 text-center text-[1.65rem] font-semibold leading-none text-[#111111] sm:text-[1.9rem]">
+                            {hour}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => shiftOption(hourOptions, hour, setHour, -1)}
+                            className="rounded-md p-0.5 text-[#444444] hover:bg-[#efefef]"
+                            aria-label="Decrease hour"
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </button>
                         </div>
+
+                        <div className="text-[1.65rem] font-semibold leading-none text-[#111111] sm:text-[1.9rem]">:</div>
+
+                        <div className="flex flex-col items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => shiftOption(minuteOptions, minute, setMinute, 1)}
+                            className="rounded-md p-0.5 text-[#444444] hover:bg-[#efefef]"
+                            aria-label="Increase minute"
+                          >
+                            <ChevronUp className="h-4 w-4" />
+                          </button>
+                          <div className="w-full rounded-[0.75rem] bg-[#ececec] px-2.5 py-1.5 text-center text-[1.65rem] font-semibold leading-none text-[#111111] sm:text-[1.9rem]">
+                            {minute}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => shiftOption(minuteOptions, minute, setMinute, -1)}
+                            className="rounded-md p-0.5 text-[#444444] hover:bg-[#efefef]"
+                            aria-label="Decrease minute"
+                          >
+                            <ChevronDown className="h-4 w-4" />
+                          </button>
+                        </div>
+
                         <button
                           type="button"
-                          onClick={() => shiftOption(hourOptions, hour, setHour, -1)}
-                          className="rounded-md p-1 text-[#444444] hover:bg-[#efefef]"
-                          aria-label="Decrease hour"
+                          onClick={() => setMeridiem((p) => (p === "am" ? "pm" : "am"))}
+                          className="rounded-[0.75rem] bg-[#e0e0e0] px-2.5 py-1.5 text-[1.15rem] font-semibold lowercase leading-none text-black sm:text-[1.35rem]"
                         >
-                          <ChevronDown className="h-5 w-5" />
+                          {meridiem}
                         </button>
                       </div>
-
-                      <div className="text-[1.95rem] font-semibold leading-none text-[#111111] sm:text-[2.25rem]">:</div>
-
-                      <div className="flex flex-col items-center gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => shiftOption(minuteOptions, minute, setMinute, 1)}
-                          className="rounded-md p-1 text-[#444444] hover:bg-[#efefef]"
-                          aria-label="Increase minute"
-                        >
-                          <ChevronUp className="h-5 w-5" />
-                        </button>
-                        <div className="w-full rounded-[0.85rem] bg-[#ececec] px-3 py-2.5 text-center text-[1.95rem] font-semibold leading-none text-[#111111] sm:text-[2.25rem]">
-                          {minute}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => shiftOption(minuteOptions, minute, setMinute, -1)}
-                          className="rounded-md p-1 text-[#444444] hover:bg-[#efefef]"
-                          aria-label="Decrease minute"
-                        >
-                          <ChevronDown className="h-5 w-5" />
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setMeridiem((p) => (p === "am" ? "pm" : "am"))}
-                        className="rounded-[0.85rem] bg-[#e0e0e0] px-3 py-2.5 text-[1.35rem] font-semibold lowercase leading-none text-black sm:text-[1.7rem]"
-                      >
-                        {meridiem}
-                      </button>
                     </div>
-                  </div>
 
-                  <div className="rounded-xl bg-secondary/50 p-3">
-                    <p className="flex items-center gap-2 text-sm text-foreground">
-                      <CalendarDays className="h-4 w-4 text-[#111111]" />
-                      {formattedDate}
-                    </p>
-                    <p className="mt-1 flex items-center gap-2 text-sm text-foreground">
-                      <Clock className="h-4 w-4 text-[#111111]" />
-                      {selectedTime || "Select time slot"}
-                    </p>
+                    <div className="rounded-xl bg-secondary/50 px-3 py-2.5 sm:min-w-[205px] sm:self-center">
+                      <p className="flex items-center gap-2 text-[1rem] font-medium leading-tight text-foreground sm:text-[1.05rem]">
+                        <CalendarDays className="h-4 w-4 text-[#111111]" />
+                        {formattedDate}
+                      </p>
+                      <p className="mt-1.5 flex items-center gap-2 text-[1rem] font-medium leading-tight text-foreground sm:text-[1.05rem]">
+                        <Clock className="h-4 w-4 text-[#111111]" />
+                        {selectedTime},
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -336,7 +338,7 @@ function BookRepairContent() {
                     <Label htmlFor="issueNotes" className="sr-only">Comments</Label>
                     <Textarea
                       id="issueNotes"
-                      rows={8}
+                      rows={14}
                       placeholder="Comments / Remarks"
                       value={issueNotes}
                       onChange={(e) => setIssueNotes(e.target.value)}
@@ -364,30 +366,6 @@ function BookRepairContent() {
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="mb-2.5 text-base font-semibold text-[#111111] sm:text-[1.1rem]" style={sketchFont}>
-                    A simple promise for every repair.
-                  </h4>
-                  <div className="relative overflow-hidden rounded-2xl border border-[#d8dee8] bg-gradient-to-br from-white via-[#f8f9fc] to-[#eef2f7] p-4 shadow-[0_12px_28px_-22px_rgba(15,23,42,0.65)] sm:p-5">
-                    <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[#6b7280]/12 blur-2xl" />
-                    <div className="pointer-events-none absolute -bottom-10 -left-10 h-28 w-28 rounded-full bg-[#9ca3af]/12 blur-2xl" />
-
-                    <div className="relative grid gap-2.5 sm:grid-cols-2">
-                      <div className="flex items-center gap-2.5 rounded-xl border border-[#cfd6e2] bg-white/75 px-3 py-2.5">
-                        <Shield className="h-4.5 w-4.5 text-[#4b5563]" />
-                        <p className="text-[0.9rem] font-semibold text-[#111111]" style={sketchFont}>No fix, no fee guarantee</p>
-                      </div>
-                      <div className="flex items-center gap-2.5 rounded-xl border border-[#cfd6e2] bg-white/75 px-3 py-2.5">
-                        <Award className="h-4.5 w-4.5 text-[#4b5563]" />
-                        <p className="text-[0.9rem] font-semibold text-[#111111]" style={sketchFont}>6-month warranty on all repairs</p>
-                      </div>
-                    </div>
-
-                    <p className="relative mt-3.5 rounded-xl border border-[#d6dbe5] bg-white/70 px-3.5 py-3 text-sm leading-relaxed text-[#4b5563]" style={sketchFont}>
-                      We know this device holds your memories, so we repair it with heart.
-                    </p>
-                  </div>
-                </div>
               </div>
             </form>
           </AnimatedSection>
