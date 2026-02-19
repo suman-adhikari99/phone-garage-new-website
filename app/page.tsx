@@ -9,6 +9,7 @@ import { CTABanner } from "@/components/cta-banner"
 import { ShopLocationShowcase } from "@/components/shop-location-showcase"
 import { FAQ } from "@/components/faq"
 import { Footer } from "@/components/footer"
+import { LaptopRepairCloneSection } from "@/components/laptop-repair-clone"
 
 export default function Home() {
   return (
@@ -18,6 +19,7 @@ export default function Home() {
         <Hero />
         <ServicesPreview />
         <CommonPhoneRepairsSection backgroundTheme="white" />
+        <LaptopRepairCloneSection />
         <Stats />
         <About />
         <Testimonials />

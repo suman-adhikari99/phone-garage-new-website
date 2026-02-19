@@ -1044,18 +1044,18 @@ export function Hero() {
           <motion.div variants={fadeUp} className="mb-10 flex flex-col gap-3.5 sm:flex-row">
             <Button
               size="lg"
-              className="bg-[#3CB043] text-[#ffffff] hover:bg-[#2d8a34] h-[52px] px-8 text-[15px] font-semibold shadow-lg shadow-[#3CB043]/20 transition-all hover:shadow-xl hover:shadow-[#3CB043]/30 hover:-translate-y-0.5 active:translate-y-0"
+              className="bg-[rgba(21,33,21,1)] text-[#ffffff] hover:bg-[rgba(28,44,28,1)] h-[52px] px-8 text-[15px] font-semibold shadow-lg shadow-[rgba(21,33,21,0.28)] transition-all hover:shadow-xl hover:shadow-[rgba(21,33,21,0.36)] hover:-translate-y-0.5 active:translate-y-0"
               asChild
             >
               <a href="#contact">
-                Get a Free Quote
+                Get a quote
                 <ArrowRight className="ml-2 h-[18px] w-[18px]" />
               </a>
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="border-border bg-transparent text-foreground hover:bg-secondary h-[52px] px-8 text-[15px] font-semibold hover:-translate-y-0.5 transition-all active:translate-y-0"
+              className="h-[52px] border-[rgba(21,33,21,0.35)] bg-transparent px-8 text-[15px] font-semibold text-[rgba(21,33,21,1)] transition-all hover:-translate-y-0.5 hover:border-[rgba(21,33,21,1)] hover:bg-[rgba(21,33,21,1)] hover:text-[#ffffff] active:translate-y-0"
               asChild
             >
               <a href="tel:+61400000000">

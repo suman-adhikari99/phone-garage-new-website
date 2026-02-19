@@ -42,7 +42,7 @@ export function Header() {
           isScrolled ? "max-h-0 opacity-0" : "max-h-12 opacity-100"
         }`}
       >
-        <div className="bg-[#3CB043] text-[#ffffff]">
+        <div className="bg-[rgba(21,33,21,1)] text-[#ffffff]">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-sm">
             <div className="flex items-center gap-6">
               <a
@@ -105,10 +105,10 @@ export function Header() {
           </Button>
           <Button
             size="sm"
-            className="bg-primary text-primary-foreground hover:bg-[#2d8a34]"
+            className="bg-[rgba(21,33,21,1)] text-primary-foreground hover:bg-[rgba(28,44,28,1)]"
             asChild
           >
-            <a href={getNavHref("#contact")}>Get a Quote</a>
+            <a href={getNavHref("#contact")}>Get a quote</a>
           </Button>
         </div>
 
@@ -156,10 +156,10 @@ export function Header() {
                 </a>
               </Button>
               <Button
-                className="bg-primary text-primary-foreground hover:bg-[#2d8a34] w-full"
+                className="bg-[rgba(21,33,21,1)] text-primary-foreground hover:bg-[rgba(28,44,28,1)] w-full"
                 asChild
               >
-                <a href={getNavHref("#contact")}>Get a Quote</a>
+                <a href={getNavHref("#contact")}>Get a quote</a>
               </Button>
             </div>
           </div>

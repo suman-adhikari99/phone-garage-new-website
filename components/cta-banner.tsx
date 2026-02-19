@@ -31,7 +31,7 @@ export function CTABanner() {
         <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button
             size="lg"
-            className="bg-[#3CB043] text-[#ffffff] hover:bg-[#2d8a34] px-8 py-6 text-base font-semibold shadow-lg shadow-[#3CB043]/25"
+            className="bg-[#000000] text-[#ffffff] hover:bg-[#111111] px-8 py-6 text-base font-semibold shadow-lg shadow-[rgba(60,176,67,0.36)] transition-all hover:shadow-lg hover:shadow-[rgba(21,33,21,0.48)] hover:-translate-y-0.5 active:translate-y-0"
             asChild
           >
             <a href="#contact">

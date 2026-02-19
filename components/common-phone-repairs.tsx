@@ -93,17 +93,15 @@ const leftCards = [
     items: ["Broken glass replacements", "LCD replacements", "Touch IC problems", "Back-light issues"],
   },
   {
-    title: "Network Unlocking",
+    title: "Data Recovery",
     icon: (
-      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-10 h-10">
-        <path d="m32.02593 44.99267c-8.54742.30369-8.5393 12.61941-.00012 12.92193a6.461 6.461 0 0 0 .00012-12.92193z" />
-        <path d="m32.89661 12.24254a39.02078 39.02078 0 0 0 -28.60636 11.47052 1.01518 1.01518 0 0 0 0 1.42136l3.8636 3.86358a1.01771 1.01771 0 0 0 1.42129 0 31.53738 31.53738 0 0 1 21.44969-9.26855 15.24589 15.24589 0 0 1 1.87178-7.48691z" />
-        <path d="m19.73446 39.15728a.99691.99691 0 0 0 0 1.41133l3.85359 3.86355a1.01827 1.01827 0 0 0 1.42129.01 9.93153 9.93153 0 0 1 14.03294 0 1.00423 1.00423 0 0 0 1.42129-.01l3.85359-3.86355a.99691.99691 0 0 0 0-1.41133c-6.44283-6.73643-18.13969-6.73628-24.5827 0z" />
-        <path d="m46.53917 6.08685a13.58018 13.58018 0 0 0 -13.02187 17.1059c1.94392 7.84163 11.46038 12.2729 18.75726 8.64755 12.87444-6.2009 8.76595-25.5373-5.73539-25.75345zm0 24.02212a3.003 3.003 0 0 1 .00013-6.00553 3.003 3.003 0 0 1 -.00013 6.00556zm3.00277-10.00922a3.003 3.003 0 0 1 -6.00553-.00012v-8.00725a3.003 3.003 0 0 1 6.00553.00006z" />
-        <path d="m36.04953 31.00982a15.32884 15.32884 0 0 1 -4.60427-7.84725 28.08276 28.08276 0 0 0 -19.42787 8.27764 1.00885 1.00885 0 0 0 0 1.42129l3.84351 3.8535a1.0089 1.0089 0 0 0 1.42135 0 20.86043 20.86043 0 0 1 18.76728-5.70518z" />
-      </svg>
+      <img
+        src="https://img.icons8.com/?size=100&id=frTIXk0UvkY2&format=png&color=3CB043"
+        alt="Data recovery icon"
+        className="h-10 w-10 object-contain"
+      />
     ),
-    items: ["Local network unlocks", "Overseas network unlocks", "Software lock Issues"],
+    items: ["Data recovery for photos, videos, contacts, and files on supported devices."],
   },
   {
     title: "Water Damage Repair",
@@ -214,9 +212,7 @@ function RepairCard({
           <div className="mt-2 space-y-1.5 text-sm text-muted-foreground leading-relaxed sm:mt-2.5">
             {items.map((item, i) => (
               <p key={i} className="flex items-start gap-2">
-                {items.length > 1 && (
-                  <span className="mt-0.5 text-primary text-xs shrink-0">{"\u2192"}</span>
-                )}
+                <span className="mt-0.5 text-primary text-xs shrink-0">{"\u2192"}</span>
                 <span>{item}</span>
               </p>
             ))}
