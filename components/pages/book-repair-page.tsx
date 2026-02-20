@@ -26,6 +26,7 @@ function BookRepairContent() {
   const brand = searchParams.get("brand") || undefined
   const model = searchParams.get("model") || undefined
   const serviceId = searchParams.get("serviceId") || undefined
+  const serviceSlug = searchParams.get("serviceSlug") || undefined
   const serviceName = searchParams.get("serviceName") || undefined
   const brandName = searchParams.get("brandName") || undefined
   const modelName = searchParams.get("modelName") || undefined
@@ -44,6 +45,8 @@ function BookRepairContent() {
   const [storeLocation, setStoreLocation] = useState("")
   const [issueNotes, setIssueNotes] = useState("")
   const [submitted, setSubmitted] = useState(false)
+  const [savedBookingRef, setSavedBookingRef] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState("")
   const selectedTime = `${hour}:${minute} ${meridiem}`
 
@@ -66,14 +69,70 @@ function BookRepairContent() {
     setter(options[next])
   }
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!selectedDate) {
       setFormError("Please choose an appointment date.")
       return
     }
+
     setFormError("")
-    setSubmitted(true)
+    setSubmitted(false)
+    setSavedBookingRef(null)
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          brandId: brand || null,
+          brandName: brandName || null,
+          modelId: model || null,
+          modelName: modelName || null,
+          serviceId: serviceId || null,
+          serviceSlug: serviceSlug || null,
+          serviceName: serviceName || null,
+          estimatedCost: cost || null,
+          estimatedTime: time || null,
+          appointmentDate: selectedDate.toISOString(),
+          appointmentTime: selectedTime,
+          storeLocation,
+          customerName: fullName,
+          customerPhone: phone,
+          customerEmail: email,
+          company: company || null,
+          issueNotes: issueNotes || null,
+        }),
+      })
+
+      const payload = (await response.json().catch(() => null)) as
+        | { message?: string; bookingRef?: string }
+        | null
+
+      if (!response.ok) {
+        throw new Error(payload?.message || "Failed to save booking. Please try again.")
+      }
+
+      const bookingRef = payload?.bookingRef || null
+      setSubmitted(true)
+      setSavedBookingRef(bookingRef)
+
+      window.alert(
+        bookingRef
+          ? `Booking submitted successfully. Reference: ${bookingRef}`
+          : "Booking submitted successfully."
+      )
+      router.push("/")
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to save booking. Please try again."
+      setFormError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const formattedDate = selectedDate
@@ -351,8 +410,12 @@ function BookRepairContent() {
                     <p className="text-sm font-medium text-destructive">{formError}</p>
                   )}
 
-                  <Button type="submit" className="h-9 w-full rounded-lg border border-[#cfd5dd] bg-[#e7e7e7] text-sm text-black hover:bg-[#dcdcdc]">
-                    BOOK NOW
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="h-9 w-full rounded-lg border border-[#cfd5dd] bg-[#e7e7e7] text-sm text-black hover:bg-[#dcdcdc] disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    {isSubmitting ? "SAVING..." : "BOOK NOW"}
                   </Button>
 
                   {submitted && (
@@ -360,6 +423,11 @@ function BookRepairContent() {
                       <p className="text-sm text-muted-foreground">
                         Thanks {fullName || "there"}, we have your request for {formattedDate} at {selectedTime}. Our team will confirm shortly.
                       </p>
+                      {savedBookingRef && (
+                        <p className="mt-2 text-xs font-semibold text-[#111111]">
+                          Booking Ref: {savedBookingRef}
+                        </p>
+                      )}
                     </div>
                   )}
 

@@ -10,7 +10,7 @@ import {
   Volume2, Mic, Headphones, Power, Fingerprint, Vibrate, ScanFace, Monitor, Hand,
   Wifi, Signal, CreditCard, ArrowLeftRight, ShieldAlert, Shield, Unlock,
   Keyboard, CircuitBoard, FlipVertical, Thermometer, MemoryStick, MousePointer,
-  Search, Clock, DollarSign, Star, Phone, Wrench, ChevronRight, X, ArrowLeft,
+  Search, Clock, Star, Phone, Wrench, ChevronRight, X, ArrowLeft,
 } from "lucide-react"
 
 const iconMap: Record<string, React.ElementType> = {
@@ -94,40 +94,6 @@ const serviceGroups = [
 const popularSlugs = new Set([
   "screen-repair", "battery-replacement", "charging-port", "camera-repair", "water-damage", "speaker-repair", "software-issues",
 ])
-
-/* Starting prices mapped by slug */
-const startingPrices: Record<string, string> = {
-  "screen-repair": "$149",
-  "battery-replacement": "$79",
-  "camera-repair": "$119",
-  "charging-port": "$89",
-  "water-damage": "$99",
-  "back-glass": "$129",
-  "speaker-repair": "$69",
-  "microphone-repair": "$69",
-  "headphone-jack": "$59",
-  "power-button": "$69",
-  "home-button": "$89",
-  "vibration-motor": "$59",
-  "face-id-repair": "$179",
-  "lcd-replacement": "$169",
-  "touch-screen": "$139",
-  "wifi-bluetooth": "$89",
-  "signal-repair": "$89",
-  "sim-card-tray": "$49",
-  "software-issues": "$59",
-  "data-recovery": "$129",
-  "data-transfer": "$49",
-  "virus-removal": "$69",
-  "screen-protector": "$29",
-  "device-unlocking": "$79",
-  "keyboard-repair": "$149",
-  "motherboard-repair": "$249",
-  "hinge-repair": "$129",
-  "fan-overheating": "$89",
-  "storage-upgrade": "$99",
-  "trackpad-repair": "$109",
-}
 
 export function ServicesPage() {
   const router = useRouter()
@@ -277,12 +243,6 @@ export function ServicesPage() {
                 </div>
                 <span><strong className="text-foreground">Warranty</strong> on every repair</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                  <DollarSign className="h-4 w-4 text-primary" />
-                </div>
-                <span>Prices from <strong className="text-foreground">$29</strong></span>
-              </div>
             </div>
           </AnimatedSection>
         </div>
@@ -342,35 +302,35 @@ export function ServicesPage() {
                     if (!cat) return null
                     const Icon = (iconMap[cat.icon] || Settings) as React.ComponentType<{ className?: string }>
                     const isPopular = popularSlugs.has(slug)
-                    const price = startingPrices[slug]
 
                     return (
                       <AnimatedSection key={cat.id} delay={gi * 40 + si * 50}>
                         <Link
                           href={`/services/${cat.slug}`}
-                          className="group relative flex flex-col rounded-2xl border border-border bg-card p-6 transition-all duration-200 hover:border-primary/20 hover:shadow-lg"
+                          className="group relative flex h-full flex-col overflow-hidden rounded-[1.3rem] border-[1.5px] border-zinc-300 bg-zinc-200 px-4 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-black active:scale-[0.99]"
                         >
+                          <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-white/85" />
+
                           {isPopular && (
-                            <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                              <Star className="h-3 w-3 fill-current" />
+                            <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full border border-zinc-300 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-zinc-700">
+                              <Star className="h-3 w-3" />
                               Popular
                             </span>
                           )}
 
-                          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/15">
-                            <Icon className="h-5 w-5 text-primary" />
+                          <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl border border-zinc-300 bg-zinc-100 text-zinc-700 shadow-sm transition-colors group-hover:border-black group-hover:bg-white group-hover:text-zinc-900">
+                            <Icon className="h-5 w-5" />
                           </div>
 
-                          <h3 className="mt-4 text-base font-semibold text-card-foreground">{cat.name}</h3>
-                          <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">{cat.description}</p>
+                          <h3 className="mt-3 line-clamp-2 text-[0.98rem] font-semibold leading-tight tracking-tight text-zinc-900">
+                            {cat.name}
+                          </h3>
+                          <p className="mt-1.5 flex-1 text-[12.5px] leading-relaxed text-zinc-600">
+                            {cat.description}
+                          </p>
 
-                          <div className="mt-4 flex items-center justify-between">
-                            {price && (
-                              <span className="text-sm font-medium text-foreground">
-                                From {price}
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1 text-sm font-medium text-primary">
+                          <div className="mt-4 flex items-center justify-end">
+                            <span className="flex items-center gap-1 text-sm font-medium text-zinc-900">
                               View details
                               <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
                             </span>

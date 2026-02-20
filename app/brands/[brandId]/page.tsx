@@ -2,6 +2,8 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { getBrandById, getModelsByBrand } from "../../../lib/data"
 import { BrandPage } from "../../../components/pages/brand-page"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 
 interface Props {
   params: Promise<{ brandId: string }>
@@ -22,5 +24,13 @@ export default async function Brand({ params }: Props) {
   const brand = getBrandById(brandId)
   if (!brand) notFound()
   const models = getModelsByBrand(brandId)
-  return <BrandPage brand={brand} models={models} />
+  return (
+    <>
+      <Header />
+      <main className="relative z-10 pt-28 sm:pt-32">
+        <BrandPage brand={brand} models={models} />
+      </main>
+      <Footer />
+    </>
+  )
 }

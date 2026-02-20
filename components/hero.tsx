@@ -29,6 +29,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { motion, useInView, AnimatePresence } from "framer-motion"
 
+type GoogleReviewsSummaryResponse = {
+  rating?: unknown
+  reviewCount?: unknown
+}
+
 /* ------------------------------------------------------------------ */
 /*  Easing                                                              */
 /* ------------------------------------------------------------------ */
@@ -984,6 +989,42 @@ function HeroBackgroundVideo() {
 export function Hero() {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { once: true, amount: 0.15 })
+  const [googleRating, setGoogleRating] = useState<number | null>(null)
+  const [googleReviewCount, setGoogleReviewCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadGoogleSummary() {
+      try {
+        const res = await fetch("/api/google-reviews", { cache: "no-store" })
+        if (!res.ok) return
+
+        const data = (await res.json()) as GoogleReviewsSummaryResponse
+        const rating = typeof data.rating === "number" && Number.isFinite(data.rating)
+          ? Math.max(0, Math.min(5, data.rating))
+          : null
+        const reviewCount = typeof data.reviewCount === "number" && Number.isFinite(data.reviewCount)
+          ? Math.max(0, Math.round(data.reviewCount))
+          : null
+
+        if (cancelled) return
+        setGoogleRating(rating)
+        setGoogleReviewCount(reviewCount)
+      } catch {
+        // Keep local fallback values.
+      }
+    }
+
+    loadGoogleSummary()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const displayedRating = googleRating ?? 4.9
+  const displayedReviewCount = googleReviewCount ?? 500
 
   return (
     <section
@@ -1102,12 +1143,18 @@ export function Hero() {
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="h-3.5 w-3.5 fill-[#facc15] text-[#facc15]" />
                 ))}
-                <span className="ml-1.5 text-sm font-bold text-foreground">4.9</span>
+                <span className="ml-1.5 text-sm font-bold text-foreground">
+                  {displayedRating.toFixed(1)}
+                </span>
               </div>
               <span className="text-xs text-muted-foreground">
                 {"from "}
                 <span className="font-semibold text-foreground">
-                  <Counter target={500} suffix="+" duration={1.8} />
+                  <Counter
+                    target={displayedReviewCount}
+                    suffix={googleReviewCount === null ? "+" : ""}
+                    duration={1.8}
+                  />
                 </span>
                 {" Google reviews"}
               </span>

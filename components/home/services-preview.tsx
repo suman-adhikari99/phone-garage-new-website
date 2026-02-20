@@ -450,8 +450,8 @@ function ModelCardPicker({
               const customModel = customValue.trim()
               if (customModel) onChange("custom:" + customModel)
             }}
-            disabled={!customValue.trim()}
-            className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+            aria-disabled={!customValue.trim()}
+            className="rounded-xl border border-[#000000] bg-[#000000] px-4 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-1 hover:bg-[#000000] hover:shadow-[0_12px_24px_rgba(0,0,0,0.32)] hover:ring-2 hover:ring-white/70 hover:ring-offset-1 hover:ring-offset-zinc-200 active:translate-y-0 active:bg-[#000000]"
           >
             Use this model
           </button>
@@ -477,7 +477,7 @@ type ServicesJumpDetail = {
 const OTHER_DEVICE_BRAND_ID = "other-device-custom"
 const OTHER_DEVICE_OPTIONS = [
   { value: "custom:Smart Watch", label: "Smart Watch", sub: "Other device" },
-  { value: "custom:Smart TV", label: "TV", sub: "Other device" },
+  { value: "custom:Digital Cameras", label: "Digital Cameras", sub: "Other device" },
   { value: "custom:Computer Monitor", label: "Monitor", sub: "Other device" },
   { value: "custom:Desktop Computer", label: "Desktop Computer", sub: "Other device" },
   { value: "custom:Gaming Console", label: "Gaming Console", sub: "Other device" },
@@ -831,7 +831,7 @@ export function ServicesPreview() {
                 </div>
                 <div className="mt-2">
                   <span className="block text-xl font-semibold tracking-tight text-foreground">Other</span>
-                  <span className="mt-1 block text-sm leading-snug text-muted-foreground">Smart Watch, TV, Monitor, Desktop Computer & more</span>
+                  <span className="mt-1 block text-sm leading-snug text-muted-foreground">Smart Watch, Digital Cameras, Monitor, Desktop Computer & more</span>
                 </div>
               </button>
             </div>
@@ -983,8 +983,8 @@ export function ServicesPreview() {
                       const model = customModelName.trim()
                       if (model) handleModelSelect(`custom:${model}`)
                     }}
-                    disabled={!customModelName.trim()}
-                    className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-disabled={!customModelName.trim()}
+                    className="rounded-xl border border-[#000000] bg-[#000000] px-4 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-1 hover:bg-[#000000] hover:shadow-[0_12px_24px_rgba(0,0,0,0.32)] hover:ring-2 hover:ring-white/70 hover:ring-offset-1 hover:ring-offset-zinc-200 active:translate-y-0 active:bg-[#000000]"
                   >
                     Use this model
                   </button>
@@ -1124,8 +1124,8 @@ export function ServicesPreview() {
                   <button
                     type="button"
                     onClick={handleCustomServiceSubmit}
-                    disabled={!customServiceIssue.trim()}
-                    className="rounded-xl border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-semibold text-white transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                    aria-disabled={!customServiceIssue.trim()}
+                    className="rounded-xl border border-[#000000] bg-[#000000] px-4 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-1 hover:bg-[#000000] hover:shadow-[0_12px_24px_rgba(0,0,0,0.32)] hover:ring-2 hover:ring-white/70 hover:ring-offset-1 hover:ring-offset-zinc-200 active:translate-y-0 active:bg-[#000000]"
                   >
                     Use this problem
                   </button>

@@ -4,7 +4,32 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 
-const testimonials = [
+type TestimonialItem = {
+  name: string
+  role: string
+  text: string
+  rating: number
+  date: string
+  avatar: string
+}
+
+type GoogleReviewPayload = {
+  authorName: string
+  authorPhotoUrl: string
+  rating: number
+  text: string
+  relativeDate: string
+  publishedAt: string
+}
+
+type GoogleReviewsApiResponse = {
+  placeName: string
+  rating: number | null
+  reviewCount: number | null
+  reviews: GoogleReviewPayload[]
+}
+
+const fallbackTestimonials: TestimonialItem[] = [
   {
     name: "Sarah Mitchell",
     role: "iPhone 15 Pro Max",
@@ -31,11 +56,85 @@ const testimonials = [
   },
 ]
 
+function formatReviewDate(relativeDate: string, publishedAt: string) {
+  if (relativeDate?.trim()) return relativeDate
+  if (!publishedAt) return "Google Review"
+  const parsed = new Date(publishedAt)
+  if (Number.isNaN(parsed.getTime())) return "Google Review"
+  return parsed.toLocaleDateString("en-AU", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })
+}
+
 export function Testimonials() {
   const { ref: sectionRef, isVisible } = useScrollAnimation()
+  const [testimonials, setTestimonials] = useState<TestimonialItem[]>(fallbackTestimonials)
+  const [googleSummary, setGoogleSummary] = useState<{
+    placeName: string
+    rating: number | null
+    reviewCount: number | null
+  }>({
+    placeName: "Google Reviews",
+    rating: null,
+    reviewCount: null,
+  })
+  const [usingGoogleReviews, setUsingGoogleReviews] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [failedAvatars, setFailedAvatars] = useState<Record<string, boolean>>({})
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadGoogleReviews() {
+      try {
+        const res = await fetch("/api/google-reviews", { cache: "no-store" })
+        if (!res.ok) return
+        const data: GoogleReviewsApiResponse = await res.json()
+        if (!Array.isArray(data.reviews) || data.reviews.length === 0) return
+
+        const mapped = data.reviews.map((review) => {
+          const safeRating = Math.min(5, Math.max(1, Number(review.rating) || 5))
+
+          return {
+            name: review.authorName || "Google User",
+            role: "Verified Google Review",
+            text: review.text,
+            rating: safeRating,
+            date: formatReviewDate(review.relativeDate, review.publishedAt),
+            avatar: review.authorPhotoUrl || "",
+          }
+        })
+
+        if (cancelled) return
+        setTestimonials(mapped)
+        setFailedAvatars({})
+        setGoogleSummary({
+          placeName: data.placeName || "Google Reviews",
+          rating: data.rating ?? null,
+          reviewCount: data.reviewCount ?? null,
+        })
+        setUsingGoogleReviews(true)
+        setActiveIndex(0)
+      } catch {
+        // Keep fallback testimonials on failure.
+      }
+    }
+
+    loadGoogleReviews()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (activeIndex >= testimonials.length) {
+      setActiveIndex(0)
+    }
+  }, [activeIndex, testimonials.length])
 
   const featured = testimonials[activeIndex] ?? testimonials[0]
   const list = useMemo(() => {
@@ -59,7 +158,7 @@ export function Testimonials() {
       { ...testimonials[activeIndex], index: activeIndex, position: "active" as const },
       { ...testimonials[nextIndex], index: nextIndex, position: "next" as const },
     ]
-  }, [activeIndex])
+  }, [activeIndex, testimonials])
   const positions = [
     "md:top-[12px] md:translate-x-1",
     "md:top-[92px] md:translate-x-6",
@@ -92,7 +191,7 @@ export function Testimonials() {
         clearTimeout(timeoutRef.current)
       }
     }
-  }, [triggerTransition])
+  }, [triggerTransition, testimonials.length])
 
   return (
     <section
@@ -203,8 +302,13 @@ export function Testimonials() {
             <div className="mb-10">
               <span className="block h-[3px] w-9 rounded-full bg-[#2f9f53]" />
               <p className="mt-4 text-sm font-semibold text-slate-700">
-                Customer Reviews
+                {usingGoogleReviews ? "Live Google Reviews" : "Customer Reviews"}
               </p>
+              {usingGoogleReviews && googleSummary.rating !== null && googleSummary.reviewCount !== null && (
+                <p className="mt-1 text-xs text-slate-500">
+                  {googleSummary.placeName} • {googleSummary.rating.toFixed(1)} from {googleSummary.reviewCount.toLocaleString()} reviews
+                </p>
+              )}
             </div>
 
             <div className="relative grid gap-10 md:grid-cols-[1fr_1.25fr] md:items-stretch">
@@ -237,6 +341,9 @@ export function Testimonials() {
                 <div className="relative space-y-8 md:h-[240px] md:space-y-0 md:pl-12">
                   {list.map((testimonial, index) => {
                     const isActive = testimonial.position === "active"
+                    const avatarKey = `${testimonial.name}-${testimonial.index}`
+                    const showAvatarImage = Boolean(testimonial.avatar?.trim()) && !failedAvatars[avatarKey]
+                    const fallbackLetter = (testimonial.name?.trim().charAt(0) || "G").toUpperCase()
                     return (
                     <div
                       key={`${testimonial.name}-${testimonial.index}`}
@@ -252,13 +359,27 @@ export function Testimonials() {
                               : "h-10 w-10 border-[#e1e7f0]"
                           }`}
                         >
-                          <img
-                            src={testimonial.avatar}
-                            alt={testimonial.name}
-                            className={`h-full w-full object-cover ${
-                              isActive ? "" : "grayscale"
-                            }`}
-                          />
+                          {showAvatarImage ? (
+                            <img
+                              src={testimonial.avatar}
+                              alt={testimonial.name}
+                              onError={() =>
+                                setFailedAvatars((prev) => ({
+                                  ...prev,
+                                  [avatarKey]: true,
+                                }))
+                              }
+                              className={`h-full w-full object-cover ${
+                                isActive ? "" : "grayscale"
+                              }`}
+                            />
+                          ) : (
+                            <span className={`text-sm font-bold ${
+                              isActive ? "text-[#2f9f53]" : "text-slate-500"
+                            }`}>
+                              {fallbackLetter}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div>
@@ -280,7 +401,7 @@ export function Testimonials() {
 
               <div className="relative flex h-full flex-col items-center justify-center text-center md:pl-6">
                 <p
-                  className={`max-w-md text-[18px] font-serif italic leading-relaxed text-slate-600 transition-all duration-500 md:text-[22px] ${
+                  className={`max-w-md line-clamp-5 text-[18px] font-serif italic leading-relaxed text-slate-600 transition-all duration-500 md:text-[22px] ${
                     isTransitioning
                       ? "opacity-0 translate-y-2"
                       : "opacity-100 translate-y-0"

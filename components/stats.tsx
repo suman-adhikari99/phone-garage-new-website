@@ -1,11 +1,11 @@
 "use client"
 
-import { useScrollAnimation, useCountUp } from "@/hooks/use-scroll-animation"
+import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 
 const stats = [
-  { value: 15000, suffix: "+", label: "Devices Repaired" },
-  { value: 98, suffix: "%", label: "Customer Satisfaction" },
-  { value: 10, suffix: "+", label: "Years Experience" },
+  { value: 2000, suffix: "+", label: "Devices Repaired" },
+  { value: 99, suffix: "%", label: "Customer Satisfaction" },
+  { value: 6, suffix: "+", label: "Years Experience" },
   { value: 6, suffix: " Mo", label: "Repair Warranty" },
 ]
 
@@ -54,8 +54,6 @@ function StatItem({
   index: number
   isVisible: boolean
 }) {
-  const count = useCountUp(stat.value, 2000, true, isVisible)
-
   return (
     <div
       className={`flex flex-col items-center text-center transition-all duration-700 ${
@@ -64,7 +62,7 @@ function StatItem({
       style={{ transitionDelay: isVisible ? `${index * 150}ms` : "0ms" }}
     >
       <div className="mb-2 text-4xl font-bold text-[#f8f9fa] tabular-nums sm:text-5xl lg:text-6xl">
-        {count.toLocaleString()}
+        {stat.value.toLocaleString()}
         <span className="text-[#3CB043]">{stat.suffix}</span>
       </div>
       <div className="text-sm text-[#6b7280] font-medium tracking-wide uppercase">

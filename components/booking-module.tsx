@@ -160,6 +160,9 @@ export function BookingModule({
   const [showCustomInput, setShowCustomInput] = useState(false)
   const [formData, setFormData] = useState({ name: "", phone: "", email: "", notes: "" })
   const [formErrors, setFormErrors] = useState<Record<string, string>>({})
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [savedBookingRef, setSavedBookingRef] = useState<string | null>(null)
 
   // Derived data
   const isCustomModel = selectedModel?.startsWith("custom:") || false
@@ -277,9 +280,65 @@ export function BookingModule({
     return Object.keys(errors).length === 0
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (validateForm()) setStep(7)
+    if (!validateForm()) return
+
+    setSubmitError(null)
+    setSavedBookingRef(null)
+    setIsSubmitting(true)
+
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          brandId: selectedBrand || null,
+          brandName: displayBrandName || null,
+          modelId: selectedModel || null,
+          modelName: displayModelName || null,
+          serviceId: selectedServiceId || null,
+          serviceSlug: selectedServiceSlug || null,
+          serviceName: displayServiceName || null,
+          estimatedCost: costDisplay || null,
+          estimatedTime: timeDisplay || null,
+          appointmentDate: new Date().toISOString(),
+          appointmentTime: "Not specified",
+          storeLocation: selectedStoreObj?.address || selectedStoreObj?.name || "Not specified",
+          customerName: formData.name,
+          customerPhone: formData.phone,
+          customerEmail: formData.email,
+          company: null,
+          issueNotes: formData.notes || null,
+        }),
+      })
+
+      const payload = (await response.json().catch(() => null)) as
+        | { message?: string; bookingRef?: string }
+        | null
+
+      if (!response.ok) {
+        throw new Error(payload?.message || "Failed to save booking. Please try again.")
+      }
+
+      const bookingRef = payload?.bookingRef || null
+      setSavedBookingRef(bookingRef)
+
+      window.alert(
+        bookingRef
+          ? `Booking submitted successfully. Reference: ${bookingRef}`
+          : "Booking submitted successfully."
+      )
+      window.location.href = "/"
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to save booking. Please try again."
+      setSubmitError(message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const goBack = () => {
@@ -309,6 +368,9 @@ export function BookingModule({
     setSelectedStore(null)
     setFormData({ name: "", phone: "", email: "", notes: "" })
     setFormErrors({})
+    setSubmitError(null)
+    setSavedBookingRef(null)
+    setIsSubmitting(false)
   }
 
   // ─── Progress ───
@@ -781,11 +843,13 @@ export function BookingModule({
                 rows={2}
                 className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none"
               />
+              {submitError && <p className="text-xs text-destructive">{submitError}</p>}
               <button
                 type="submit"
-                className="mt-1 inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110"
+                disabled={isSubmitting}
+                className="mt-1 inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:shadow-md hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                Confirm Booking
+                {isSubmitting ? "Saving..." : "Confirm Booking"}
               </button>
             </form>
           </div>
@@ -801,6 +865,11 @@ export function BookingModule({
             <p className="mt-2 max-w-xs text-sm text-muted-foreground">
               We&apos;ll confirm your appointment shortly via email and phone.
             </p>
+            {savedBookingRef && (
+              <p className="mt-2 rounded-lg border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
+                Ref: {savedBookingRef}
+              </p>
+            )}
 
             {/* Confirmation summary */}
             <div className="mt-4 w-full max-w-sm rounded-xl bg-secondary/50 p-4 text-left">

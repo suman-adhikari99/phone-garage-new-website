@@ -19,35 +19,55 @@ const backgroundThemes: Record<
 > = {
   white: {
     base: "linear-gradient(180deg, rgba(241,241,241,0.22) 0%, rgba(241,241,241,0.28) 100%)",
-    spots: "radial-gradient(45% 35% at 18% 84%, rgba(60,176,67,0.08) 0%, transparent 72%), radial-gradient(42% 32% at 82% 86%, rgba(60,176,67,0.07) 0%, transparent 72%), radial-gradient(30% 22% at 50% 78%, rgba(60,176,67,0.05) 0%, transparent 78%)",
-    linesPrimary: "repeating-linear-gradient(170deg, rgba(15,23,42,0.035) 0px, rgba(15,23,42,0.035) 1px, transparent 1px, transparent 20px)",
-    linesAccent: "repeating-linear-gradient(8deg, rgba(60,176,67,0.3) 0px, rgba(60,176,67,0.3) 1px, transparent 1px, transparent 28px)",
-    overlay: "linear-gradient(to bottom, rgba(241,241,241,0.06), rgba(241,241,241,0.1), rgba(241,241,241,0.16))",
-    accent: "radial-gradient(ellipse 62% 50% at 50% 52%, rgba(60,176,67,0.08) 0%, transparent 72%)",
+    spots:
+      "radial-gradient(45% 35% at 18% 84%, rgba(60,176,67,0.08) 0%, transparent 72%), radial-gradient(42% 32% at 82% 86%, rgba(60,176,67,0.07) 0%, transparent 72%), radial-gradient(30% 22% at 50% 78%, rgba(60,176,67,0.05) 0%, transparent 78%)",
+    linesPrimary:
+      "repeating-linear-gradient(170deg, rgba(15,23,42,0.035) 0px, rgba(15,23,42,0.035) 1px, transparent 1px, transparent 20px)",
+    linesAccent:
+      "repeating-linear-gradient(8deg, rgba(60,176,67,0.3) 0px, rgba(60,176,67,0.3) 1px, transparent 1px, transparent 28px)",
+    overlay:
+      "linear-gradient(to bottom, rgba(241,241,241,0.06), rgba(241,241,241,0.1), rgba(241,241,241,0.16))",
+    accent:
+      "radial-gradient(ellipse 62% 50% at 50% 52%, rgba(60,176,67,0.08) 0%, transparent 72%)",
   },
   mint: {
     base: "radial-gradient(120% 90% at 50% 100%, rgba(25,128,102,0.2) 0%, rgba(45,181,146,0.14) 30%, rgba(236,251,247,0.9) 66%, rgba(249,255,252,1) 100%)",
-    spots: "radial-gradient(45% 35% at 18% 84%, rgba(25,128,102,0.14) 0%, transparent 72%), radial-gradient(42% 32% at 82% 86%, rgba(45,181,146,0.12) 0%, transparent 72%), radial-gradient(30% 22% at 50% 78%, rgba(30,160,128,0.1) 0%, transparent 78%)",
-    linesPrimary: "repeating-linear-gradient(170deg, rgba(10,40,32,0.045) 0px, rgba(10,40,32,0.045) 1px, transparent 1px, transparent 20px)",
-    linesAccent: "repeating-linear-gradient(8deg, rgba(25,128,102,0.35) 0px, rgba(25,128,102,0.35) 1px, transparent 1px, transparent 30px)",
-    overlay: "linear-gradient(to bottom, rgba(250,255,252,0.7), rgba(247,255,251,0.74), rgba(242,255,248,0.84))",
-    accent: "radial-gradient(ellipse 62% 50% at 50% 52%, rgba(25,128,102,0.14) 0%, transparent 72%)",
+    spots:
+      "radial-gradient(45% 35% at 18% 84%, rgba(25,128,102,0.14) 0%, transparent 72%), radial-gradient(42% 32% at 82% 86%, rgba(45,181,146,0.12) 0%, transparent 72%), radial-gradient(30% 22% at 50% 78%, rgba(30,160,128,0.1) 0%, transparent 78%)",
+    linesPrimary:
+      "repeating-linear-gradient(170deg, rgba(10,40,32,0.045) 0px, rgba(10,40,32,0.045) 1px, transparent 1px, transparent 20px)",
+    linesAccent:
+      "repeating-linear-gradient(8deg, rgba(25,128,102,0.35) 0px, rgba(25,128,102,0.35) 1px, transparent 1px, transparent 30px)",
+    overlay:
+      "linear-gradient(to bottom, rgba(250,255,252,0.7), rgba(247,255,251,0.74), rgba(242,255,248,0.84))",
+    accent:
+      "radial-gradient(ellipse 62% 50% at 50% 52%, rgba(25,128,102,0.14) 0%, transparent 72%)",
   },
   sky: {
     base: "radial-gradient(120% 90% at 50% 100%, rgba(45,134,255,0.18) 0%, rgba(106,168,255,0.12) 30%, rgba(241,248,255,0.9) 66%, rgba(255,255,255,1) 100%)",
-    spots: "radial-gradient(45% 35% at 18% 84%, rgba(45,134,255,0.14) 0%, transparent 72%), radial-gradient(42% 32% at 82% 86%, rgba(106,168,255,0.12) 0%, transparent 72%), radial-gradient(30% 22% at 50% 78%, rgba(72,145,255,0.09) 0%, transparent 78%)",
-    linesPrimary: "repeating-linear-gradient(170deg, rgba(15,23,42,0.05) 0px, rgba(15,23,42,0.05) 1px, transparent 1px, transparent 20px)",
-    linesAccent: "repeating-linear-gradient(8deg, rgba(72,145,255,0.35) 0px, rgba(72,145,255,0.35) 1px, transparent 1px, transparent 28px)",
-    overlay: "linear-gradient(to bottom, rgba(255,255,255,0.68), rgba(252,255,255,0.74), rgba(248,252,255,0.84))",
-    accent: "radial-gradient(ellipse 62% 50% at 50% 52%, rgba(72,145,255,0.12) 0%, transparent 72%)",
+    spots:
+      "radial-gradient(45% 35% at 18% 84%, rgba(45,134,255,0.14) 0%, transparent 72%), radial-gradient(42% 32% at 82% 86%, rgba(106,168,255,0.12) 0%, transparent 72%), radial-gradient(30% 22% at 50% 78%, rgba(72,145,255,0.09) 0%, transparent 78%)",
+    linesPrimary:
+      "repeating-linear-gradient(170deg, rgba(15,23,42,0.05) 0px, rgba(15,23,42,0.05) 1px, transparent 1px, transparent 20px)",
+    linesAccent:
+      "repeating-linear-gradient(8deg, rgba(72,145,255,0.35) 0px, rgba(72,145,255,0.35) 1px, transparent 1px, transparent 28px)",
+    overlay:
+      "linear-gradient(to bottom, rgba(255,255,255,0.68), rgba(252,255,255,0.74), rgba(248,252,255,0.84))",
+    accent:
+      "radial-gradient(ellipse 62% 50% at 50% 52%, rgba(72,145,255,0.12) 0%, transparent 72%)",
   },
   sand: {
     base: "radial-gradient(120% 90% at 50% 100%, rgba(204,158,92,0.2) 0%, rgba(214,176,120,0.12) 30%, rgba(252,248,241,0.9) 66%, rgba(255,255,255,1) 100%)",
-    spots: "radial-gradient(45% 35% at 18% 84%, rgba(204,158,92,0.14) 0%, transparent 72%), radial-gradient(42% 32% at 82% 86%, rgba(214,176,120,0.12) 0%, transparent 72%), radial-gradient(30% 22% at 50% 78%, rgba(184,134,78,0.1) 0%, transparent 78%)",
-    linesPrimary: "repeating-linear-gradient(170deg, rgba(42,28,12,0.04) 0px, rgba(42,28,12,0.04) 1px, transparent 1px, transparent 20px)",
-    linesAccent: "repeating-linear-gradient(8deg, rgba(184,134,78,0.3) 0px, rgba(184,134,78,0.3) 1px, transparent 1px, transparent 28px)",
-    overlay: "linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,252,248,0.74), rgba(255,249,240,0.84))",
-    accent: "radial-gradient(ellipse 62% 50% at 50% 52%, rgba(184,134,78,0.14) 0%, transparent 72%)",
+    spots:
+      "radial-gradient(45% 35% at 18% 84%, rgba(204,158,92,0.14) 0%, transparent 72%), radial-gradient(42% 32% at 82% 86%, rgba(214,176,120,0.12) 0%, transparent 72%), radial-gradient(30% 22% at 50% 78%, rgba(184,134,78,0.1) 0%, transparent 78%)",
+    linesPrimary:
+      "repeating-linear-gradient(170deg, rgba(42,28,12,0.04) 0px, rgba(42,28,12,0.04) 1px, transparent 1px, transparent 20px)",
+    linesAccent:
+      "repeating-linear-gradient(8deg, rgba(184,134,78,0.3) 0px, rgba(184,134,78,0.3) 1px, transparent 1px, transparent 28px)",
+    overlay:
+      "linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,252,248,0.74), rgba(255,249,240,0.84))",
+    accent:
+      "radial-gradient(ellipse 62% 50% at 50% 52%, rgba(184,134,78,0.14) 0%, transparent 72%)",
   },
 }
 
@@ -87,7 +107,10 @@ const leftCards = [
     title: "Display Issues / Cracked Screens",
     icon: (
       <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="w-10 h-10">
-        <path d="m216.99 475.869a8 8 0 0 1 8-8h62.021a8 8 0 0 1 0 16h-62.021a8 8 0 0 1 -8-8zm-82.611-442.869v446a17.019 17.019 0 0 0 17 17h209.242a17.016 17.016 0 0 0 17-17v-446a17.015 17.015 0 0 0 -17-17h-33.221l-7.628 23.467a8 8 0 0 1 -7.613 5.529h-112.32a8 8 0 0 1 -7.609-5.529l-7.63-23.467h-33.22a17.018 17.018 0 0 0 -17 17zm17 479h209.242a33.033 33.033 0 0 0 33-33v-446a33.039 33.039 0 0 0 -33-33h-209.241a33.039 33.039 0 0 0 -33 33v446a33.033 33.033 0 0 0 33 33z" fillRule="evenodd" />
+        <path
+          d="m216.99 475.869a8 8 0 0 1 8-8h62.021a8 8 0 0 1 0 16h-62.021a8 8 0 0 1 -8-8zm-82.611-442.869v446a17.019 17.019 0 0 0 17 17h209.242a17.016 17.016 0 0 0 17-17v-446a17.015 17.015 0 0 0 -17-17h-33.221l-7.628 23.467a8 8 0 0 1 -7.613 5.529h-112.32a8 8 0 0 1 -7.609-5.529l-7.63-23.467h-33.22a17.018 17.018 0 0 0 -17 17zm17 479h209.242a33.033 33.033 0 0 0 33-33v-446a33.039 33.039 0 0 0 -33-33h-209.241a33.039 33.039 0 0 0 -33 33v446a33.033 33.033 0 0 0 33 33z"
+          fillRule="evenodd"
+        />
       </svg>
     ),
     items: ["Broken glass replacements", "LCD replacements", "Touch IC problems", "Back-light issues"],
@@ -255,7 +278,7 @@ export function CommonPhoneRepairsSection({
     return () => observer.disconnect()
   }, [])
 
-  /* Scroll-linked parallax for the ground background — moves only on scroll */
+  /* Scroll-linked parallax for the ground background — moves only on scroll (NO ZOOM) */
   const rafRef = useRef<number>(0)
 
   const onScroll = useCallback(() => {
@@ -272,9 +295,9 @@ export function CommonPhoneRepairsSection({
       // progress: 0 when section top enters viewport, 1 when section bottom leaves
       const progress = Math.min(1, Math.max(0, (windowH - rect.top) / (windowH + sectionH)))
 
-      // Subtle parallax for gradient layers
+      // ✅ Subtle parallax only (movement), NO scale()
       const yShift = (progress - 0.5) * -90
-      bg.style.transform = `translate3d(0, ${yShift}px, 0) scale(1.2)`
+      bg.style.transform = `translate3d(0, ${yShift}px, 0)`
     })
   }, [])
 
@@ -292,183 +315,158 @@ export function CommonPhoneRepairsSection({
         strategy="afterInteractive"
       />
 
-      <section
-        ref={sectionRef}
-        className="relative"
-        style={{ backgroundColor: "#f1f1f1" }}
-      >
-      <div className="relative max-w-7xl mx-auto px-4 py-20 lg:py-28">
+      <section ref={sectionRef} className="relative" style={{ backgroundColor: "#f1f1f1" }}>
+        <div className="relative max-w-7xl mx-auto px-4 py-20 lg:py-28">
+          <div className="relative rounded-2xl border border-border overflow-hidden">
+            <HeroBackgroundVideo />
 
-        {/* ═══════════════════════════════════════════
-            THE BOX — framed container with parallax gradient ground
-        ═══════════════════════════════════════════ */}
-        <div className="relative rounded-2xl border border-border overflow-hidden">
-          {/* Animated background -- Phone Garage style video */}
-          <HeroBackgroundVideo />
-
-          {/* ═══ PARALLAX GROUND TEXTURE — inside box, moves on scroll only ═══ */}
-          <div className="absolute inset-0">
-            <div
-              ref={bgRef}
-              className="absolute -inset-32 will-change-transform"
-              style={{ transform: "translate3d(0, 0, 0) scale(1.2)" }}
-            >
+            {/* ═══ PARALLAX GROUND TEXTURE — NO ZOOM ═══ */}
+            <div className="absolute inset-0">
               <div
-                className="absolute inset-0"
-                style={{
-                  background: theme.base,
-                }}
-              />
-
-              <div
-                className="absolute inset-0 opacity-40"
-                style={{
-                  background: theme.spots,
-                }}
-              />
-
-              <div
-                className="absolute inset-0 opacity-[0.14]"
-                style={{
-                  background: theme.linesPrimary,
-                }}
-              />
-
-              <div
-                className="absolute inset-0 opacity-[0.08]"
-                style={{
-                  background: theme.linesAccent,
-                }}
-              />
-            </div>
-
-            {/* Readability overlay */}
-            <div className="absolute inset-0" style={{ background: theme.overlay }} />
-
-            {/* Accent glow */}
-            <div
-              className="absolute inset-0 opacity-25"
-              style={{
-                background: customAccentColor
-                  ? `radial-gradient(ellipse 62% 50% at 50% 52%, ${customAccentColor} 0%, transparent 72%)`
-                  : theme.accent,
-              }}
-            />
-          </div>
-
-          {/* ── Box header ── */}
-          <div className="relative border-b border-border px-5 py-5 sm:px-8 sm:py-7 lg:px-10 lg:py-8">
-            <div
-              className="text-center"
-              style={{
-                opacity: sectionVisible ? 1 : 0,
-                transform: sectionVisible ? "translateY(0)" : "translateY(20px)",
-                transition: "opacity 0.8s ease, transform 0.8s ease",
-              }}
-            >
-              <h2
-                className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground"
+                ref={bgRef}
+                className="absolute -inset-32 will-change-transform"
+                style={{ transform: "translate3d(0, 0, 0)" }} // ✅ removed scale(1.2)
               >
-                Common Phone Repairs
-              </h2>
-            </div>
-          </div>
-
-          {/* ── Box body — 3 column grid ── */}
-          <div className="relative px-4 py-5 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-5 items-start">
-
-              {/* Left column */}
-              <div className="flex flex-col gap-4">
-                {leftCards.map((card, i) => (
-                  <RepairCard
-                    key={card.title}
-                    title={card.title}
-                    icon={card.icon}
-                    items={card.items}
-                    direction="left"
-                    index={i}
-                  />
-                ))}
+                <div className="absolute inset-0" style={{ background: theme.base }} />
+                <div className="absolute inset-0 opacity-40" style={{ background: theme.spots }} />
+                <div className="absolute inset-0 opacity-[0.14]" style={{ background: theme.linesPrimary }} />
+                <div className="absolute inset-0 opacity-[0.08]" style={{ background: theme.linesAccent }} />
               </div>
 
-              {/* Center column — 3D rotating phone */}
-              <div className="flex items-center justify-center order-first lg:order-none py-4 lg:py-0">
-                <div
-                  className="relative w-full"
-                  style={{
-                    maxWidth: 320,
-                    aspectRatio: "9/16",
-                    opacity: sectionVisible ? 1 : 0,
-                    transform: sectionVisible ? "scale(1)" : "scale(0.88)",
-                    transition: "opacity 1s cubic-bezier(0.16,1,0.3,1) 0.3s, transform 1s cubic-bezier(0.16,1,0.3,1) 0.3s",
-                  }}
-                >
-                  {/* Glow behind phone */}
-                  <div
-                    className="absolute inset-0 -m-6 rounded-full blur-3xl"
-                    style={{ background: "radial-gradient(ellipse at center, rgba(60,176,67,0.12) 0%, transparent 70%)" }}
-                  />
+              <div className="absolute inset-0" style={{ background: theme.overlay }} />
 
-                  {React.createElement("model-viewer", {
-                    src: "/models/iphone.glb",
-                    "loading": "eager",
-                    "auto-rotate": true,
-                    "camera-controls": true,
-                    "rotation-per-second": "30deg",
-                    "interaction-prompt": "none",
-                    "camera-orbit": "0deg 75deg 105%",
-                    "min-camera-orbit": "auto auto 90%",
-                    "max-camera-orbit": "auto auto 130%",
-                    "field-of-view": "30deg",
-                    ar: true,
-                    "tone-mapping": "commerce",
-                    "shadow-intensity": "1.2",
-                    "shadow-softness": "0.8",
-                    exposure: "1.0",
-                    "environment-image": "neutral",
-                    style: { width: "100%", height: "100%", cursor: "grab", ["--poster-color" as string]: "transparent" },
-                  } as React.HTMLAttributes<HTMLElement>)}
+              <div
+                className="absolute inset-0 opacity-25"
+                style={{
+                  background: customAccentColor
+                    ? `radial-gradient(ellipse 62% 50% at 50% 52%, ${customAccentColor} 0%, transparent 72%)`
+                    : theme.accent,
+                }}
+              />
+            </div>
+
+            {/* Header */}
+            <div className="relative border-b border-border px-5 py-5 sm:px-8 sm:py-7 lg:px-10 lg:py-8">
+              <div
+                className="text-center"
+                style={{
+                  opacity: sectionVisible ? 1 : 0,
+                  transform: sectionVisible ? "translateY(0)" : "translateY(20px)",
+                  transition: "opacity 0.8s ease, transform 0.8s ease",
+                }}
+              >
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">
+                  Common Phone Repairs
+                </h2>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="relative px-4 py-5 sm:px-8 sm:py-8 lg:px-10 lg:py-10">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-5 items-start">
+                {/* Left */}
+                <div className="flex flex-col gap-4">
+                  {leftCards.map((card, i) => (
+                    <RepairCard
+                      key={card.title}
+                      title={card.title}
+                      icon={card.icon}
+                      items={card.items}
+                      direction="left"
+                      index={i}
+                    />
+                  ))}
+                </div>
+
+                {/* Center — 3D rotating phone */}
+                <div className="flex items-center justify-center order-first lg:order-none py-4 lg:py-0">
+                  <div
+                    className="relative w-full"
+                    style={{
+                      maxWidth: 320,
+                      aspectRatio: "9/16",
+                      opacity: sectionVisible ? 1 : 0,
+                      transform: sectionVisible ? "scale(1)" : "scale(0.88)",
+                      transition:
+                        "opacity 1s cubic-bezier(0.16,1,0.3,1) 0.3s, transform 1s cubic-bezier(0.16,1,0.3,1) 0.3s",
+                    }}
+                  >
+                    <div
+                      className="absolute inset-0 -m-6 rounded-full blur-3xl"
+                      style={{
+                        background: "radial-gradient(ellipse at center, rgba(60,176,67,0.12) 0%, transparent 70%)",
+                      }}
+                    />
+
+                    {React.createElement(
+                      "model-viewer",
+                      {
+                        src: "/models/iphone.glb",
+                        loading: "eager",
+                        // ✅ ONLY disable zoom (wheel / pinch) 
+                        // "disable-zoom": true, 
+                        "auto-rotate": true,
+                        "camera-controls": true,
+                        "rotation-per-second": "30deg",
+                        "interaction-prompt": "none",
+                        "camera-orbit": "0deg 75deg 105%",
+                        "min-camera-orbit": "auto auto 105%",
+                        "max-camera-orbit": "auto auto 90%",
+                        "field-of-view": "30deg",
+                        ar: true,
+                        "tone-mapping": "commerce",
+                        "shadow-intensity": "1.2",
+                        "shadow-softness": "0.8",
+                        exposure: "1.0",
+                        "environment-image": "neutral",
+                        style: {
+                          width: "100%",
+                          height: "100%",
+                          cursor: "grab",
+                          ["--poster-color" as string]: "transparent",
+                        },
+                      } as React.HTMLAttributes<HTMLElement>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right */}
+                <div className="flex flex-col gap-4">
+                  {rightCards.map((card, i) => (
+                    <RepairCard
+                      key={card.title}
+                      title={card.title}
+                      icon={card.icon}
+                      items={card.items}
+                      direction="right"
+                      index={i}
+                    />
+                  ))}
                 </div>
               </div>
-
-              {/* Right column */}
-              <div className="flex flex-col gap-4">
-                {rightCards.map((card, i) => (
-                  <RepairCard
-                    key={card.title}
-                    title={card.title}
-                    icon={card.icon}
-                    items={card.items}
-                    direction="right"
-                    index={i}
-                  />
-                ))}
-              </div>
             </div>
-          </div>
 
-          {/* ── Box footer ── */}
-          <div className="relative border-t border-border px-5 py-4 sm:px-8 lg:px-10">
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-              <p className="text-[13px] text-muted-foreground sm:text-sm">
-                All repairs come with a 12-month warranty. Free diagnostic assessment on every device.
-              </p>
-              <Link
-                href="/book"
-                className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-primary transition-colors active:text-primary/80 hover:text-primary/80 sm:text-sm"
-              >
-                Book a Repair
-                <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </Link>
+            {/* Footer */}
+            <div className="relative border-t border-border px-5 py-4 sm:px-8 lg:px-10">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+                <p className="text-[13px] text-muted-foreground sm:text-sm">
+                  All repairs come with a 12-month warranty. Free diagnostic assessment on every device.
+                </p>
+
+                <Link
+                  href="/book"
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-primary transition-colors active:text-primary/80 hover:text-primary/80 sm:text-sm"
+                >
+                  Book a Repair
+                  <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-
-      </div>
-    </section>
+      </section>
     </>
   )
 }

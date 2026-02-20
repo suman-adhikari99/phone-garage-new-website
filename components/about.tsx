@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import {
   Award,
   Clock,
@@ -10,6 +11,11 @@ import {
   Wrench,
 } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+
+type GoogleReviewsSummaryResponse = {
+  rating?: unknown
+  reviewCount?: unknown
+}
 
 const features = [
   {
@@ -59,15 +65,56 @@ const guarantees = [
   },
 ]
 
-const stats = [
-  { label: "Years Experience", value: "10+" },
-  { label: "Average Rating", value: "4.9/5" },
-  { label: "Google Reviews", value: "1,200+" },
-]
-
 export function About() {
   const { ref: leftRef, isVisible: leftVisible } = useScrollAnimation()
   const { ref: rightRef, isVisible: rightVisible } = useScrollAnimation(0.08)
+  const [googleRating, setGoogleRating] = useState<number | null>(null)
+  const [googleReviewCount, setGoogleReviewCount] = useState<number | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadGoogleSummary() {
+      try {
+        const res = await fetch("/api/google-reviews", { cache: "no-store" })
+        if (!res.ok) return
+
+        const data = (await res.json()) as GoogleReviewsSummaryResponse
+        const rating =
+          typeof data.rating === "number" && Number.isFinite(data.rating)
+            ? Math.max(0, Math.min(5, data.rating))
+            : null
+        const reviewCount =
+          typeof data.reviewCount === "number" && Number.isFinite(data.reviewCount)
+            ? Math.max(0, Math.round(data.reviewCount))
+            : null
+
+        if (cancelled) return
+        setGoogleRating(rating)
+        setGoogleReviewCount(reviewCount)
+      } catch {
+        // Keep local fallback values.
+      }
+    }
+
+    loadGoogleSummary()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const displayedRating = googleRating ?? 4.9
+  const displayedReviewCount = googleReviewCount ?? 1200
+
+  const stats = [
+    { label: "Years Experience", value: "10+" },
+    { label: "Average Rating", value: `${displayedRating.toFixed(1)}/5` },
+    {
+      label: "Google Reviews",
+      value: `${displayedReviewCount.toLocaleString()}${googleReviewCount === null ? "+" : ""}`,
+    },
+  ]
 
   return (
     <section
@@ -250,10 +297,11 @@ export function About() {
                       </div>
                       <div>
                         <div className="text-base font-semibold text-foreground">
-                          4.9 / 5.0 Rating
+                          {displayedRating.toFixed(1)} / 5.0 Rating
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Based on 1,200+ Google Reviews
+                          Based on {displayedReviewCount.toLocaleString()}
+                          {googleReviewCount === null ? "+" : ""} Google Reviews
                         </div>
                       </div>
                     </div>

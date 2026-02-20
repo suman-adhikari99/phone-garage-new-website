@@ -44,26 +44,26 @@ export function Footer() {
               alt="Phone Garage logo"
               className="mb-4 h-10 w-auto"
             />
-            <p className="mb-6 text-sm leading-relaxed">
+            <p className="mb-6 text-lg leading-relaxed">
               Your trusted mobile phone repair specialists in Australia.
               Professional repairs with warranty on all services.
             </p>
             <div className="flex flex-col gap-3">
               <a
                 href="tel:+61212345678"
-                className="flex items-center gap-2 text-sm hover:text-[#3CB043] transition-colors"
+                className="flex items-center gap-2 text-lg hover:text-[#3CB043] transition-colors"
               >
                 <Phone className="h-4 w-4 text-[#3CB043]" />
                 (02) 1234 5678
               </a>
               <a
                 href="mailto:info@phonegarage.com.au"
-                className="flex items-center gap-2 text-sm hover:text-[#3CB043] transition-colors"
+                className="flex items-center gap-2 text-lg hover:text-[#3CB043] transition-colors"
               >
                 <Mail className="h-4 w-4 text-[#3CB043]" />
                 info@phonegarage.com.au
               </a>
-              <span className="flex items-center gap-2 text-sm">
+              <span className="flex items-center gap-2 text-lg">
                 <MapPin className="h-4 w-4 text-[#3CB043]" />
                 Sydney, NSW, Australia
               </span>
@@ -72,7 +72,7 @@ export function Footer() {
 
           {/* Services */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#0f172a]">
+            <h4 className="mb-4 text-lg font-semibold uppercase tracking-wider text-[#0f172a]">
               Services
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -80,7 +80,7 @@ export function Footer() {
                 <li key={service}>
                   <a
                     href="#services"
-                    className="text-sm hover:text-[#3CB043] transition-colors"
+                    className="text-lg hover:text-[#3CB043] transition-colors"
                   >
                     {service}
                   </a>
@@ -91,7 +91,7 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#0f172a]">
+            <h4 className="mb-4 text-lg font-semibold uppercase tracking-wider text-[#0f172a]">
               Quick Links
             </h4>
             <ul className="flex flex-col gap-2.5">
@@ -99,7 +99,7 @@ export function Footer() {
                 <li key={typeof link === "string" ? link : link.label}>
                   <a
                     href={typeof link === "string" ? "#" : link.href}
-                    className="text-sm hover:text-[#3CB043] transition-colors"
+                    className="text-lg hover:text-[#3CB043] transition-colors"
                   >
                     {typeof link === "string" ? link : link.label}
                   </a>
@@ -110,13 +110,13 @@ export function Footer() {
 
           {/* Brands */}
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wider text-[#0f172a]">
+            <h4 className="mb-4 text-lg font-semibold uppercase tracking-wider text-[#0f172a]">
               Brands We Repair
             </h4>
             <ul className="flex flex-col gap-2.5">
               {footerLinks.Brands.map((brand) => (
                 <li key={brand}>
-                  <span className="text-sm">{brand}</span>
+                  <span className="text-lg">{brand}</span>
                 </li>
               ))}
             </ul>
@@ -125,7 +125,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="border-t border-[#e5e7eb] py-6">
-          <div className="flex flex-col items-center justify-between gap-4 text-xs sm:flex-row">
+          <div className="flex flex-col items-center justify-between gap-4 text-base sm:flex-row">
             <p>
               &copy; {new Date().getFullYear()} Phone Garage. All rights
               reserved.

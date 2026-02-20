@@ -1,11 +1,12 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter, useSearchParams } from "next/navigation"
 import { AnimatedSection } from "../animated-section"
 import { BookingModule } from "../booking-module"
 import { FaqSection } from "../home/faq-section"
-import type { Brand, Model, Service } from "../../lib/data"
-import { ChevronRight, Clock, DollarSign, Shield } from "lucide-react"
+import { serviceCategories, type Brand, type DeviceCategory, type Model, type Service } from "../../lib/data"
+import { ArrowLeft, ChevronRight, Clock, DollarSign, Shield } from "lucide-react"
 
 interface Props {
   brand: Brand
@@ -14,15 +15,79 @@ interface Props {
 }
 
 export function ModelPage({ brand, model, services }: Props) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const serviceSlug = searchParams.get("serviceSlug")
+  const serviceCategory = serviceSlug ? serviceCategories.find((category) => category.slug === serviceSlug) : null
+  const device = searchParams.get("device")
+  const selectedDevice: DeviceCategory | null =
+    device === "mobile" || device === "tablet" || device === "laptop" ? device : null
+
+  const deviceLabelMap: Record<DeviceCategory, string> = {
+    mobile: "Mobile",
+    tablet: "Tablet",
+    laptop: "Laptop",
+  }
+
+  const contextParams = new URLSearchParams()
+  if (serviceCategory) contextParams.set("serviceSlug", serviceCategory.slug)
+  if (selectedDevice) contextParams.set("device", selectedDevice)
+  const contextQuery = contextParams.toString()
+  const brandPageHref = contextQuery ? `/brands/${brand.id}?${contextQuery}` : `/brands/${brand.id}`
+
+  const buildBookHref = (service: Service) => {
+    const params = new URLSearchParams({
+      brand: brand.id,
+      model: model.id,
+      serviceId: service.id,
+      serviceName: service.name,
+      brandName: brand.name,
+      modelName: model.name,
+      cost: String(service.estimateCost),
+      time: service.estimateTime,
+    })
+
+    if (serviceCategory) params.set("serviceSlug", serviceCategory.slug)
+    if (selectedDevice) params.set("device", selectedDevice)
+
+    return `/book?${params.toString()}`
+  }
+
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      router.back()
+      return
+    }
+    router.push(brandPageHref)
+  }
+
   return (
     <div className="bg-background">
       <section className="border-b border-border bg-background-secondary py-12 lg:py-16">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <AnimatedSection>
+            <div className="mb-5">
+              <button
+                type="button"
+                onClick={handleGoBack}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </button>
+            </div>
             <nav className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
               <Link href="/services" className="transition-colors hover:text-foreground">Services</Link>
               <ChevronRight className="h-3.5 w-3.5" />
-              <Link href={`/brands/${brand.id}`} className="transition-colors hover:text-foreground">{brand.name}</Link>
+              {serviceCategory && (
+                <>
+                  <Link href={`/services/${serviceCategory.slug}`} className="transition-colors hover:text-foreground">
+                    {serviceCategory.name}
+                  </Link>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </>
+              )}
+              <Link href={brandPageHref} className="transition-colors hover:text-foreground">{brand.name}</Link>
               <ChevronRight className="h-3.5 w-3.5" />
               <span className="text-foreground">{model.name}</span>
             </nav>
@@ -30,6 +95,29 @@ export function ModelPage({ brand, model, services }: Props) {
               {brand.name} {model.name} Repair
             </h1>
             <p className="mt-2 text-muted-foreground">Professional repair services with premium parts and warranty included.</p>
+            <div className="mt-6 flex flex-wrap items-center gap-1.5">
+              <span
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  serviceCategory ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                1. Service
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              <span
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
+                  selectedDevice ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"
+                }`}
+              >
+                2. Device{selectedDevice ? ` (${deviceLabelMap[selectedDevice]})` : ""}
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">3. Brand</span>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="rounded-full bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary">4. Model</span>
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="rounded-full bg-foreground px-3 py-1.5 text-xs font-semibold text-background">5. Book</span>
+            </div>
           </AnimatedSection>
         </div>
       </section>
@@ -51,7 +139,10 @@ export function ModelPage({ brand, model, services }: Props) {
                           <h3 className="text-base font-semibold text-card-foreground">{service.name}</h3>
                           <p className="mt-1 text-sm text-muted-foreground">{service.description}</p>
                         </div>
-                        <Link href="/book" className="shrink-0 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20">
+                        <Link
+                          href={buildBookHref(service)}
+                          className="shrink-0 rounded-lg bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/20"
+                        >
                           Book
                         </Link>
                       </div>

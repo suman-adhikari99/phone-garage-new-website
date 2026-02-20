@@ -56,6 +56,7 @@ export function ShopLocationShowcase() {
 
   return (
     <section
+      id="visit-us"
       ref={ref}
       className="relative overflow-hidden bg-white py-16 lg:py-20"
     >
