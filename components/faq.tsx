@@ -112,7 +112,7 @@ export function FAQ() {
       </div>
 
       <div
-        id="contact"
+        id="contact-info"
         className="rounded-b-[60px] bg-[#040404] pb-[50px] max-[689px]:py-[60px]"
       >
         <div className="mx-auto w-full max-w-[1200px] px-4 lg:px-8">

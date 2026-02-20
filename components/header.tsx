@@ -10,7 +10,7 @@ const navLinks = [
   { label: "About", href: "#about" },
   { label: "Testimonials", href: "#testimonials" },
   { label: "FAQ", href: "#faq" },
-  { label: "Contact", href: "#contact" },
+  { label: "Contact", href: "/quote" },
 ]
 
 export function Header() {
@@ -18,7 +18,12 @@ export function Header() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const isHomeRoute = pathname === "/"
-  const getNavHref = (hashLink: string) => (isHomeRoute ? hashLink : `/${hashLink}`)
+  const getNavHref = (href: string) => {
+    if (href.startsWith("#")) {
+      return isHomeRoute ? href : `/${href}`
+    }
+    return href
+  }
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,7 +47,7 @@ export function Header() {
           isScrolled ? "max-h-0 opacity-0" : "max-h-12 opacity-100"
         }`}
       >
-        <div className="bg-[rgba(21,33,21,1)] text-[#ffffff]">
+        <div className="bg-black text-white">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-sm">
             <div className="flex items-center gap-6">
               <a
@@ -95,7 +100,7 @@ export function Header() {
           <Button
             variant="outline"
             size="sm"
-            className="border-primary text-primary hover:bg-primary hover:text-primary-foreground bg-transparent"
+            className="border-black text-black hover:bg-black hover:text-white bg-transparent"
             asChild
           >
             <a href="tel:+61400000000">
@@ -108,7 +113,7 @@ export function Header() {
             className="bg-[rgba(21,33,21,1)] text-primary-foreground hover:bg-[rgba(28,44,28,1)]"
             asChild
           >
-            <a href={getNavHref("#contact")}>Get a quote</a>
+            <a href="/quote">Get a quote</a>
           </Button>
         </div>
 
@@ -147,7 +152,7 @@ export function Header() {
             <div className="flex flex-col gap-2 pt-2 border-t border-border">
               <Button
                 variant="outline"
-                className="border-primary text-primary hover:bg-primary hover:text-primary-foreground w-full bg-transparent"
+                className="border-black text-black hover:bg-black hover:text-white w-full bg-transparent"
                 asChild
               >
                 <a href="tel:+61400000000">
@@ -159,7 +164,7 @@ export function Header() {
                 className="bg-[rgba(21,33,21,1)] text-primary-foreground hover:bg-[rgba(28,44,28,1)] w-full"
                 asChild
               >
-                <a href={getNavHref("#contact")}>Get a quote</a>
+                <a href="/quote">Get a quote</a>
               </Button>
             </div>
           </div>

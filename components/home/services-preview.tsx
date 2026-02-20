@@ -470,6 +470,10 @@ function ModelCardPicker({
    Main Component
 ═══════════════════ */
 type Step = 1 | 2 | 3 | 4
+type ServicesJumpDetail = {
+  device?: DeviceCategory
+  step?: Step
+}
 const OTHER_DEVICE_BRAND_ID = "other-device-custom"
 const OTHER_DEVICE_OPTIONS = [
   { value: "custom:Smart Watch", label: "Smart Watch", sub: "Other device" },
@@ -479,6 +483,22 @@ const OTHER_DEVICE_OPTIONS = [
   { value: "custom:Gaming Console", label: "Gaming Console", sub: "Other device" },
   { value: "custom:Audio Device", label: "Audio Device", sub: "Other device" },
 ]
+const LAPTOP_ONLY_SERVICE_SLUGS = new Set([
+  "keyboard-repair",
+  "motherboard-repair",
+  "hinge-repair",
+  "fan-overheating",
+  "storage-upgrade",
+  "trackpad-repair",
+])
+const HANDHELD_ONLY_SERVICE_SLUGS = new Set([
+  "back-glass",
+  "sim-card-tray",
+  "home-button",
+  "vibration-motor",
+  "face-id-repair",
+  "device-unlocking",
+])
 
 export function ServicesPreview() {
   const router = useRouter()
@@ -488,6 +508,8 @@ export function ServicesPreview() {
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [selectedModel, setSelectedModel] = useState("")
   const [showMoreModels, setShowMoreModels] = useState(false)
+  const [showMoreServices, setShowMoreServices] = useState(false)
+  const [customServiceIssue, setCustomServiceIssue] = useState("")
   const sectionRef = useRef<HTMLElement>(null)
 
   const scrollToSection = () => {
@@ -499,6 +521,7 @@ export function ServicesPreview() {
 
   // Step handlers
   const handleServiceSelect = (slug: string) => {
+    setSelectedServiceSlug(slug)
     const selectedCategory = serviceCategories.find((c) => c.slug === slug)
     const isOtherDeviceBrand = selectedBrand === OTHER_DEVICE_BRAND_ID
     const selectedBrandObj = isOtherDeviceBrand ? null : brands.find((b) => b.id === selectedBrand)
@@ -533,11 +556,29 @@ export function ServicesPreview() {
     router.push(`/book?${params.toString()}`)
   }
 
+  const handleCustomServiceSubmit = () => {
+    const issue = customServiceIssue.trim()
+    if (!issue) return
+
+    const params = new URLSearchParams()
+    if (selectedBrand) params.set("brand", selectedBrand)
+    if (selectedModel) params.set("model", selectedModel)
+    if (selectedDevice) params.set("device", selectedDevice)
+    if (modelDisplayName) params.set("modelName", modelDisplayName)
+    if (brandDisplayName) params.set("brandName", brandDisplayName)
+    params.set("serviceSlug", "custom-problem")
+    params.set("serviceName", "Custom Problem")
+    params.set("customIssue", issue)
+
+    router.push(`/book?${params.toString()}`)
+  }
+
   const handleDeviceSelect = (cat: DeviceCategory) => {
     setSelectedDevice(cat)
     setSelectedBrand(null)
     setSelectedModel("")
     setSelectedServiceSlug(null)
+    setCustomServiceIssue("")
     setStep(2)
     setTimeout(scrollToSection, 50)
   }
@@ -546,6 +587,7 @@ export function ServicesPreview() {
     setSelectedBrand(brandId)
     setSelectedModel("")
     setSelectedServiceSlug(null)
+    setCustomServiceIssue("")
     setStep(3)
     setTimeout(scrollToSection, 50)
   }
@@ -555,6 +597,7 @@ export function ServicesPreview() {
     setSelectedBrand(OTHER_DEVICE_BRAND_ID)
     setSelectedModel("")
     setSelectedServiceSlug(null)
+    setCustomServiceIssue("")
     setStep(3)
     setTimeout(scrollToSection, 50)
   }
@@ -562,15 +605,17 @@ export function ServicesPreview() {
   const handleModelSelect = (modelId: string) => {
     setSelectedModel(modelId)
     setSelectedServiceSlug(null)
+    setCustomServiceIssue("")
     setStep(4)
     setTimeout(scrollToSection, 50)
   }
 
   const goBack = () => {
-    if (step === 4) { setSelectedServiceSlug(null); setStep(3) }
+    if (step === 4) { setSelectedServiceSlug(null); setCustomServiceIssue(""); setStep(3) }
     else if (step === 3) {
       setSelectedModel("")
       setSelectedServiceSlug(null)
+      setCustomServiceIssue("")
       if (selectedBrand === OTHER_DEVICE_BRAND_ID) {
         setSelectedBrand(null)
         setStep(1)
@@ -578,7 +623,7 @@ export function ServicesPreview() {
         setStep(2)
       }
     }
-    else if (step === 2) { setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null); setStep(1) }
+    else if (step === 2) { setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null); setCustomServiceIssue(""); setStep(1) }
   }
 
   // Derived data
@@ -595,6 +640,19 @@ export function ServicesPreview() {
   const modelOptions = isOtherDeviceBrand
     ? OTHER_DEVICE_OPTIONS
     : currentModels.map((m) => ({ value: m.id, label: m.name, sub: m.year }))
+  const selectedDeviceLabel = selectedDevice
+    ? deviceCategoryConfig.find((d) => d.id === selectedDevice)?.label || "Device"
+    : isOtherDeviceBrand
+      ? "Other Device"
+      : "Device"
+  const filteredServiceCategories = serviceCategories.filter((cat) => {
+    if (selectedDevice === "laptop") return !HANDHELD_ONLY_SERVICE_SLUGS.has(cat.slug)
+    if (selectedDevice === "mobile" || selectedDevice === "tablet") return !LAPTOP_ONLY_SERVICE_SLUGS.has(cat.slug)
+    return true
+  })
+  const visibleServiceCategories = showMoreServices
+    ? filteredServiceCategories
+    : filteredServiceCategories.slice(0, 8)
 
   const matchedRepair =
     selectedModel && currentServiceCat
@@ -619,8 +677,32 @@ export function ServicesPreview() {
     setShowMoreModels(false)
   }, [selectedBrand])
 
+  useEffect(() => {
+    setShowMoreServices(false)
+  }, [selectedDevice, selectedBrand, selectedModel])
+
+  useEffect(() => {
+    const onServicesJump = (event: Event) => {
+      const customEvent = event as CustomEvent<ServicesJumpDetail>
+      const nextDevice = customEvent.detail?.device
+      const nextStep = customEvent.detail?.step
+      if (!nextDevice) return
+
+      setSelectedDevice(nextDevice)
+      setSelectedBrand(null)
+      setSelectedModel("")
+      setSelectedServiceSlug(null)
+      setCustomServiceIssue("")
+      setStep(nextStep && nextStep >= 1 && nextStep <= 4 ? nextStep : 2)
+      setTimeout(scrollToSection, 50)
+    }
+
+    window.addEventListener("services:go-to-step", onServicesJump as EventListener)
+    return () => window.removeEventListener("services:go-to-step", onServicesJump as EventListener)
+  }, [])
+
   return (
-    <section className="bg-zinc-200 py-12 sm:py-14 lg:py-16" ref={sectionRef}>
+    <section id="our-services" className="bg-zinc-200 py-12 sm:py-14 lg:py-16" ref={sectionRef}>
       <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
         {/* ─── Header ─── */}
         <AnimatedSection>
@@ -645,43 +727,45 @@ export function ServicesPreview() {
               <React.Fragment key={label}>
                 {i > 0 && (
                   <div
-                    className="h-0.5 w-6 sm:w-10 rounded-full transition-colors duration-300"
-                    style={{ backgroundColor: step > i ? "var(--primary)" : "var(--border)" }}
+                    className={`h-0.5 w-6 rounded-full transition-colors duration-300 sm:w-10 ${
+                      step > i ? "bg-zinc-900" : "bg-border"
+                    }`}
                   />
                 )}
                 <button
                   onClick={() => {
                     if (s < step) {
-                      if (s === 1) { setSelectedDevice(null); setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null) }
+                      if (s === 1) { setSelectedDevice(null); setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null); setCustomServiceIssue("") }
                       else if (s === 2) {
                         if (isOtherDeviceBrand) {
                           setSelectedDevice(null)
                           setSelectedBrand(null)
                           setSelectedModel("")
                           setSelectedServiceSlug(null)
+                          setCustomServiceIssue("")
                           setStep(1)
                           return
                         }
-                        setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null)
+                        setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null); setCustomServiceIssue("")
                       }
-                      else if (s === 3) { setSelectedServiceSlug(null) }
+                      else if (s === 3) { setSelectedServiceSlug(null); setCustomServiceIssue("") }
                       setStep(s)
                     }
                   }}
                   disabled={s > step}
                   className={`flex items-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-medium transition-all duration-300 sm:px-2.5 sm:py-1.5 sm:text-xs ${
                     isCurrent
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-zinc-900 text-white"
                       : isActive
-                        ? "bg-primary/10 text-primary cursor-pointer hover:bg-primary/20"
+                        ? "cursor-pointer bg-zinc-900/10 text-zinc-900 hover:bg-zinc-900/20"
                         : "bg-secondary text-muted-foreground"
                   }`}
                 >
                   <span className={`flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold sm:h-5 sm:w-5 sm:text-[10px] ${
                     isCurrent
-                      ? "bg-primary-foreground/20 text-primary-foreground"
+                      ? "bg-white/20 text-white"
                       : isActive
-                        ? "bg-primary/20 text-primary"
+                        ? "bg-zinc-900/20 text-zinc-900"
                         : "bg-muted-foreground/20 text-muted-foreground"
                   }`}>
                     {step > s ? "✓" : s}
@@ -723,7 +807,7 @@ export function ServicesPreview() {
                     onClick={() => handleDeviceSelect(dc.id)}
                     className="group px-3 pb-4 pt-3 text-center transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    <div className="flex h-52 items-center justify-center rounded-2xl bg-transparent transition-colors duration-200 group-hover:bg-zinc-100 sm:h-60">
+                    <div className="flex h-52 items-center justify-center rounded-2xl border border-zinc-300 bg-zinc-200 transition-colors duration-200 group-hover:border-zinc-500 group-hover:bg-zinc-200 sm:h-60">
                       <DeviceLineDrawing
                         type={dc.id}
                         className="h-44 w-44 text-zinc-900 transition-transform duration-200 group-hover:scale-105 sm:h-52 sm:w-52"
@@ -742,7 +826,7 @@ export function ServicesPreview() {
                 onClick={handleOtherDeviceSelect}
                 className="group px-3 pb-4 pt-3 text-center transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
-                <div className="flex h-52 items-center justify-center rounded-2xl bg-transparent transition-colors duration-200 group-hover:bg-zinc-100 sm:h-60">
+                <div className="flex h-52 items-center justify-center rounded-2xl border border-zinc-300 bg-zinc-200 transition-colors duration-200 group-hover:border-zinc-500 group-hover:bg-zinc-200 sm:h-60">
                   <OtherDeviceDrawing className="h-44 w-44 text-zinc-900 transition-transform duration-200 group-hover:scale-105 sm:h-52 sm:w-52" />
                 </div>
                 <div className="mt-2">
@@ -777,7 +861,7 @@ export function ServicesPreview() {
                     onClick={() => handleBrandSelect(brand.id)}
                     className="group flex flex-col items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    <div className="flex h-[7.5rem] w-[7.5rem] items-center justify-center rounded-2xl border border-transparent bg-transparent transition-colors duration-200 group-hover:border-[#b7d9ba] group-hover:bg-[#dbe6de]">
+                    <div className="flex h-[7.5rem] w-[7.5rem] items-center justify-center rounded-2xl border border-zinc-300 bg-zinc-200 transition-colors duration-200 group-hover:border-zinc-500 group-hover:bg-zinc-200">
                       {logoSrc ? (
                         <img src={logoSrc} alt={`${brand.name} logo`} className="h-[5.5rem] w-[5.5rem] object-contain transition-transform duration-200 group-hover:scale-110" loading="lazy" />
                       ) : LogoComponent ? (
@@ -799,9 +883,9 @@ export function ServicesPreview() {
         ═══════════════════════════════════════ */}
         {step === 3 && (
           <div className="mt-7 sm:mt-8">
-            <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-border bg-card p-5 sm:p-8">
+            <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border border-zinc-300 bg-zinc-200 p-5 sm:p-8">
               <div className="grid grid-cols-1 gap-5 sm:grid-cols-[120px_1fr] sm:items-center">
-                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 sm:mx-0 sm:h-28 sm:w-28">
+                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white shadow-[0_8px_22px_rgba(0,0,0,0.10)] sm:mx-0 sm:h-28 sm:w-28">
                   {selectedBrand && brandLogoCdn[selectedBrand] ? (
                     <img
                       src={brandLogoCdn[selectedBrand]}
@@ -810,33 +894,54 @@ export function ServicesPreview() {
                       loading="lazy"
                     />
                   ) : brandLogos[selectedBrand || ""] ? (
-                    React.createElement(brandLogos[selectedBrand || ""], { className: "h-14 w-14 text-primary" })
+                    React.createElement(brandLogos[selectedBrand || ""], { className: "h-14 w-14 text-zinc-900" })
                   ) : (
-                    <span className="text-3xl font-extrabold text-primary">{(brandDisplayName || "Other").charAt(0)}</span>
+                    <span className="text-3xl font-extrabold text-zinc-900">{(brandDisplayName || "Other").charAt(0)}</span>
                   )}
                 </div>
-                <h3 className="text-center text-2xl font-semibold leading-tight text-foreground sm:text-left sm:text-4xl">
-                  Choose your <span className="text-primary">{brandDisplayName}</span> model
+                <h3 className="text-center text-2xl font-semibold leading-tight text-zinc-900 sm:text-left sm:text-4xl">
+                  <span className="text-zinc-500">Choose your</span>
+                  <br />
+                  <span className="text-zinc-900">{brandDisplayName || "Device"} </span>
+                  <span className="text-zinc-500">model</span>
                 </h3>
               </div>
 
-              <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <div className="mt-7 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {(showMoreModels ? modelOptions : modelOptions.slice(0, 9)).map((opt) => {
                   const isSelected = selectedModel === opt.value
                   const modelName = opt.label.replace(brandDisplayName, "").trim() || opt.label
+                  const words = modelName.split(/\s+/).filter(Boolean)
+                  const topLabel = words.length > 1 ? words[0] : (brandDisplayName || "Device")
+                  const remainingWords = words.length > 1 ? words.slice(1) : words
+                  const trailingKeywords = ["Max", "Plus", "Mini", "Ultra"]
+                  const hasBottom = remainingWords.length > 1 && trailingKeywords.includes(remainingWords[remainingWords.length - 1])
+                  const mainLabel = hasBottom ? remainingWords.slice(0, -1).join(" ") : remainingWords.join(" ")
+                  const bottomLabel = hasBottom ? remainingWords[remainingWords.length - 1] : ""
                   return (
                     <button
                       key={opt.value}
                       type="button"
                       onClick={() => handleModelSelect(opt.value)}
-                      className={`rounded-2xl border px-3 py-4 text-center transition-all duration-200 ${
+                      className={`rounded-[1.45rem] border-2 bg-transparent px-2 py-2 text-center transition-all duration-200 ${
                         isSelected
-                          ? "border-[#b7d9ba] bg-[#dbe6de]"
-                          : "border-transparent bg-transparent hover:border-[#b7d9ba] hover:bg-[#dbe6de]"
+                          ? "border-zinc-500 text-zinc-900 shadow-[0_4px_16px_rgba(2,6,23,0.08)]"
+                          : "border-zinc-300 text-zinc-900 hover:border-black"
                       }`}
                     >
-                      <p className="text-[11px] text-muted-foreground sm:text-xs">{brandDisplayName}</p>
-                      <p className="mt-1.5 text-lg font-semibold tracking-tight text-foreground sm:text-xl">{modelName}</p>
+                      <div className="flex h-24 flex-col items-center justify-center sm:h-28">
+                        <p className={`text-[11px] sm:text-xs ${isSelected ? "text-zinc-600" : "text-zinc-500"}`}>
+                          {topLabel}
+                        </p>
+                        <p className="mt-1 line-clamp-2 text-[1.15rem] font-semibold leading-tight tracking-tight text-zinc-900 sm:text-[1.3rem]">
+                          {mainLabel || modelName}
+                        </p>
+                        <p className={`mt-1 text-[1rem] leading-none sm:text-[1.15rem] ${
+                          isSelected ? "text-zinc-600" : "text-zinc-500"
+                        }`}>
+                          {bottomLabel || "\u00A0"}
+                        </p>
+                      </div>
                     </button>
                   )
                 })}
@@ -847,7 +952,7 @@ export function ServicesPreview() {
                   <button
                     type="button"
                     onClick={() => setShowMoreModels((prev) => !prev)}
-                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-5 py-3 text-sm font-semibold uppercase tracking-wide text-foreground transition-colors hover:bg-secondary"
+                    className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-5 py-3 text-sm font-semibold uppercase tracking-wide text-zinc-900 transition-colors hover:bg-zinc-50"
                   >
                     {showMoreModels ? "Show Less Models" : "View More Models"}
                     <ChevronDown className={`h-4 w-4 transition-transform ${showMoreModels ? "rotate-180" : ""}`} />
@@ -855,51 +960,41 @@ export function ServicesPreview() {
                 </div>
               )}
 
-              {!isOtherDeviceBrand && (
-                <div className="mt-6 rounded-xl border border-dashed border-border bg-background p-4">
-                  <p className="text-sm font-semibold text-foreground">Can&apos;t find your model?</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Enter your exact model name manually.
-                  </p>
-                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                    <input
-                      type="text"
-                      value={customModelName}
-                      onChange={(e) => setSelectedModel(`custom:${e.target.value}`)}
-                      placeholder="Type your model name..."
-                      className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const model = customModelName.trim()
-                        if (model) handleModelSelect(`custom:${model}`)
-                      }}
-                      disabled={!customModelName.trim()}
-                      className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      Use this model
-                    </button>
-                  </div>
-                  {isCustomModel && customModelName && (
-                    <p className="mt-2 text-xs font-medium text-primary">
-                      Selected custom model: {customModelName}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {isOtherDeviceBrand && (
-                <div className="mt-6 rounded-xl border border-border bg-background p-4">
-                  <ModelCardPicker
-                    value={selectedModel}
-                    onChange={handleModelSelect}
-                    options={modelOptions}
-                    customLabel="My model is not listed — enter manually"
-                    emptyStateMessage="No matching device type found. Enter your model below."
+              <div className="mt-6 rounded-xl border border-dashed border-border bg-background p-4">
+                <p className="text-sm font-semibold text-foreground">
+                  {isOtherDeviceBrand ? "Can't find your device type?" : "Can't find your model?"}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {isOtherDeviceBrand
+                    ? "Enter your exact device model manually."
+                    : "Enter your exact model name manually."}
+                </p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <input
+                    type="text"
+                    value={customModelName}
+                    onChange={(e) => setSelectedModel(`custom:${e.target.value}`)}
+                    placeholder={isOtherDeviceBrand ? "Type your device model..." : "Type your model name..."}
+                    className="flex-1 rounded-xl border border-border bg-card px-4 py-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const model = customModelName.trim()
+                      if (model) handleModelSelect(`custom:${model}`)
+                    }}
+                    disabled={!customModelName.trim()}
+                    className="rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Use this model
+                  </button>
                 </div>
-              )}
+                {isCustomModel && customModelName && (
+                  <p className="mt-2 text-xs font-medium text-primary">
+                    Selected custom model: {customModelName}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -908,79 +1003,169 @@ export function ServicesPreview() {
             STEP 4 — Select Service + Book
         ═══════════════════════════════ */}
         {step === 4 && (
-          <div className="mt-6 sm:mt-7">
-            <p className="mb-6 text-center text-base font-semibold text-foreground sm:mb-7 sm:text-lg">
-              Choose the service you need
-            </p>
-            <div className="mx-auto grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
-              {serviceCategories.slice(0, 8).map((cat, i) => {
-                const Icon = (serviceIconMap[cat.icon] || Settings) as React.ComponentType<{ className?: string }>
-                const isSelected = selectedServiceSlug === cat.slug
-                return (
-                  <AnimatedSection key={cat.id} delay={i * 60}>
-                    <button
-                      onClick={() => handleServiceSelect(cat.slug)}
-                      type="button"
-                      title={cat.name}
-                      aria-label={cat.name}
-                      className={`group flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.01] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:p-4 ${
-                        isSelected
-                          ? "border-primary/40 bg-primary/10"
-                          : "border-transparent bg-transparent hover:border-primary/20 hover:bg-primary/5"
-                      }`}
-                    >
-                      <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border transition-colors duration-200 ${
-                        isSelected
-                          ? "border-primary/30 bg-primary/10 text-primary"
-                          : "border-transparent bg-transparent text-foreground/75 group-hover:text-primary"
-                      }`}>
-                        <Icon className="h-7 w-7" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className={`text-base font-semibold leading-tight sm:text-[1.05rem] ${isSelected ? "text-primary" : "text-card-foreground"}`}>
-                          {cat.name}
-                        </p>
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                          Fast diagnostics, quality parts, and warranty-backed repair.
-                        </p>
-                      </div>
-                    </button>
-                  </AnimatedSection>
-                )
-              })}
-            </div>
+          <div className="mt-7 sm:mt-8">
+            <div className="relative mx-auto max-w-5xl overflow-hidden rounded-[2rem] border border-zinc-300/90 bg-zinc-200 p-5 shadow-[0_18px_42px_rgba(0,0,0,0.08)] sm:p-8">
+              <div className="pointer-events-none absolute inset-0">
+                <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full bg-white/45 blur-3xl" />
+                <div className="absolute -right-24 bottom-0 h-56 w-56 rounded-full bg-white/30 blur-3xl" />
+                <div className="absolute inset-x-0 top-0 h-px bg-white/80" />
+              </div>
 
-            {selectedServiceSlug && (
-              <div className="mx-auto mt-7 max-w-xl sm:mt-8">
-                <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
-                  <div className="space-y-3 rounded-xl bg-secondary/50 p-4">
+              <div className="relative grid grid-cols-1 gap-5 sm:grid-cols-[112px_1fr] sm:items-center">
+                <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white shadow-[0_10px_24px_rgba(0,0,0,0.10)] sm:mx-0 sm:h-28 sm:w-28">
+                  {selectedServiceSlug ? (
+                    <FeaturedServiceGlyph slug={selectedServiceSlug} className="h-14 w-14 text-zinc-900" />
+                  ) : (
+                    <BadgeCheck className="h-12 w-12 text-zinc-900" />
+                  )}
+                </div>
+                <div className="text-center sm:text-left">
+                  <p className="inline-flex items-center rounded-full border border-zinc-300 bg-white/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
+                    Step 4 of 4
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold leading-tight text-zinc-900 sm:text-4xl">
+                    <span className="text-zinc-500">Choose your</span>
+                    <br />
+                    <span className="text-zinc-900">service </span>
+                    <span className="text-zinc-500">type</span>
+                  </h3>
+                  <p className="mt-2 text-sm text-zinc-600 sm:text-base">
+                    For <span className="font-semibold text-zinc-900">{`${brandDisplayName || "Device"} ${modelDisplayName}`.trim()}</span>
+                  </p>
+                  <div className="mt-3 flex flex-wrap justify-center gap-1.5 sm:justify-start">
+                    <span className="rounded-full border border-zinc-300 bg-white/75 px-2.5 py-1 text-[11px] font-medium text-zinc-700">
+                      {selectedDeviceLabel}
+                    </span>
+                    <span className="rounded-full border border-zinc-300 bg-white/75 px-2.5 py-1 text-[11px] font-medium text-zinc-700">
+                      {filteredServiceCategories.length} services
+                    </span>
+                    <span className="rounded-full border border-zinc-300 bg-white/75 px-2.5 py-1 text-[11px] font-medium text-zinc-700">Premium parts</span>
+                    <span className="rounded-full border border-zinc-300 bg-white/75 px-2.5 py-1 text-[11px] font-medium text-zinc-700">Certified repair</span>
+                    <span className="rounded-full border border-zinc-300 bg-white/75 px-2.5 py-1 text-[11px] font-medium text-zinc-700">Warranty backed</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative mt-7 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
+                {visibleServiceCategories.map((cat, i) => {
+                  const Icon = (serviceIconMap[cat.icon] || Settings) as React.ComponentType<{ className?: string }>
+                  const isSelected = selectedServiceSlug === cat.slug
+
+                  return (
+                    <AnimatedSection key={cat.id} delay={i * 50}>
+                      <button
+                        onClick={() => handleServiceSelect(cat.slug)}
+                        type="button"
+                        title={cat.name}
+                        aria-label={cat.name}
+                        aria-pressed={isSelected}
+                        className={`group relative w-full overflow-hidden rounded-[1.3rem] border-[1.5px] px-2.5 py-2.5 text-center transition-all duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                          isSelected
+                            ? "border-zinc-900 bg-zinc-200 shadow-[0_10px_24px_rgba(0,0,0,0.12)]"
+                            : "border-zinc-300 bg-zinc-200 hover:-translate-y-0.5 hover:border-black"
+                        }`}
+                      >
+                        <span className="pointer-events-none absolute inset-x-4 top-0 h-px bg-white/85" />
+                        <div className="flex h-[8rem] flex-col items-center justify-center gap-1.5 sm:h-[8.6rem]">
+                          <div className={`flex h-11 w-11 items-center justify-center rounded-xl border shadow-sm transition-colors ${
+                            isSelected
+                              ? "border-zinc-900 bg-zinc-900 text-white"
+                              : "border-zinc-300 bg-zinc-100 text-zinc-700 group-hover:border-black group-hover:bg-white group-hover:text-zinc-900"
+                          }`}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <p className="line-clamp-2 px-1 text-[0.93rem] font-semibold leading-tight tracking-tight text-zinc-900 sm:text-[1rem]">
+                            {cat.name}
+                          </p>
+                          <p className={`line-clamp-2 px-1 text-[10px] leading-tight sm:text-[11px] ${
+                            isSelected ? "text-zinc-600" : "text-zinc-500"
+                          }`}>
+                            {cat.description}
+                          </p>
+                        </div>
+                      </button>
+                    </AnimatedSection>
+                  )
+                })}
+                {filteredServiceCategories.length === 0 && (
+                  <p className="col-span-full rounded-xl border border-dashed border-zinc-300 bg-white/70 px-4 py-5 text-center text-sm text-zinc-600">
+                    No services available for this device type yet.
+                  </p>
+                )}
+              </div>
+
+              {filteredServiceCategories.length > 8 && (
+                <div className="relative mt-5 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowMoreServices((prev) => !prev)}
+                    className="inline-flex items-center gap-2 rounded-xl border border-zinc-300 bg-white px-5 py-3 text-sm font-semibold uppercase tracking-wide text-zinc-900 transition-colors hover:border-black hover:bg-zinc-50"
+                  >
+                    {showMoreServices ? "Show Less Services" : "View More Services"}
+                    <ChevronDown className={`h-4 w-4 transition-transform ${showMoreServices ? "rotate-180" : ""}`} />
+                  </button>
+                </div>
+              )}
+
+              <div className="relative mt-6 rounded-xl border border-dashed border-zinc-300 bg-white/70 p-4 sm:p-5">
+                <p className="text-sm font-semibold text-zinc-900">
+                  Service not listed?
+                </p>
+                <p className="mt-1 text-xs text-zinc-600">
+                  Describe your problem and we will match it with the right repair service.
+                </p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+                  <textarea
+                    value={customServiceIssue}
+                    onChange={(e) => setCustomServiceIssue(e.target.value)}
+                    placeholder="Example: My phone restarts randomly and gets hot while charging."
+                    className="min-h-[96px] flex-1 rounded-xl border border-zinc-300 bg-white px-4 py-3 text-sm text-zinc-900 outline-none transition-colors placeholder:text-zinc-500 focus:border-black focus:ring-2 focus:ring-zinc-900/10"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCustomServiceSubmit}
+                    disabled={!customServiceIssue.trim()}
+                    className="rounded-xl border border-zinc-900 bg-zinc-900 px-4 py-3 text-sm font-semibold text-white transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Use this problem
+                  </button>
+                </div>
+              </div>
+
+              <p className="relative mt-4 text-center text-[11px] text-zinc-500 sm:text-xs">
+                All repairs include full diagnostics and quality assurance checks.
+              </p>
+
+              {selectedServiceSlug && (
+                <div className="relative mx-auto mt-7 max-w-3xl rounded-2xl border border-zinc-300 bg-white/90 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:p-6">
+                  <div className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Service</span>
-                      <span className="text-sm font-semibold text-foreground">{currentServiceCat?.name}</span>
+                      <span className="text-sm text-zinc-500">Service</span>
+                      <span className="text-sm font-semibold text-zinc-900">{currentServiceCat?.name}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">Device</span>
-                      <span className="text-sm font-semibold text-foreground">{`${brandDisplayName || "Device"} ${modelDisplayName}`.trim()}</span>
+                      <span className="text-sm text-zinc-500">Device</span>
+                      <span className="text-sm font-semibold text-zinc-900">{`${brandDisplayName || "Device"} ${modelDisplayName}`.trim()}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1.5 text-sm text-zinc-500">
                         <Clock className="h-3.5 w-3.5" /> Time Estimated
                       </span>
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-sm font-semibold text-zinc-900">
                         {matchedRepair?.estimateTime || "Contact us"}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <span className="flex items-center gap-1.5 text-sm text-zinc-500">
                         <DollarSign className="h-3.5 w-3.5" /> Cost Estimated
                       </span>
-                      <span className="text-lg font-bold text-primary">
+                      <span className="text-lg font-bold text-zinc-900">
                         {matchedRepair ? `From $${matchedRepair.estimateCost}` : "Get a quote"}
                       </span>
                     </div>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+                  <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
                     <Link
                       href={(() => {
                         const params = new URLSearchParams()
@@ -998,43 +1183,43 @@ export function ServicesPreview() {
                         }
                         return `/book?${params.toString()}`
                       })()}
-                      className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-primary p-3.5 text-primary-foreground transition-all active:brightness-95 hover:shadow-md hover:brightness-110 sm:p-3"
+                      className="flex h-[5.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-zinc-900 bg-zinc-900 p-3 text-white transition-all active:brightness-95 hover:shadow-md hover:brightness-110"
                     >
                       <CheckCircle className="h-5 w-5" />
-                      <span className="text-[13px] font-semibold sm:text-xs">Book Online</span>
+                      <span className="text-[13px] font-semibold">Book Online</span>
                     </Link>
                     <Link
                       href="/locations"
-                      className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3.5 text-foreground transition-all active:bg-secondary hover:bg-secondary sm:p-3"
+                      className="flex h-[5.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900 transition-all hover:border-black"
                     >
-                      <MapPin className="h-5 w-5 text-primary" />
-                      <span className="text-[13px] font-semibold sm:text-xs">Visit Us</span>
+                      <MapPin className="h-5 w-5 text-zinc-900" />
+                      <span className="text-[13px] font-semibold">Visit Us</span>
                     </Link>
                     <a
                       href="tel:0297451234"
-                      className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3.5 text-foreground transition-all active:bg-secondary hover:bg-secondary sm:p-3"
+                      className="flex h-[5.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900 transition-all hover:border-black"
                     >
-                      <Smartphone className="h-5 w-5 text-primary" />
-                      <span className="text-[13px] font-semibold sm:text-xs">Call Us</span>
+                      <Smartphone className="h-5 w-5 text-zinc-900" />
+                      <span className="text-[13px] font-semibold">Call Us</span>
                     </a>
                     <Link
                       href="/quote"
-                      className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3.5 text-foreground transition-all active:bg-secondary hover:bg-secondary sm:p-3"
+                      className="flex h-[5.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900 transition-all hover:border-black"
                     >
-                      <ArrowRight className="h-5 w-5 text-primary" />
-                      <span className="text-[13px] font-semibold sm:text-xs">Get Quote</span>
+                      <ArrowRight className="h-5 w-5 text-zinc-900" />
+                      <span className="text-[13px] font-semibold">Get Quote</span>
                     </Link>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
         <div className="mt-8 text-center sm:mt-10">
           <Link
             href="/services"
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-border bg-background px-5 text-sm font-medium text-foreground transition-colors hover:bg-secondary"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-zinc-300 bg-white/85 px-5 text-sm font-medium text-zinc-900 transition-colors hover:border-black hover:bg-white"
           >
             View All Services
             <ArrowRight className="h-4 w-4" />

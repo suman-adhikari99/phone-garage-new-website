@@ -16,7 +16,7 @@ const footerLinks = {
     { label: "Services", href: "#services" },
     { label: "Testimonials", href: "#testimonials" },
     { label: "FAQ", href: "#faq" },
-    { label: "Contact", href: "#contact" },
+    { label: "Contact", href: "/quote" },
   ],
   Brands: [
     "Apple iPhone",

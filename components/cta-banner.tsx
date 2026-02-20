@@ -10,7 +10,7 @@ export function CTABanner() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden bg-[#0a0a0a] py-16 lg:py-20"
+      className="relative overflow-hidden bg-black py-16 lg:py-20"
     >
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[600px] rounded-full bg-[#3CB043]/8 blur-[150px]" />
@@ -34,7 +34,7 @@ export function CTABanner() {
             className="bg-[#000000] text-[#ffffff] hover:bg-[#111111] px-8 py-6 text-base font-semibold shadow-lg shadow-[rgba(60,176,67,0.36)] transition-all hover:shadow-lg hover:shadow-[rgba(21,33,21,0.48)] hover:-translate-y-0.5 active:translate-y-0"
             asChild
           >
-            <a href="#contact">
+            <a href="/quote">
               Get a Free Quote
               <ArrowRight className="ml-2 h-5 w-5" />
             </a>

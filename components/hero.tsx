@@ -1007,7 +1007,7 @@ export function Hero() {
           {/* Badge */}
           <motion.div
             variants={fadeUp}
-            className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-[#3CB043]/20 bg-[#3CB043]/[0.06] px-5 py-2 text-[13px] font-semibold text-[#2d8a34] tracking-wide"
+            className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-[#3CB043]/20 bg-[#3CB043]/[0.06] px-5 py-2 text-[13px] font-semibold text-[#4a0d1a] tracking-wide"
           >
             <span className="relative flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#3CB043] opacity-60" />
@@ -1047,7 +1047,7 @@ export function Hero() {
               className="bg-[rgba(21,33,21,1)] text-[#ffffff] hover:bg-[rgba(28,44,28,1)] h-[52px] px-8 text-[15px] font-semibold shadow-lg shadow-[rgba(21,33,21,0.28)] transition-all hover:shadow-xl hover:shadow-[rgba(21,33,21,0.36)] hover:-translate-y-0.5 active:translate-y-0"
               asChild
             >
-              <a href="#contact">
+              <a href="/quote">
                 Get a quote
                 <ArrowRight className="ml-2 h-[18px] w-[18px]" />
               </a>

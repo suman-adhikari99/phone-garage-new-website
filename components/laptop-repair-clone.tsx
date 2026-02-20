@@ -1,7 +1,17 @@
+"use client"
+
 import Image from "next/image"
 import styles from "@/styles/laptop-repair-clone.module.css"
 
 export function LaptopRepairCloneSection() {
+  const goToLaptopBrandSelection = () => {
+    window.dispatchEvent(
+      new CustomEvent("services:go-to-step", {
+        detail: { device: "laptop", step: 2 },
+      })
+    )
+  }
+
   return (
     <section className={styles.section}>
       <nav className={styles.nav}>
@@ -60,7 +70,7 @@ export function LaptopRepairCloneSection() {
               </ul>
             </div>
 
-          <button className={styles.cta} type="button">
+          <button className={styles.cta} type="button" onClick={goToLaptopBrandSelection}>
             Book a Repair Now
           </button>
         </div>
