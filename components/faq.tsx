@@ -22,7 +22,7 @@ type ConnectLink = {
 const CONNECT_LINKS: ConnectLink[] = [
   {
     label: "TikTok",
-    href: "https://www.tiktok.com/@phonegarage",
+    href: "https://www.tiktok.com/@phonegarage.official2024?_r=1&_t=ZS-9481MssIYxc",
     external: true,
     icon: IconBrandTiktok,
   },

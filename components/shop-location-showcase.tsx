@@ -120,7 +120,7 @@ export function ShopLocationShowcase() {
                   <div className="min-w-0">
                     <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#64748b]">Tiktok</p>
                     <a
-                      href="https://www.tiktok.com/@phonegarage"
+                      href="https://www.tiktok.com/@phonegarage.official2024?_r=1&_t=ZS-9481MssIYxc"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-lg font-semibold text-[#0f172a] underline-offset-4 transition-colors hover:text-[#166534] hover:underline"

@@ -134,7 +134,13 @@ const leftCards = [
         <path d="M209.232,181.265c-5.6-0.4-10.4,4-10.8,9.6c-0.4,8.8-3.2,17.2-7.6,24.4c-4.4,7.2-10.8,13.6-18.4,17.6 c-4.8,2.8-6.8,9.2-4,14c3.2,5.6,9.6,7.2,14.4,4.4c10.8-6,19.6-14.8,25.6-24.8c6.4-10,10-22,10.4-34.4 C219.232,186.465,214.832,181.665,209.232,181.265z" />
       </svg>
     ),
-    items: ["Free quotes for all repairs, if we find the handset cannot be fixed no charges will be applied."],
+    items: [
+      "Professional water damage diagnostics",
+      "Component-level repair",
+      "Treat quickly to limit corrosion",
+      "Helps prevent short circuits",
+      "Helps reduce motherboard failure risk",
+    ],
   },
 ]
 
@@ -450,7 +456,7 @@ export function CommonPhoneRepairsSection({
             <div className="relative border-t border-border px-5 py-4 sm:px-8 lg:px-10">
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <p className="text-[13px] text-muted-foreground sm:text-sm">
-                  All repairs come with a 12-month warranty. Free diagnostic assessment on every device.
+                  All repairs come with a 6 month warranty. Free diagnostic assessment on every device.
                 </p>
 
                 <Link
