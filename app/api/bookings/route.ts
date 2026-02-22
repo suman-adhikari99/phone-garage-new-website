@@ -290,9 +290,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  if (!isAuthorized(request)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-  }
+  // Customer booking submissions must stay public.
+  // Secret/admin auth is enforced on read/update routes.
 
   let idempotencyKey: string | null = null
   let idempotencyReserved = false
