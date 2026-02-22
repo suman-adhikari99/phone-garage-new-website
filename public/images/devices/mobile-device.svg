@@ -1,0 +1,38 @@
+<svg width="640" height="640" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <linearGradient id="phoneBody" x1="180" y1="80" x2="460" y2="560" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EAF1FF"/>
+      <stop offset="1" stop-color="#93A6C6"/>
+    </linearGradient>
+    <linearGradient id="phoneSide" x1="172" y1="90" x2="470" y2="548" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F9FCFF"/>
+      <stop offset="1" stop-color="#B9C7DD"/>
+    </linearGradient>
+    <linearGradient id="phoneScreen" x1="226" y1="136" x2="414" y2="504" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A1324"/>
+      <stop offset="1" stop-color="#243A64"/>
+    </linearGradient>
+    <radialGradient id="screenGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(356 256) rotate(127) scale(260 200)">
+      <stop stop-color="#5BA6FF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#5BA6FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="phoneShadow" x="120" y="60" width="400" height="540" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#0F172A" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#phoneShadow)">
+    <rect x="172" y="84" width="296" height="472" rx="52" fill="url(#phoneSide)"/>
+    <rect x="182" y="94" width="276" height="452" rx="46" fill="url(#phoneBody)"/>
+    <rect x="214" y="126" width="212" height="388" rx="30" fill="url(#phoneScreen)"/>
+    <rect x="214" y="126" width="212" height="388" rx="30" fill="url(#screenGlow)"/>
+    <rect x="286" y="138" width="68" height="10" rx="5" fill="#8DA0BD" fill-opacity="0.75"/>
+    <circle cx="320" cy="530" r="9" fill="#8294B2"/>
+
+    <rect x="448" y="210" width="7" height="72" rx="3.5" fill="#7A8EAD"/>
+    <rect x="448" y="296" width="7" height="110" rx="3.5" fill="#7A8EAD"/>
+    <rect x="185" y="246" width="7" height="52" rx="3.5" fill="#7A8EAD"/>
+  </g>
+
+  <path d="M232 178C258 144 306 124 366 124" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
+</svg>

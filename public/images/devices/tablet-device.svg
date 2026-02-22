@@ -1,0 +1,35 @@
+<svg width="640" height="640" viewBox="0 0 640 640" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <linearGradient id="tabBody" x1="82" y1="152" x2="558" y2="486" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F2F7FF"/>
+      <stop offset="1" stop-color="#9FB3D1"/>
+    </linearGradient>
+    <linearGradient id="tabFrame" x1="90" y1="160" x2="550" y2="478" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#C3D1E7"/>
+    </linearGradient>
+    <linearGradient id="tabScreen" x1="122" y1="190" x2="518" y2="446" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0A1326"/>
+      <stop offset="1" stop-color="#294677"/>
+    </linearGradient>
+    <radialGradient id="tabGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(420 256) rotate(146) scale(330 200)">
+      <stop stop-color="#5FAAFD" stop-opacity="0.48"/>
+      <stop offset="1" stop-color="#5FAAFD" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="tabShadow" x="40" y="110" width="560" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#0F172A" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#tabShadow)">
+    <rect x="74" y="142" width="492" height="356" rx="42" fill="url(#tabFrame)"/>
+    <rect x="84" y="152" width="472" height="336" rx="36" fill="url(#tabBody)"/>
+    <rect x="118" y="184" width="404" height="272" rx="24" fill="url(#tabScreen)"/>
+    <rect x="118" y="184" width="404" height="272" rx="24" fill="url(#tabGlow)"/>
+
+    <circle cx="320" cy="470" r="6" fill="#7B8FAB"/>
+    <circle cx="320" cy="166" r="4" fill="#7B8FAB"/>
+  </g>
+
+  <path d="M170 222C210 180 292 154 390 158" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="7" stroke-linecap="round"/>
+</svg>
