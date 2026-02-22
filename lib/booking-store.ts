@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto"
 import { mkdirSync } from "node:fs"
-import { dirname, join } from "node:path"
+import { dirname } from "node:path"
 import { DatabaseSync } from "node:sqlite"
+import { resolveWritableStoragePath } from "@/lib/server-storage-path"
 
 export type CreateRepairBookingInput = {
   brandId: string | null
@@ -97,8 +98,10 @@ export type BookingOwnerNotificationRecord = {
 }
 
 const DB_PATH =
-  process.env.REPAIR_BOOKINGS_DB_PATH?.trim() ||
-  join(process.cwd(), "data", "repair-bookings.sqlite")
+  resolveWritableStoragePath(
+    process.env.REPAIR_BOOKINGS_DB_PATH,
+    "data/repair-bookings.sqlite"
+  )
 
 let db: DatabaseSync | null = null
 

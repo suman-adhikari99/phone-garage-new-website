@@ -1,5 +1,6 @@
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises"
 import { join } from "node:path"
+import { resolveWritableStoragePath } from "@/lib/server-storage-path"
 
 export type BookingEmailAttachment = {
   filename: string
@@ -7,8 +8,7 @@ export type BookingEmailAttachment = {
 }
 
 const BOOKING_UPLOADS_DIR =
-  process.env.BOOKING_UPLOADS_DIR?.trim() ||
-  join(process.cwd(), "data", "booking-uploads")
+  resolveWritableStoragePath(process.env.BOOKING_UPLOADS_DIR, "data/booking-uploads")
 
 const MAX_UPLOAD_FILES = 4
 const MAX_UPLOAD_SIZE_BYTES = 4 * 1024 * 1024
