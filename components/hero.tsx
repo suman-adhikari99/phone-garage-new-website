@@ -28,11 +28,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { motion, useInView, AnimatePresence } from "framer-motion"
-
-type GoogleReviewsSummaryResponse = {
-  rating?: unknown
-  reviewCount?: unknown
-}
+import { getCachedGoogleReviews } from "@/lib/google-reviews-client"
 
 /* ------------------------------------------------------------------ */
 /*  Easing                                                              */
@@ -997,16 +993,11 @@ export function Hero() {
 
     async function loadGoogleSummary() {
       try {
-        const res = await fetch("/api/google-reviews", { cache: "no-store" })
-        if (!res.ok) return
+        const data = await getCachedGoogleReviews()
+        if (!data) return
 
-        const data = (await res.json()) as GoogleReviewsSummaryResponse
-        const rating = typeof data.rating === "number" && Number.isFinite(data.rating)
-          ? Math.max(0, Math.min(5, data.rating))
-          : null
-        const reviewCount = typeof data.reviewCount === "number" && Number.isFinite(data.reviewCount)
-          ? Math.max(0, Math.round(data.reviewCount))
-          : null
+        const rating = data.rating
+        const reviewCount = data.reviewCount
 
         if (cancelled) return
         setGoogleRating(rating)
@@ -1099,9 +1090,9 @@ export function Hero() {
               className="h-[52px] border-[rgba(21,33,21,0.35)] bg-transparent px-8 text-[15px] font-semibold text-[rgba(21,33,21,1)] transition-all hover:-translate-y-0.5 hover:border-[rgba(21,33,21,1)] hover:bg-[rgba(21,33,21,1)] hover:text-[#ffffff] active:translate-y-0"
               asChild
             >
-              <a href="tel:+61400000000">
+              <a href="tel:0403983009">
                 <PhoneCall className="mr-2 h-[18px] w-[18px]" />
-                Call (02) 1234 5678
+                Call 0403983009
               </a>
             </Button>
           </motion.div>

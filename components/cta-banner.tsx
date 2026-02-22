@@ -45,7 +45,7 @@ export function CTABanner() {
             className="border-[#333] bg-transparent text-[#f8f9fa] hover:bg-[#1a1a1a] hover:text-[#f8f9fa] px-8 py-6 text-base font-semibold"
             asChild
           >
-            <a href="tel:+61212345678">
+            <a href="tel:0403983009">
               <Phone className="mr-2 h-5 w-5" />
               Call Us Now
             </a>

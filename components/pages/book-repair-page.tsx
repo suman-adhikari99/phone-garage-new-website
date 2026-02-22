@@ -1,14 +1,22 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { Suspense, useState, type CSSProperties, type FormEvent } from "react"
+import { Suspense, useEffect, useState, type CSSProperties, type ChangeEvent, type FormEvent } from "react"
 import { AnimatedSection } from "../animated-section"
-import { Shield, Clock, Award, Phone, Mail, MapPin, ArrowLeft, Building2, User, ChevronUp, ChevronDown, CalendarDays } from "lucide-react"
+import { Shield, Clock, Award, Phone, Mail, MapPin, ArrowLeft, Building2, User, ChevronUp, ChevronDown, CalendarDays, Upload, X } from "lucide-react"
 import { Calendar } from "../ui/calendar"
 import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { Textarea } from "../ui/textarea"
 import { Button } from "../ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select"
+import { stores } from "@/lib/data"
 
 const benefits = [
   { icon: Clock, text: "Same-day repairs available" },
@@ -18,6 +26,22 @@ const benefits = [
 
 const hourOptions = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"]
 const minuteOptions = ["00", "15", "30", "45"]
+
+function createIdempotencyKey(prefix: string) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `${prefix}-${crypto.randomUUID()}`
+  }
+
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
+function isValidPhoneDigits(value: string) {
+  return /^\d{8,15}$/.test(value)
+}
 
 function BookRepairContent() {
   const searchParams = useSearchParams()
@@ -42,13 +66,36 @@ function BookRepairContent() {
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
   const [company, setCompany] = useState("")
-  const [storeLocation, setStoreLocation] = useState("")
+  const defaultStore = stores.find((store) => store.id === "lidcombe") || stores[0]
+  const [storeLocation, setStoreLocation] = useState(defaultStore?.id || "")
   const [issueNotes, setIssueNotes] = useState("")
+  const [deviceImages, setDeviceImages] = useState<File[]>([])
+  const [deviceImagePreviews, setDeviceImagePreviews] = useState<string[]>([])
   const [submitted, setSubmitted] = useState(false)
   const [savedBookingRef, setSavedBookingRef] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState("")
   const selectedTime = `${hour}:${minute} ${meridiem}`
+
+  useEffect(() => {
+    const nextUrls = deviceImages.map((file) => URL.createObjectURL(file))
+    setDeviceImagePreviews(nextUrls)
+
+    return () => {
+      nextUrls.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [deviceImages])
+
+  const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const selected = Array.from(event.target.files || []).filter((file) =>
+      file.type.startsWith("image/")
+    )
+    setDeviceImages(selected.slice(0, 4))
+  }
+
+  const removeImageAt = (index: number) => {
+    setDeviceImages((prev) => prev.filter((_, i) => i !== index))
+  }
 
   const handleGoBack = () => {
     if (window.history.length > 1) {
@@ -76,36 +123,66 @@ function BookRepairContent() {
       return
     }
 
+    if (!isValidPhoneDigits(phone.trim())) {
+      setFormError("Phone number must contain only digits (8-15).")
+      return
+    }
+
+    if (email.trim() && !isValidEmail(email.trim())) {
+      setFormError("Please enter a valid email address or leave it empty.")
+      return
+    }
+
     setFormError("")
     setSubmitted(false)
     setSavedBookingRef(null)
     setIsSubmitting(true)
+    const imageNote = deviceImages.length
+      ? `Customer uploaded ${deviceImages.length} device image(s): ${deviceImages
+          .map((file) => file.name)
+          .join(", ")}`
+      : null
+    const combinedIssueNotes =
+      [issueNotes.trim() || null, imageNote].filter(Boolean).join("\n\n") || null
 
     try {
+      const idempotencyKey = createIdempotencyKey("booking")
+      const resolvedStoreLocation =
+        stores.find((store) => store.id === storeLocation)?.address ||
+        stores.find((store) => store.id === storeLocation)?.name ||
+        defaultStore?.address ||
+        defaultStore?.name ||
+        "Lidcombe"
+
+      const formData = new FormData()
+      formData.set("brandId", brand || "")
+      formData.set("brandName", brandName || "")
+      formData.set("modelId", model || "")
+      formData.set("modelName", modelName || "")
+      formData.set("serviceId", serviceId || "")
+      formData.set("serviceSlug", serviceSlug || "")
+      formData.set("serviceName", serviceName || "")
+      formData.set("estimatedCost", cost || "")
+      formData.set("estimatedTime", time || "")
+      formData.set("appointmentDate", selectedDate.toISOString())
+      formData.set("appointmentTime", selectedTime)
+      formData.set("storeLocation", resolvedStoreLocation)
+      formData.set("customerName", fullName)
+      formData.set("customerPhone", phone)
+      formData.set("customerEmail", email || "")
+      formData.set("company", company || "")
+      formData.set("issueNotes", combinedIssueNotes || "")
+
+      for (const image of deviceImages) {
+        formData.append("deviceImages", image)
+      }
+
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Idempotency-Key": idempotencyKey,
         },
-        body: JSON.stringify({
-          brandId: brand || null,
-          brandName: brandName || null,
-          modelId: model || null,
-          modelName: modelName || null,
-          serviceId: serviceId || null,
-          serviceSlug: serviceSlug || null,
-          serviceName: serviceName || null,
-          estimatedCost: cost || null,
-          estimatedTime: time || null,
-          appointmentDate: selectedDate.toISOString(),
-          appointmentTime: selectedTime,
-          storeLocation,
-          customerName: fullName,
-          customerPhone: phone,
-          customerEmail: email,
-          company: company || null,
-          issueNotes: issueNotes || null,
-        }),
+        body: formData,
       })
 
       const payload = (await response.json().catch(() => null)) as
@@ -120,12 +197,10 @@ function BookRepairContent() {
       setSubmitted(true)
       setSavedBookingRef(bookingRef)
 
-      window.alert(
-        bookingRef
-          ? `Booking submitted successfully. Reference: ${bookingRef}`
-          : "Booking submitted successfully."
-      )
-      router.push("/")
+      const successPath = bookingRef
+        ? `/booking-success?bookingRef=${encodeURIComponent(bookingRef)}`
+        : "/booking-success"
+      router.push(successPath)
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to save booking. Please try again."
@@ -188,7 +263,7 @@ function BookRepairContent() {
       <section className="py-8 lg:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <AnimatedSection>
-            <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+            <form onSubmit={handleSubmit} className="grid items-start gap-6 lg:grid-cols-2">
               <div className="overflow-hidden rounded-2xl border border-border bg-card">
                 <div className="bg-[#e7e7e7] px-5 py-2.5 text-[2.15rem] font-semibold leading-none text-black sm:text-[2.6rem]" style={sketchFont}>
                   Booking summary
@@ -346,18 +421,30 @@ function BookRepairContent() {
                   <p className="text-[1.3rem] font-semibold text-[#374151] sm:text-[1.55rem]" style={sketchFont}>Fill your Details</p>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="storeLocation" className="sr-only">Store location</Label>
+                    <Label className="sr-only">Store location</Label>
                     <div className="flex items-center gap-3 rounded-lg border border-[#6b7280]/60 bg-white/80 px-3 py-1">
                       <MapPin className="h-5 w-5 text-[#4b5563]" />
-                      <Input
-                        id="storeLocation"
-                        value={storeLocation}
-                        onChange={(e) => setStoreLocation(e.target.value)}
-                        placeholder="STORE LOCATION"
-                        className="h-9 border-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]"
-                        style={sketchFont}
-                        required
-                      />
+                      <Select value={storeLocation} onValueChange={setStoreLocation}>
+                        <SelectTrigger
+                          aria-label="Store location"
+                          className="h-9 w-full border-0 bg-transparent px-0 text-[0.95rem] shadow-none ring-0 focus-visible:ring-0 sm:text-[1rem]"
+                          style={sketchFont}
+                        >
+                          <SelectValue placeholder="Select store location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {stores.map((store) => (
+                            <SelectItem
+                              key={store.id}
+                              value={store.id}
+                              className="focus:bg-[#ececec] focus:text-[#111111]"
+                              style={sketchFont}
+                            >
+                              {store.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
 
@@ -365,7 +452,7 @@ function BookRepairContent() {
                     <Label htmlFor="fullName" className="sr-only">Full name</Label>
                     <div className="flex items-center gap-3 border-b border-[#6b7280]/60 px-1 pb-2">
                       <User className="h-5 w-5 text-[#4b5563]" />
-                      <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} required />
+                      <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name *" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} required />
                     </div>
                   </div>
 
@@ -373,7 +460,7 @@ function BookRepairContent() {
                     <Label htmlFor="phone" className="sr-only">Phone number</Label>
                     <div className="flex items-center gap-3 border-b border-[#6b7280]/60 px-1 pb-2">
                       <Phone className="h-5 w-5 text-[#4b5563]" />
-                      <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone Number" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} required />
+                      <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 15))} placeholder="Phone Number *" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} inputMode="numeric" pattern="[0-9]*" maxLength={15} required />
                     </div>
                   </div>
 
@@ -381,7 +468,7 @@ function BookRepairContent() {
                     <Label htmlFor="company" className="sr-only">Company</Label>
                     <div className="flex items-center gap-3 border-b border-[#6b7280]/60 px-1 pb-2">
                       <Building2 className="h-5 w-5 text-[#4b5563]" />
-                      <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} />
+                      <Input id="company" value={company} onChange={(e) => setCompany(e.target.value)} placeholder="Company (Optional)" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} />
                     </div>
                   </div>
 
@@ -389,7 +476,7 @@ function BookRepairContent() {
                     <Label htmlFor="email" className="sr-only">Email</Label>
                     <div className="flex items-center gap-3 border-b border-[#6b7280]/60 px-1 pb-2">
                       <Mail className="h-5 w-5 text-[#4b5563]" />
-                      <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} required />
+                      <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email (Optional)" className="h-9 border-0 bg-transparent px-0 text-[0.95rem] shadow-none focus-visible:ring-0 sm:text-[1rem]" style={sketchFont} />
                     </div>
                   </div>
 
@@ -398,11 +485,74 @@ function BookRepairContent() {
                     <Textarea
                       id="issueNotes"
                       rows={14}
-                      placeholder="Comments / Remarks"
+                      placeholder="Comments / Remarks (Optional)"
                       value={issueNotes}
                       onChange={(e) => setIssueNotes(e.target.value)}
                       className="border-[#6b7280]/60 bg-white/80 text-[0.95rem] sm:text-[1rem]"
                       style={sketchFont}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="device-images"
+                      className="text-[11px] font-semibold uppercase tracking-[0.14em] text-zinc-600"
+                    >
+                      Device Images (Optional)
+                    </Label>
+                    <label
+                      htmlFor="device-images"
+                      className="group flex min-h-[104px] cursor-pointer flex-col rounded-xl border border-dashed border-[#6b7280]/60 bg-white/80 px-4 py-4 transition-colors hover:border-[#111111] hover:bg-[#f2f2f2]"
+                    >
+                      <div className="flex w-full items-center justify-between gap-4">
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-zinc-900" style={sketchFont}>
+                            Upload clear damage photos
+                          </p>
+                          <p className="mt-0.5 text-xs text-zinc-600">JPG, PNG, WEBP - up to 4 images</p>
+                        </div>
+                        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-zinc-300 bg-white text-zinc-900 transition-colors group-hover:border-zinc-900">
+                          <Upload className="h-4 w-4" />
+                        </span>
+                      </div>
+
+                      {deviceImagePreviews.length > 0 && (
+                        <div className="mt-3 flex w-full gap-2 overflow-x-auto pb-1">
+                          {deviceImagePreviews.map((preview, index) => (
+                            <div
+                              key={`${preview}-${index}`}
+                              className="group/preview relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-[#6b7280]/35 bg-white"
+                            >
+                              <img
+                                src={preview}
+                                alt={`Device image ${index + 1}`}
+                                className="h-full w-full object-cover"
+                                loading="lazy"
+                              />
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.preventDefault()
+                                  event.stopPropagation()
+                                  removeImageAt(index)
+                                }}
+                                className="absolute right-1 top-1 inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white transition-colors hover:bg-black"
+                                aria-label={`Remove image ${index + 1}`}
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </label>
+                    <input
+                      id="device-images"
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageChange}
+                      className="sr-only"
                     />
                   </div>
 

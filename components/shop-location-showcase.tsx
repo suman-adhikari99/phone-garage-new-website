@@ -119,7 +119,14 @@ export function ShopLocationShowcase() {
                   </span>
                   <div className="min-w-0">
                     <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[#64748b]">Tiktok</p>
-                    <p className="text-lg font-semibold text-[#0f172a]">@phonegarage</p>
+                    <a
+                      href="https://www.tiktok.com/@phonegarage"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-lg font-semibold text-[#0f172a] underline-offset-4 transition-colors hover:text-[#166534] hover:underline"
+                    >
+                      @phonegarage
+                    </a>
                   </div>
                 </div>
               </div>
@@ -166,10 +173,11 @@ export function ShopLocationShowcase() {
             <div className="w-full overflow-hidden rounded-2xl">
               <iframe
                 title="Lidcombe Phone Garage location map"
-                src="https://maps.google.com/maps?q=27%20Church%20St%2C%20Lidcombe%2C%20NSW%202141&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                src="https://www.google.com/maps?q=Phone+Garage,+27+Church+St,+Lidcombe+NSW+2141&output=embed"
                 className="h-[420px] w-full border-0 sm:h-[500px]"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
               />
             </div>
           </section>

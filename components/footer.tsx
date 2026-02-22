@@ -1,6 +1,10 @@
 "use client"
 
-import { Phone, Mail, MapPin } from "lucide-react"
+import {
+  Mail,
+  MapPin,
+  Phone,
+} from "lucide-react"
 
 const footerLinks = {
   Services: [
@@ -50,11 +54,11 @@ export function Footer() {
             </p>
             <div className="flex flex-col gap-3">
               <a
-                href="tel:+61212345678"
+                href="tel:0403983009"
                 className="flex items-center gap-2 text-lg hover:text-[#3CB043] transition-colors"
               >
                 <Phone className="h-4 w-4 text-[#3CB043]" />
-                (02) 1234 5678
+                0403983009
               </a>
               <a
                 href="mailto:info@phonegarage.com.au"
@@ -68,6 +72,7 @@ export function Footer() {
                 Sydney, NSW, Australia
               </span>
             </div>
+
           </div>
 
           {/* Services */}

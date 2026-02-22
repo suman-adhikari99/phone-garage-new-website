@@ -503,7 +503,7 @@ const HANDHELD_ONLY_SERVICE_SLUGS = new Set([
 export function ServicesPreview() {
   const router = useRouter()
   const [step, setStep] = useState<Step>(1)
-  const [selectedServiceSlug, setSelectedServiceSlug] = useState<string | null>(null)
+  const [selectedServiceSlugs, setSelectedServiceSlugs] = useState<string[]>([])
   const [selectedDevice, setSelectedDevice] = useState<DeviceCategory | null>(null)
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
   const [selectedModel, setSelectedModel] = useState("")
@@ -521,39 +521,9 @@ export function ServicesPreview() {
 
   // Step handlers
   const handleServiceSelect = (slug: string) => {
-    setSelectedServiceSlug(slug)
-    const selectedCategory = serviceCategories.find((c) => c.slug === slug)
-    const isOtherDeviceBrand = selectedBrand === OTHER_DEVICE_BRAND_ID
-    const selectedBrandObj = isOtherDeviceBrand ? null : brands.find((b) => b.id === selectedBrand)
-    const isCustomModel = selectedModel.startsWith("custom:")
-    const customModelName = isCustomModel ? selectedModel.replace("custom:", "") : ""
-    const selectedModelObj = isCustomModel ? null : models.find((m) => m.id === selectedModel)
-    const modelDisplayName = isCustomModel ? customModelName : selectedModelObj?.name || ""
-    const brandDisplayName = isOtherDeviceBrand ? "Other Device" : selectedBrandObj?.name || ""
-    const matchedRepair =
-      selectedModel && selectedCategory
-        ? services.find(
-            (s) =>
-              s.modelId === selectedModel &&
-              s.name.toLowerCase().includes(selectedCategory.name.split(" ")[0].toLowerCase())
-          )
-        : null
-
-    const params = new URLSearchParams()
-    if (selectedBrand) params.set("brand", selectedBrand)
-    if (selectedModel) params.set("model", selectedModel)
-    if (selectedDevice) params.set("device", selectedDevice)
-    if (matchedRepair) params.set("serviceId", matchedRepair.id)
-    params.set("serviceSlug", slug)
-    if (modelDisplayName) params.set("modelName", modelDisplayName)
-    if (brandDisplayName) params.set("brandName", brandDisplayName)
-    if (selectedCategory?.name) params.set("serviceName", selectedCategory.name)
-    if (matchedRepair) {
-      params.set("cost", String(matchedRepair.estimateCost))
-      params.set("time", matchedRepair.estimateTime)
-    }
-
-    router.push(`/book?${params.toString()}`)
+    setSelectedServiceSlugs((prev) =>
+      prev.includes(slug) ? prev.filter((item) => item !== slug) : [...prev, slug]
+    )
   }
 
   const handleCustomServiceSubmit = () => {
@@ -577,7 +547,7 @@ export function ServicesPreview() {
     setSelectedDevice(cat)
     setSelectedBrand(null)
     setSelectedModel("")
-    setSelectedServiceSlug(null)
+    setSelectedServiceSlugs([])
     setCustomServiceIssue("")
     setStep(2)
     setTimeout(scrollToSection, 50)
@@ -586,7 +556,7 @@ export function ServicesPreview() {
   const handleBrandSelect = (brandId: string) => {
     setSelectedBrand(brandId)
     setSelectedModel("")
-    setSelectedServiceSlug(null)
+    setSelectedServiceSlugs([])
     setCustomServiceIssue("")
     setStep(3)
     setTimeout(scrollToSection, 50)
@@ -596,7 +566,7 @@ export function ServicesPreview() {
     setSelectedDevice(null)
     setSelectedBrand(OTHER_DEVICE_BRAND_ID)
     setSelectedModel("")
-    setSelectedServiceSlug(null)
+    setSelectedServiceSlugs([])
     setCustomServiceIssue("")
     setStep(3)
     setTimeout(scrollToSection, 50)
@@ -604,17 +574,17 @@ export function ServicesPreview() {
 
   const handleModelSelect = (modelId: string) => {
     setSelectedModel(modelId)
-    setSelectedServiceSlug(null)
+    setSelectedServiceSlugs([])
     setCustomServiceIssue("")
     setStep(4)
     setTimeout(scrollToSection, 50)
   }
 
   const goBack = () => {
-    if (step === 4) { setSelectedServiceSlug(null); setCustomServiceIssue(""); setStep(3) }
+    if (step === 4) { setSelectedServiceSlugs([]); setCustomServiceIssue(""); setStep(3) }
     else if (step === 3) {
       setSelectedModel("")
-      setSelectedServiceSlug(null)
+      setSelectedServiceSlugs([])
       setCustomServiceIssue("")
       if (selectedBrand === OTHER_DEVICE_BRAND_ID) {
         setSelectedBrand(null)
@@ -623,11 +593,21 @@ export function ServicesPreview() {
         setStep(2)
       }
     }
-    else if (step === 2) { setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null); setCustomServiceIssue(""); setStep(1) }
+    else if (step === 2) { setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlugs([]); setCustomServiceIssue(""); setStep(1) }
   }
 
   // Derived data
-  const currentServiceCat = serviceCategories.find((c) => c.slug === selectedServiceSlug)
+  const selectedServiceCategories = selectedServiceSlugs
+    .map((slug) => serviceCategories.find((category) => category.slug === slug))
+    .filter((category): category is (typeof serviceCategories)[number] => Boolean(category))
+  const singleSelectedService =
+    selectedServiceCategories.length === 1 ? selectedServiceCategories[0] : null
+  const selectedServiceLabel =
+    selectedServiceCategories.length === 0
+      ? undefined
+      : selectedServiceCategories.length === 1
+        ? selectedServiceCategories[0].name
+        : `${selectedServiceCategories.length} services selected`
   const currentBrands = selectedDevice ? getBrandsByCategory(selectedDevice) : []
   const currentBrand = brands.find((b) => b.id === selectedBrand)
   const isOtherDeviceBrand = selectedBrand === OTHER_DEVICE_BRAND_ID
@@ -655,20 +635,42 @@ export function ServicesPreview() {
     : filteredServiceCategories.slice(0, 8)
 
   const matchedRepair =
-    selectedModel && currentServiceCat
+    selectedModel && singleSelectedService
       ? services.find(
           (s) =>
             s.modelId === selectedModel &&
-            s.name.toLowerCase().includes(currentServiceCat.name.split(" ")[0].toLowerCase())
+            s.name.toLowerCase().includes(singleSelectedService.name.split(" ")[0].toLowerCase())
         )
       : null
+
+  const buildBookHref = () => {
+    const params = new URLSearchParams()
+    if (selectedBrand) params.set("brand", selectedBrand)
+    if (selectedModel) params.set("model", selectedModel)
+    if (selectedDevice) params.set("device", selectedDevice)
+    if (modelDisplayName) params.set("modelName", modelDisplayName)
+    if (brandDisplayName) params.set("brandName", brandDisplayName)
+    if (selectedServiceSlugs.length > 0) {
+      params.set("serviceSlug", selectedServiceSlugs.join(","))
+      params.set(
+        "serviceName",
+        selectedServiceCategories.map((category) => category.name).join(", ")
+      )
+    }
+    if (matchedRepair) {
+      params.set("serviceId", matchedRepair.id)
+      params.set("cost", String(matchedRepair.estimateCost))
+      params.set("time", matchedRepair.estimateTime)
+    }
+    return `/book?${params.toString()}`
+  }
 
   // Breadcrumb
   const crumbs = [
     selectedDevice && deviceCategoryConfig.find((d) => d.id === selectedDevice)?.label,
     brandDisplayName || undefined,
     modelDisplayName || undefined,
-    currentServiceCat?.name,
+    selectedServiceLabel,
   ].filter(Boolean)
 
   const stepLabels = ["Device", "Brand", "Model", "Services"]
@@ -691,7 +693,7 @@ export function ServicesPreview() {
       setSelectedDevice(nextDevice)
       setSelectedBrand(null)
       setSelectedModel("")
-      setSelectedServiceSlug(null)
+      setSelectedServiceSlugs([])
       setCustomServiceIssue("")
       setStep(nextStep && nextStep >= 1 && nextStep <= 4 ? nextStep : 2)
       setTimeout(scrollToSection, 50)
@@ -735,20 +737,20 @@ export function ServicesPreview() {
                 <button
                   onClick={() => {
                     if (s < step) {
-                      if (s === 1) { setSelectedDevice(null); setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null); setCustomServiceIssue("") }
+                      if (s === 1) { setSelectedDevice(null); setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlugs([]); setCustomServiceIssue("") }
                       else if (s === 2) {
                         if (isOtherDeviceBrand) {
                           setSelectedDevice(null)
                           setSelectedBrand(null)
                           setSelectedModel("")
-                          setSelectedServiceSlug(null)
+                          setSelectedServiceSlugs([])
                           setCustomServiceIssue("")
                           setStep(1)
                           return
                         }
-                        setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlug(null); setCustomServiceIssue("")
+                        setSelectedBrand(null); setSelectedModel(""); setSelectedServiceSlugs([]); setCustomServiceIssue("")
                       }
-                      else if (s === 3) { setSelectedServiceSlug(null); setCustomServiceIssue("") }
+                      else if (s === 3) { setSelectedServiceSlugs([]); setCustomServiceIssue("") }
                       setStep(s)
                     }
                   }}
@@ -1013,8 +1015,8 @@ export function ServicesPreview() {
 
               <div className="relative grid grid-cols-1 gap-5 sm:grid-cols-[112px_1fr] sm:items-center">
                 <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-2xl border-2 border-zinc-300 bg-white shadow-[0_10px_24px_rgba(0,0,0,0.10)] sm:mx-0 sm:h-28 sm:w-28">
-                  {selectedServiceSlug ? (
-                    <FeaturedServiceGlyph slug={selectedServiceSlug} className="h-14 w-14 text-zinc-900" />
+                  {singleSelectedService ? (
+                    <FeaturedServiceGlyph slug={singleSelectedService.slug} className="h-14 w-14 text-zinc-900" />
                   ) : (
                     <BadgeCheck className="h-12 w-12 text-zinc-900" />
                   )}
@@ -1031,6 +1033,9 @@ export function ServicesPreview() {
                   </h3>
                   <p className="mt-2 text-sm text-zinc-600 sm:text-base">
                     For <span className="font-semibold text-zinc-900">{`${brandDisplayName || "Device"} ${modelDisplayName}`.trim()}</span>
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-600 sm:text-sm">
+                    Select one or more services if your device has multiple issues.
                   </p>
                   <div className="mt-3 flex flex-wrap justify-center gap-1.5 sm:justify-start">
                     <span className="rounded-full border border-zinc-300 bg-white/75 px-2.5 py-1 text-[11px] font-medium text-zinc-700">
@@ -1049,7 +1054,7 @@ export function ServicesPreview() {
               <div className="relative mt-7 grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 lg:grid-cols-4">
                 {visibleServiceCategories.map((cat, i) => {
                   const Icon = (serviceIconMap[cat.icon] || Settings) as React.ComponentType<{ className?: string }>
-                  const isSelected = selectedServiceSlug === cat.slug
+                  const isSelected = selectedServiceSlugs.includes(cat.slug)
 
                   return (
                     <AnimatedSection key={cat.id} delay={i * 50}>
@@ -1094,6 +1099,95 @@ export function ServicesPreview() {
                 )}
               </div>
 
+              {selectedServiceSlugs.length > 0 && (
+                <div className="relative mx-auto mt-7 max-w-3xl rounded-2xl border border-zinc-300 bg-white/90 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:p-6">
+                  <div className="rounded-xl border border-zinc-200 bg-white p-3 sm:p-4">
+                    <p className="text-center text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
+                      Next Step
+                    </p>
+                    <p className="mt-1 text-center text-xs text-zinc-600 sm:text-sm">
+                      Book online now, or choose another support option below.
+                    </p>
+
+                    <Link
+                      href={buildBookHref()}
+                      className="mt-3 flex h-12 w-full items-center justify-between rounded-xl border border-zinc-900 bg-zinc-900 px-4 text-white transition-all active:brightness-95 hover:shadow-md hover:brightness-110"
+                    >
+                      <span className="inline-flex items-center gap-2 text-sm font-semibold">
+                        <CheckCircle className="h-4.5 w-4.5" />
+                        Book Online
+                      </span>
+                      <span className="text-xs font-medium text-white/80">Fastest</span>
+                    </Link>
+
+                    <div className="mt-2.5 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                      <a
+                        href="tel:0403983009"
+                        className="flex min-h-[4.75rem] flex-col items-center justify-center gap-1 rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2 text-zinc-900 transition-all hover:border-black hover:bg-white"
+                      >
+                        <Smartphone className="h-4.5 w-4.5 text-zinc-900" />
+                        <span className="text-[13px] font-semibold">Call Us</span>
+                        <span className="text-[11px] text-zinc-500">Quick advice</span>
+                      </a>
+                      <Link
+                        href="/#visit-us"
+                        className="flex min-h-[4.75rem] flex-col items-center justify-center gap-1 rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2 text-zinc-900 transition-all hover:border-black hover:bg-white"
+                      >
+                        <MapPin className="h-4.5 w-4.5 text-zinc-900" />
+                        <span className="text-[13px] font-semibold">Visit Us</span>
+                        <span className="text-[11px] text-zinc-500">Walk-in store</span>
+                      </Link>
+                      <Link
+                        href="/quote"
+                        className="flex min-h-[4.75rem] flex-col items-center justify-center gap-1 rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2 text-zinc-900 transition-all hover:border-black hover:bg-white"
+                      >
+                        <ArrowRight className="h-4.5 w-4.5 text-zinc-900" />
+                        <span className="text-[13px] font-semibold">Get Quote</span>
+                        <span className="text-[11px] text-zinc-500">Need estimate</span>
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-600">
+                      Service Details
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-500">Services</span>
+                      <span className="text-right text-sm font-semibold text-zinc-900">
+                        {selectedServiceCategories.map((category) => category.name).join(", ")}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-zinc-500">Device</span>
+                      <span className="text-sm font-semibold text-zinc-900">{`${brandDisplayName || "Device"} ${modelDisplayName}`.trim()}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-sm text-zinc-500">
+                        <Clock className="h-3.5 w-3.5" /> Time Estimated
+                      </span>
+                      <span className="text-sm font-semibold text-zinc-900">
+                        {selectedServiceSlugs.length === 1
+                          ? matchedRepair?.estimateTime || "Contact us"
+                          : "Multiple issues - after diagnostics"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-sm text-zinc-500">
+                        <DollarSign className="h-3.5 w-3.5" /> Cost Estimated
+                      </span>
+                      <span className="text-lg font-bold text-zinc-900">
+                        {selectedServiceSlugs.length === 1
+                          ? matchedRepair
+                            ? `From $${matchedRepair.estimateCost}`
+                            : "Get a quote"
+                          : "Quoted after inspection"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {filteredServiceCategories.length > 8 && (
                 <div className="relative mt-5 flex justify-center">
                   <button
@@ -1135,83 +1229,6 @@ export function ServicesPreview() {
               <p className="relative mt-4 text-center text-[11px] text-zinc-500 sm:text-xs">
                 All repairs include full diagnostics and quality assurance checks.
               </p>
-
-              {selectedServiceSlug && (
-                <div className="relative mx-auto mt-7 max-w-3xl rounded-2xl border border-zinc-300 bg-white/90 p-5 shadow-[0_8px_24px_rgba(0,0,0,0.08)] sm:p-6">
-                  <div className="space-y-3 rounded-xl border border-zinc-200 bg-zinc-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-zinc-500">Service</span>
-                      <span className="text-sm font-semibold text-zinc-900">{currentServiceCat?.name}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-zinc-500">Device</span>
-                      <span className="text-sm font-semibold text-zinc-900">{`${brandDisplayName || "Device"} ${modelDisplayName}`.trim()}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-sm text-zinc-500">
-                        <Clock className="h-3.5 w-3.5" /> Time Estimated
-                      </span>
-                      <span className="text-sm font-semibold text-zinc-900">
-                        {matchedRepair?.estimateTime || "Contact us"}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="flex items-center gap-1.5 text-sm text-zinc-500">
-                        <DollarSign className="h-3.5 w-3.5" /> Cost Estimated
-                      </span>
-                      <span className="text-lg font-bold text-zinc-900">
-                        {matchedRepair ? `From $${matchedRepair.estimateCost}` : "Get a quote"}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
-                    <Link
-                      href={(() => {
-                        const params = new URLSearchParams()
-                        if (selectedBrand) params.set("brand", selectedBrand)
-                        if (selectedModel) params.set("model", selectedModel)
-                        if (selectedDevice) params.set("device", selectedDevice)
-                        if (matchedRepair) params.set("serviceId", matchedRepair.id)
-                        if (selectedServiceSlug) params.set("serviceSlug", selectedServiceSlug)
-                        if (modelDisplayName) params.set("modelName", modelDisplayName)
-                        if (brandDisplayName) params.set("brandName", brandDisplayName)
-                        if (currentServiceCat?.name) params.set("serviceName", currentServiceCat.name)
-                        if (matchedRepair) {
-                          params.set("cost", String(matchedRepair.estimateCost))
-                          params.set("time", matchedRepair.estimateTime)
-                        }
-                        return `/book?${params.toString()}`
-                      })()}
-                      className="flex h-[5.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-zinc-900 bg-zinc-900 p-3 text-white transition-all active:brightness-95 hover:shadow-md hover:brightness-110"
-                    >
-                      <CheckCircle className="h-5 w-5" />
-                      <span className="text-[13px] font-semibold">Book Online</span>
-                    </Link>
-                    <Link
-                      href="/locations"
-                      className="flex h-[5.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900 transition-all hover:border-black"
-                    >
-                      <MapPin className="h-5 w-5 text-zinc-900" />
-                      <span className="text-[13px] font-semibold">Visit Us</span>
-                    </Link>
-                    <a
-                      href="tel:0297451234"
-                      className="flex h-[5.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900 transition-all hover:border-black"
-                    >
-                      <Smartphone className="h-5 w-5 text-zinc-900" />
-                      <span className="text-[13px] font-semibold">Call Us</span>
-                    </a>
-                    <Link
-                      href="/quote"
-                      className="flex h-[5.25rem] flex-col items-center justify-center gap-1.5 rounded-xl border border-zinc-300 bg-white p-3 text-zinc-900 transition-all hover:border-black"
-                    >
-                      <ArrowRight className="h-5 w-5 text-zinc-900" />
-                      <span className="text-[13px] font-semibold">Get Quote</span>
-                    </Link>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         )}

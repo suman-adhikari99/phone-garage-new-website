@@ -11,6 +11,14 @@ import { DayButton, DayPicker, getDefaultClassNames } from 'react-day-picker'
 import { cn } from '@/lib/utils'
 import { Button, buttonVariants } from '@/components/ui/button'
 
+function formatCalendarDataDay(date: Date) {
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = date.getFullYear()
+
+  return `${day}/${month}/${year}`
+}
+
 function Calendar({
   className,
   classNames,
@@ -179,6 +187,11 @@ function CalendarDayButton({
   ...props
 }: React.ComponentProps<typeof DayButton>) {
   const defaultClassNames = getDefaultClassNames()
+  const { ['data-day']: _ignoredDataDay, ...dayButtonProps } = props as React.ComponentProps<
+    typeof DayButton
+  > & {
+    'data-day'?: string
+  }
 
   const ref = React.useRef<HTMLButtonElement>(null)
   React.useEffect(() => {
@@ -190,7 +203,8 @@ function CalendarDayButton({
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      {...dayButtonProps}
+      data-day={formatCalendarDataDay(day.date)}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&
@@ -205,7 +219,6 @@ function CalendarDayButton({
         defaultClassNames.day,
         className,
       )}
-      {...props}
     />
   )
 }

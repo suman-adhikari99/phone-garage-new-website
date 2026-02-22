@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight, Star } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
+import { getCachedGoogleReviews } from "@/lib/google-reviews-client"
 
 type TestimonialItem = {
   name: string
@@ -11,22 +12,6 @@ type TestimonialItem = {
   rating: number
   date: string
   avatar: string
-}
-
-type GoogleReviewPayload = {
-  authorName: string
-  authorPhotoUrl: string
-  rating: number
-  text: string
-  relativeDate: string
-  publishedAt: string
-}
-
-type GoogleReviewsApiResponse = {
-  placeName: string
-  rating: number | null
-  reviewCount: number | null
-  reviews: GoogleReviewPayload[]
 }
 
 const fallbackTestimonials: TestimonialItem[] = [
@@ -91,9 +76,8 @@ export function Testimonials() {
 
     async function loadGoogleReviews() {
       try {
-        const res = await fetch("/api/google-reviews", { cache: "no-store" })
-        if (!res.ok) return
-        const data: GoogleReviewsApiResponse = await res.json()
+        const data = await getCachedGoogleReviews()
+        if (!data) return
         if (!Array.isArray(data.reviews) || data.reviews.length === 0) return
 
         const mapped = data.reviews.map((review) => {

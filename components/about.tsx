@@ -11,11 +11,7 @@ import {
   Wrench,
 } from "lucide-react"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-
-type GoogleReviewsSummaryResponse = {
-  rating?: unknown
-  reviewCount?: unknown
-}
+import { getCachedGoogleReviews } from "@/lib/google-reviews-client"
 
 const features = [
   {
@@ -76,18 +72,11 @@ export function About() {
 
     async function loadGoogleSummary() {
       try {
-        const res = await fetch("/api/google-reviews", { cache: "no-store" })
-        if (!res.ok) return
+        const data = await getCachedGoogleReviews()
+        if (!data) return
 
-        const data = (await res.json()) as GoogleReviewsSummaryResponse
-        const rating =
-          typeof data.rating === "number" && Number.isFinite(data.rating)
-            ? Math.max(0, Math.min(5, data.rating))
-            : null
-        const reviewCount =
-          typeof data.reviewCount === "number" && Number.isFinite(data.reviewCount)
-            ? Math.max(0, Math.round(data.reviewCount))
-            : null
+        const rating = data.rating
+        const reviewCount = data.reviewCount
 
         if (cancelled) return
         setGoogleRating(rating)

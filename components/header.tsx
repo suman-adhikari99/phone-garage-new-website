@@ -51,15 +51,15 @@ export function Header() {
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-2 text-sm">
             <div className="flex items-center gap-6">
               <a
-                href="tel:+61400000000"
+                href="tel:0403983009"
                 className="flex items-center gap-2 transition-colors hover:text-[#ffffff]/80"
               >
                 <Phone className="h-3.5 w-3.5" />
-                <span>(02) 1234 5678</span>
+                <span>0403983009</span>
               </a>
               <span className="hidden items-center gap-2 sm:flex">
                 <MapPin className="h-3.5 w-3.5" />
-                <span>Sydney, Australia</span>
+                <span>27 Church St, Lidcombe, NSW 2141</span>
               </span>
             </div>
             <div className="flex items-center gap-4">
@@ -103,7 +103,7 @@ export function Header() {
             className="border-black text-black hover:bg-black hover:text-white bg-transparent"
             asChild
           >
-            <a href="tel:+61400000000">
+            <a href="tel:0403983009">
               <Phone className="mr-2 h-4 w-4" />
               Call Now
             </a>
@@ -155,7 +155,7 @@ export function Header() {
                 className="border-black text-black hover:bg-black hover:text-white w-full bg-transparent"
                 asChild
               >
-                <a href="tel:+61400000000">
+                <a href="tel:0403983009">
                   <Phone className="mr-2 h-4 w-4" />
                   Call Now
                 </a>

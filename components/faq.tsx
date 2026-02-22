@@ -3,8 +3,42 @@
 import { useEffect, useState } from "react"
 import { faqs } from "@/lib/data"
 import { cn } from "@/lib/utils"
+import {
+  IconBrandFacebook,
+  IconBrandInstagram,
+  IconBrandTiktok,
+  type Icon,
+} from "@tabler/icons-react"
 
 const FAQ_FOOTER_SPACER_EXTRA = 0
+
+type ConnectLink = {
+  label: string
+  href: string
+  external: boolean
+  icon: Icon
+}
+
+const CONNECT_LINKS: ConnectLink[] = [
+  {
+    label: "TikTok",
+    href: "https://www.tiktok.com/@phonegarage",
+    external: true,
+    icon: IconBrandTiktok,
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/Phonegarage.OfficialPage/",
+    external: true,
+    icon: IconBrandFacebook,
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/phonegarageofficial/",
+    external: true,
+    icon: IconBrandInstagram,
+  },
+]
 
 export function FAQ() {
   const [openIndex, setOpenIndex] = useState(0)
@@ -138,10 +172,10 @@ export function FAQ() {
                     Phone:
                   </h5>
                   <a
-                    href="tel:0295252986"
+                    href="tel:0403983009"
                     className="font-bold text-white transition-colors hover:text-[#d9d9d9]"
                   >
-                    (02) 9525 2986
+                    0403983009
                   </a>
                 </div>
               </div>
@@ -171,34 +205,38 @@ export function FAQ() {
               </div>
             </div>
 
-            <div className="flex flex-col justify-center rounded-[30px] p-[35px] max-[689px]:items-center max-[689px]:p-[30px]">
+            <div className="flex flex-col justify-center rounded-[30px] border-[3px] border-dashed border-[#3a3a3a] p-[35px] max-[689px]:items-center max-[689px]:p-[30px]">
               <h2 className="mb-3 max-w-[500px] text-[36px] font-semibold text-white max-[999px]:text-[30px] max-[689px]:text-center max-[689px]:text-[25px]">
-                Have more questions?
+                Connect
               </h2>
               <p className="mb-3 text-[18px] text-[#ffffffd1] max-[999px]:text-base max-[689px]:text-center">
-                Feel free to write to us or just call for more information.
+                Reach Phone Garage instantly on your preferred channel.
               </p>
-              <a
-                href="https://phonegarage.com.au/form/1564/"
-                rel="noopener"
-                className="inline-flex items-center gap-[15px] self-start text-base text-white underline transition-colors hover:text-[#d9d9d9] max-[689px]:self-center"
-              >
-                <span>Write to us</span>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 40 40"
-                  className="h-[30px] w-[30px] min-w-[30px] fill-current"
-                  aria-hidden="true"
-                >
-                  <path d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0Zm8.65 19.999V20.017a.65.65 0 0 1-.055.246c-.002.002-.001.002-.001.003h-.001v.002a.662.662 0 0 1-.128.187l-.002.001-6.857 7a.646.646 0 0 1-.919.008.65.65 0 0 1-.009-.92l5.775-5.894H12a.65.65 0 0 1 0-1.3h14.453l-5.775-5.895a.65.65 0 0 1 .928-.91l6.857 6.999.002.001c.055.056.097.12.128.187v.002l.002.002.007.016a.65.65 0 0 1 .047.231l.001.014v.002Z" />
-                </svg>
-              </a>
+              <div className="mt-2 flex flex-wrap gap-3 max-[689px]:justify-center">
+                {CONNECT_LINKS.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target={link.external ? "_blank" : undefined}
+                    rel={link.external ? "noopener noreferrer" : undefined}
+                    aria-label={link.label}
+                    title={link.label}
+                    className="inline-flex h-[52px] w-[52px] items-center justify-center rounded-full border border-[#3a3a3a] bg-[#111111] text-white transition-colors hover:border-[#3CB043] hover:text-[#86efac]"
+                  >
+                    <link.icon className="h-6 w-6" stroke={1.8} />
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
       </section>
-      <div aria-hidden style={{ height: `${footerSpacer}px` }} />
+      <div
+        aria-hidden
+        className="pointer-events-none"
+        style={{ height: `${footerSpacer}px` }}
+      />
     </div>
   )
 }

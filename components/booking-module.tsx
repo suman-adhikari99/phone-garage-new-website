@@ -101,6 +101,14 @@ const deviceTypes: { id: DeviceCategory; label: string; icon: React.ComponentTyp
   { id: "laptop", label: "Laptop", icon: Laptop, desc: "MacBook, Dell, HP & more" },
 ]
 
+function createIdempotencyKey(prefix: string) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `${prefix}-${crypto.randomUUID()}`
+  }
+
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
 interface BookingModuleProps {
   className?: string
   compact?: boolean
@@ -273,9 +281,10 @@ export function BookingModule({
     const errors: Record<string, string> = {}
     if (!formData.name.trim()) errors.name = "Name is required"
     if (!formData.phone.trim()) errors.phone = "Phone is required"
-    else if (!/^[\d\s\-+()]{8,}$/.test(formData.phone)) errors.phone = "Enter a valid phone number"
-    if (!formData.email.trim()) errors.email = "Email is required"
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) errors.email = "Enter a valid email"
+    else if (!/^\d{8,15}$/.test(formData.phone)) errors.phone = "Phone number must contain only digits (8-15)"
+    if (formData.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = "Enter a valid email"
+    }
     setFormErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -293,6 +302,7 @@ export function BookingModule({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Idempotency-Key": createIdempotencyKey("booking"),
         },
         body: JSON.stringify({
           brandId: selectedBrand || null,
@@ -309,7 +319,7 @@ export function BookingModule({
           storeLocation: selectedStoreObj?.address || selectedStoreObj?.name || "Not specified",
           customerName: formData.name,
           customerPhone: formData.phone,
-          customerEmail: formData.email,
+          customerEmail: formData.email || null,
           company: null,
           issueNotes: formData.notes || null,
         }),
@@ -326,12 +336,10 @@ export function BookingModule({
       const bookingRef = payload?.bookingRef || null
       setSavedBookingRef(bookingRef)
 
-      window.alert(
-        bookingRef
-          ? `Booking submitted successfully. Reference: ${bookingRef}`
-          : "Booking submitted successfully."
-      )
-      window.location.href = "/"
+      const successPath = bookingRef
+        ? `/booking-success?bookingRef=${encodeURIComponent(bookingRef)}`
+        : "/booking-success"
+      window.location.href = successPath
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to save booking. Please try again."
@@ -815,18 +823,21 @@ export function BookingModule({
                   type="tel"
                   placeholder="Phone Number *"
                   value={formData.phone}
-                  onChange={(e) => { setFormData({ ...formData, phone: e.target.value }); if (formErrors.phone) setFormErrors({ ...formErrors, phone: "" }) }}
+                  onChange={(e) => { setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 15) }); if (formErrors.phone) setFormErrors({ ...formErrors, phone: "" }) }}
                   className={cn(
                     "w-full rounded-xl border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:ring-2 focus:outline-none",
                     formErrors.phone ? "border-destructive focus:ring-destructive/20" : "border-border focus:border-primary focus:ring-primary/20"
                   )}
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={15}
                 />
                 {formErrors.phone && <p className="mt-1 text-xs text-destructive">{formErrors.phone}</p>}
               </div>
               <div>
                 <input
                   type="email"
-                  placeholder="Email Address *"
+                  placeholder="Email Address (Optional)"
                   value={formData.email}
                   onChange={(e) => { setFormData({ ...formData, email: e.target.value }); if (formErrors.email) setFormErrors({ ...formErrors, email: "" }) }}
                   className={cn(
@@ -863,7 +874,7 @@ export function BookingModule({
             </div>
             <h4 className="mt-4 text-lg font-semibold text-card-foreground">Booking Received!</h4>
             <p className="mt-2 max-w-xs text-sm text-muted-foreground">
-              We&apos;ll confirm your appointment shortly via email and phone.
+              We&apos;ll confirm your appointment shortly via phone.
             </p>
             {savedBookingRef && (
               <p className="mt-2 rounded-lg border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground">
@@ -950,7 +961,7 @@ export function BookingModule({
       {/* Quick Actions footer */}
       {step < 7 && (
         <div className="flex items-center justify-center gap-4 border-t border-border px-5 py-3">
-          <a href="tel:0297451234" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <a href="tel:0403983009" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
             <Phone className="h-3.5 w-3.5" />
             Call
           </a>
@@ -958,7 +969,7 @@ export function BookingModule({
             <Mail className="h-3.5 w-3.5" />
             Email
           </a>
-          <a href="/locations" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
+          <a href="/#visit-us" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground">
             <MapPin className="h-3.5 w-3.5" />
             Visit
           </a>

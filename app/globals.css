@@ -262,6 +262,28 @@ body {
   66%      { transform: translate(-30px, 50px) scale(0.93); }
 }
 
+@keyframes success-ring-draw {
+  0% {
+    stroke-dashoffset: 283;
+    opacity: 0.45;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes success-check-draw {
+  0% {
+    stroke-dashoffset: 70;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
 .animate-fade-up {
   animation: fade-up 0.8s ease-out forwards;
 }
@@ -292,6 +314,20 @@ body {
 
 .animate-marquee {
   animation: marquee 30s linear infinite;
+}
+
+.success-ring-draw {
+  stroke-dasharray: 283;
+  stroke-dashoffset: 283;
+  transform-origin: 50% 50%;
+  transform: rotate(-90deg);
+  animation: success-ring-draw 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.success-check-draw {
+  stroke-dasharray: 70;
+  stroke-dashoffset: 70;
+  animation: success-check-draw 1.1s cubic-bezier(0.17, 0.84, 0.44, 1) 1.5s forwards;
 }
 
 /* Animation delay utilities */

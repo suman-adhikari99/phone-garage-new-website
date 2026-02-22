@@ -384,7 +384,7 @@ export function ServicesPage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
                 <a
-                  href="tel:0297451234"
+                  href="tel:0403983009"
                   className="inline-flex h-11 items-center gap-2 rounded-xl border border-border bg-card px-6 text-sm font-medium text-foreground transition-all hover:bg-secondary"
                 >
                   <Phone className="h-4 w-4" />

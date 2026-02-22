@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="base" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f4f4f4" />
+      <stop offset="50%" stop-color="#ececec" />
+      <stop offset="100%" stop-color="#f1f1f1" />
+    </linearGradient>
+
+    <filter id="organic-emboss" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.0028 0.0062"
+        numOctaves="2"
+        seed="23"
+        stitchTiles="stitch"
+        result="noiseA"
+      />
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.0048 0.009"
+        numOctaves="1"
+        seed="44"
+        stitchTiles="stitch"
+        result="noiseB"
+      />
+      <feBlend in="noiseA" in2="noiseB" mode="screen" result="noiseMix" />
+      <feGaussianBlur in="noiseMix" stdDeviation="1.6" result="smoothNoise" />
+
+      <feDiffuseLighting in="smoothNoise" surfaceScale="22" lighting-color="#ffffff" result="diffuse">
+        <feDistantLight azimuth="225" elevation="54" />
+      </feDiffuseLighting>
+
+      <feSpecularLighting in="smoothNoise" surfaceScale="10" specularConstant="0.25" specularExponent="22" lighting-color="#ffffff" result="spec">
+        <feDistantLight azimuth="225" elevation="54" />
+      </feSpecularLighting>
+
+      <feColorMatrix
+        in="diffuse"
+        type="matrix"
+        values="
+          0.95 0    0    0 0
+          0    0.95 0    0 0
+          0    0    0.95 0 0
+          0    0    0    1 0"
+        result="softDiffuse"
+      />
+
+      <feBlend in="softDiffuse" in2="spec" mode="screen" result="litSurface" />
+      <feComposite in="litSurface" in2="SourceAlpha" operator="in" />
+    </filter>
+
+    <filter id="micro-noise" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.62"
+        numOctaves="1"
+        seed="9"
+        stitchTiles="stitch"
+      />
+      <feColorMatrix
+        type="matrix"
+        values="
+          0 0 0 0 0.88
+          0 0 0 0 0.88
+          0 0 0 0 0.88
+          0 0 0 0.03 0"
+      />
+    </filter>
+  </defs>
+
+  <rect width="100%" height="100%" fill="url(#base)" />
+  <rect width="100%" height="100%" filter="url(#organic-emboss)" opacity="0.96" />
+  <rect width="100%" height="100%" filter="url(#micro-noise)" opacity="1" />
+</svg>
