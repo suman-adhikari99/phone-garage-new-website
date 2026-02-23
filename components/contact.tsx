@@ -150,12 +150,20 @@ export function Contact() {
     setSelectedBrand("")
     setSelectedModel("")
     setSelectedIssues([])
+    setStep((prev) => (prev === 1 ? 2 : prev))
   }
 
   const handleBrandSelect = (brandId: string) => {
     setSelectedBrand(brandId)
     setSelectedModel("")
     setSelectedIssues([])
+    setStep((prev) => (prev === 2 ? 3 : prev))
+  }
+
+  const handleModelSelect = (modelId: string) => {
+    setSelectedModel(modelId)
+    setSelectedIssues([])
+    setStep((prev) => (prev === 3 ? 4 : prev))
   }
 
   const handleIssueToggle = (issueValue: string) => {
@@ -493,10 +501,7 @@ export function Contact() {
                             <button
                               key={model.id}
                               type="button"
-                              onClick={() => {
-                                setSelectedModel(model.id)
-                                setSelectedIssues([])
-                              }}
+                              onClick={() => handleModelSelect(model.id)}
                               className={`relative rounded-xl border px-4 py-3 text-left transition-all ${
                                 isSelected
                                   ? "border-zinc-900 bg-zinc-900 text-white shadow-[0_14px_28px_-22px_rgba(0,0,0,0.65)]"
@@ -761,7 +766,7 @@ export function Contact() {
                       Back
                     </Button>
 
-                    {step < 5 ? (
+                    {step === 4 ? (
                       <Button
                         type="button"
                         onClick={goToNextStep}
@@ -771,23 +776,25 @@ export function Contact() {
                         Continue
                       </Button>
                     ) : (
-                      <Button
-                        type="submit"
-                        size="lg"
-                        className="h-11 rounded-xl bg-zinc-900 px-6 text-sm font-semibold text-white shadow-[0_18px_35px_-20px_rgba(0,0,0,0.75)] hover:bg-black disabled:opacity-55"
-                        disabled={submitted || isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          "Sending..."
-                        ) : submitted ? (
-                          "Quote Request Sent!"
-                        ) : (
-                          <>
-                            <Send className="mr-2 h-4 w-4" />
-                            Request Free Quote
-                          </>
-                        )}
-                      </Button>
+                      step === 5 && (
+                        <Button
+                          type="submit"
+                          size="lg"
+                          className="h-11 rounded-xl bg-zinc-900 px-6 text-sm font-semibold text-white shadow-[0_18px_35px_-20px_rgba(0,0,0,0.75)] hover:bg-black disabled:opacity-55"
+                          disabled={submitted || isSubmitting}
+                        >
+                          {isSubmitting ? (
+                            "Sending..."
+                          ) : submitted ? (
+                            "Quote Request Sent!"
+                          ) : (
+                            <>
+                              <Send className="mr-2 h-4 w-4" />
+                              Request Free Quote
+                            </>
+                          )}
+                        </Button>
+                      )
                     )}
                   </div>
                   {submitError && (
