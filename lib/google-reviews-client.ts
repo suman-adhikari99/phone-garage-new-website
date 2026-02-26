@@ -16,7 +16,7 @@ export type GoogleReviewsApiResponse = {
   reviews: GoogleReviewPayload[]
 }
 
-const CLIENT_CACHE_TTL_MS = 5 * 60 * 1000
+const CLIENT_CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 2
 
 let cachedPayload: GoogleReviewsApiResponse | null = null
 let cacheExpiresAt = 0
@@ -96,4 +96,3 @@ export async function getCachedGoogleReviews() {
     inFlight = null
   }
 }
-

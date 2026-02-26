@@ -97,6 +97,13 @@ export type BookingOwnerNotificationRecord = {
   updatedAt: number
 }
 
+export type MarketingRecipientRecord = {
+  email: string
+  customerName: string | null
+  lastSeenAt: number
+  bookingCount: number
+}
+
 const DB_PATH =
   resolveWritableStoragePath(
     process.env.REPAIR_BOOKINGS_DB_PATH,
@@ -410,6 +417,70 @@ export function listRepairBookings(limit = 50): RepairBookingRecord[] {
   }>
 
   return rows.map(mapRepairBookingRow)
+}
+
+function normalizeEmailKey(value: string) {
+  return value.trim().toLowerCase()
+}
+
+function isValidMarketingEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+}
+
+function normalizeCustomerName(value: string | null | undefined) {
+  const trimmed = value?.trim()
+  return trimmed ? trimmed.slice(0, 160) : null
+}
+
+export function listMarketingRecipients(limit = 2500): MarketingRecipientRecord[] {
+  const database = getDb()
+  const safeLimit = Math.max(1, Math.min(5000, Math.floor(Number(limit) || 2500)))
+  const rowLimit = Math.max(safeLimit * 4, safeLimit)
+
+  const rows = database
+    .prepare(`
+      SELECT
+        id,
+        customer_name,
+        customer_email,
+        created_at
+      FROM repair_bookings
+      WHERE customer_email IS NOT NULL
+        AND TRIM(customer_email) != ''
+      ORDER BY created_at DESC, id DESC
+      LIMIT ?
+    `)
+    .all(rowLimit) as Array<{
+    id: number
+    customer_name: string | null
+    customer_email: string
+    created_at: number
+  }>
+
+  const recipients = new Map<string, MarketingRecipientRecord>()
+
+  for (const row of rows) {
+    const email = row.customer_email.trim()
+    if (!isValidMarketingEmail(email)) continue
+
+    const key = normalizeEmailKey(email)
+    const existing = recipients.get(key)
+    if (existing) {
+      existing.bookingCount += 1
+      continue
+    }
+
+    recipients.set(key, {
+      email,
+      customerName: normalizeCustomerName(row.customer_name),
+      lastSeenAt: Number(row.created_at),
+      bookingCount: 1,
+    })
+
+    if (recipients.size >= safeLimit) break
+  }
+
+  return Array.from(recipients.values())
 }
 
 export function getRepairBookingByRef(bookingRef: string): RepairBookingRecord | null {

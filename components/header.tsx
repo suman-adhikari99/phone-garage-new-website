@@ -75,9 +75,9 @@ export function Header() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 lg:px-8">
         <a href="/" className="flex items-center gap-2 shrink-0">
           <img
-            src="https://www.phonegarage.com.au/headerTop.png"
+            src="/images/phone-garage-logo.jpg"
             alt="Phone Garage logo"
-            className="h-10 w-auto"
+            className="h-12 w-auto lg:h-14"
           />
         </a>
 

@@ -9,7 +9,7 @@ const GOOGLE_PLACE_DETAILS_URL = "https://places.googleapis.com/v1/places"
 const GOOGLE_PLACE_DETAILS_LEGACY_URL = "https://maps.googleapis.com/maps/api/place/details/json"
 const GOOGLE_BUSINESS_PROFILE_BASE_URL = "https://mybusiness.googleapis.com/v4"
 const GOOGLE_OAUTH_TOKEN_URL = "https://oauth2.googleapis.com/token"
-const DEFAULT_CACHE_TTL_MS = 1000 * 60 * 60 * 6 // 6 hours
+const DEFAULT_CACHE_TTL_MS = 1000 * 60 * 60 * 24 * 2 // 2 days
 
 export type GoogleReviewsApiPayload = GoogleReviewsSnapshot & {
   source: "database" | "google"

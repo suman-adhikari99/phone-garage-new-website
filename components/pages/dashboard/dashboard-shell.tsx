@@ -8,6 +8,7 @@ import {
   ClipboardList,
   LayoutGrid,
   LogOut,
+  Megaphone,
   RefreshCw,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -44,13 +45,20 @@ const NAV_ITEMS: NavItem[] = [
     description: "Performance trends",
     icon: ChartColumnIncreasing,
   },
+  {
+    href: "/dashboard/marketing",
+    label: "Marketing",
+    description: "Bulk customer email",
+    icon: Megaphone,
+  },
 ]
 
-const PHONE_GARAGE_LOGO_URL = "https://www.phonegarage.com.au/headerTop.png"
+const PHONE_GARAGE_LOGO_URL = "/images/phone-garage-logo.jpg"
 
 function getPageTitle(pathname: string) {
   if (pathname === "/dashboard/requests") return "Request Management"
   if (pathname === "/dashboard/analytics") return "Analytics and Insights"
+  if (pathname === "/dashboard/marketing") return "Marketing Campaigns"
   return "Operations Overview"
 }
 
@@ -81,7 +89,7 @@ function DashboardFrame({ children }: { children: ReactNode }) {
             <img
               src={PHONE_GARAGE_LOGO_URL}
               alt="Phone Garage"
-              className="h-8 w-auto"
+              className="h-11 w-auto"
             />
             <p className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-300">
               Phone Garage
@@ -152,7 +160,7 @@ function DashboardFrame({ children }: { children: ReactNode }) {
                 <img
                   src={PHONE_GARAGE_LOGO_URL}
                   alt="Phone Garage"
-                  className="h-10 w-auto rounded-md border border-zinc-300 bg-white px-1.5 py-1"
+                  className="h-12 w-auto rounded-md border border-zinc-300 bg-white px-1.5 py-1 lg:h-14"
                 />
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-600">
@@ -191,7 +199,7 @@ function DashboardFrame({ children }: { children: ReactNode }) {
             </div>
 
             <div className="mt-4 grid gap-2 sm:hidden">
-              <nav className="grid grid-cols-3 gap-2">
+              <nav className="grid grid-cols-2 gap-2">
                 {NAV_ITEMS.map((item) => {
                   const active =
                     pathname === item.href ||
