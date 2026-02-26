@@ -44,7 +44,7 @@ export function Footer() {
           {/* Brand column */}
           <div className="sm:col-span-2 lg:col-span-1">
             <img
-              src="https://www.phonegarage.com.au/headerTop.png"
+              src="/images/phone-garage-logo.jpg"
               alt="Phone Garage logo"
               className="mb-4 h-10 w-auto"
             />
