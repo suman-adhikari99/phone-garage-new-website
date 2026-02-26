@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server"
 import { isAdminAuthenticatedFromRequest } from "@/lib/admin-auth"
-import { listMarketingRecipients } from "@/lib/booking-store"
+import {
+  listMarketingRecipients,
+  type MarketingRecipientRecord,
+} from "@/lib/booking-store"
 import {
   isMarketingEmailConfigured,
   sendBulkMarketingEmail,
@@ -63,6 +66,15 @@ function getAudienceLimit(url: URL) {
   const parsed = Number(url.searchParams.get("limit"))
   if (!Number.isFinite(parsed) || parsed <= 0) return DEFAULT_AUDIENCE_LIMIT
   return Math.max(1, Math.min(5000, Math.floor(parsed)))
+}
+
+function toFallbackRecipient(email: string, timestamp: number): MarketingRecipientRecord {
+  return {
+    email,
+    customerName: null,
+    lastSeenAt: timestamp,
+    bookingCount: 0,
+  }
 }
 
 export async function GET(request: Request) {
@@ -135,17 +147,8 @@ export async function POST(request: Request) {
     }
 
     const recipients = listMarketingRecipients(DEFAULT_AUDIENCE_LIMIT)
-    if (recipients.length === 0) {
-      return NextResponse.json(
-        {
-          error: "No recipients",
-          message: "No valid customer emails were found.",
-        },
-        { status: 400 }
-      )
-    }
-
     let campaignRecipients = recipients
+
     if (selectedEmails.provided) {
       if (selectedEmails.emails.length === 0) {
         return NextResponse.json(
@@ -157,20 +160,32 @@ export async function POST(request: Request) {
         )
       }
 
-      const selectedSet = new Set(selectedEmails.emails)
-      campaignRecipients = recipients.filter((recipient) =>
-        selectedSet.has(normalizeEmailKey(recipient.email))
+      const recipientByEmail = new Map(
+        recipients.map((recipient) => [normalizeEmailKey(recipient.email), recipient])
       )
+      const fallbackTimestamp = Date.now()
+      campaignRecipients = selectedEmails.emails.map((email) => {
+        const matched = recipientByEmail.get(email)
+        return matched || toFallbackRecipient(email, fallbackTimestamp)
+      })
+    } else if (recipients.length === 0) {
+      return NextResponse.json(
+        {
+          error: "No recipients",
+          message: "No valid customer emails were found.",
+        },
+        { status: 400 }
+      )
+    }
 
-      if (campaignRecipients.length === 0) {
-        return NextResponse.json(
-          {
-            error: "Selected recipients not found",
-            message: "Selected customers are no longer available in the audience.",
-          },
-          { status: 400 }
-        )
-      }
+    if (campaignRecipients.length === 0) {
+      return NextResponse.json(
+        {
+          error: "Selected recipients not found",
+          message: "Selected customers are no longer available in the audience.",
+        },
+        { status: 400 }
+      )
     }
 
     const sendResult = await sendBulkMarketingEmail({
