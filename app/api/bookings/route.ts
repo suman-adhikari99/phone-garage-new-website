@@ -83,19 +83,26 @@ function parsePayload(body: unknown): CreateRepairBookingInput | null {
   const storeLocation = asRequiredString(data.storeLocation)
   const customerName = asRequiredString(data.customerName)
   const customerPhone = asRequiredString(data.customerPhone)
-  const customerEmail = asOptionalString(data.customerEmail) || ""
+  const isQuoteRequest =
+    appointmentTime === "Quote request" || storeLocation === "Website Quote Form"
+  const customerEmail = isQuoteRequest
+    ? asRequiredString(data.customerEmail)
+    : asOptionalString(data.customerEmail) || ""
 
   if (
     !appointmentDate ||
     !appointmentTime ||
     !storeLocation ||
     !customerName ||
-    !customerPhone
+    !customerPhone ||
+    (isQuoteRequest && !customerEmail)
   ) {
     return null
   }
 
-  if (customerEmail && !isValidEmail(customerEmail)) {
+  const normalizedCustomerEmail = customerEmail || ""
+
+  if (normalizedCustomerEmail && !isValidEmail(normalizedCustomerEmail)) {
     return null
   }
 
@@ -118,7 +125,7 @@ function parsePayload(body: unknown): CreateRepairBookingInput | null {
     storeLocation,
     customerName,
     customerPhone,
-    customerEmail,
+    customerEmail: normalizedCustomerEmail,
     company: asOptionalString(data.company),
     issueNotes: asOptionalString(data.issueNotes),
   }

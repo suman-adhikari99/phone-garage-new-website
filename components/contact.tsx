@@ -192,16 +192,20 @@ export function Contact() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
-    if (!fullName.trim() || !phoneNumber.trim()) {
-      setSubmitError("Please enter your full name and phone number.")
+    const trimmedFullName = fullName.trim()
+    const trimmedPhoneNumber = phoneNumber.trim()
+    const trimmedEmailAddress = emailAddress.trim()
+
+    if (!trimmedFullName || !trimmedPhoneNumber || !trimmedEmailAddress) {
+      setSubmitError("Please enter your full name, phone number, and email address.")
       return
     }
-    if (!isValidPhoneDigits(phoneNumber.trim())) {
+    if (!isValidPhoneDigits(trimmedPhoneNumber)) {
       setSubmitError("Phone number must contain only digits (8-15).")
       return
     }
-    if (emailAddress.trim() && !isValidEmail(emailAddress.trim())) {
-      setSubmitError("Please enter a valid email address or leave it empty.")
+    if (!isValidEmail(trimmedEmailAddress)) {
+      setSubmitError("Please enter a valid email address.")
       return
     }
 
@@ -251,9 +255,9 @@ export function Contact() {
       formData.set("appointmentDate", new Date().toISOString())
       formData.set("appointmentTime", "Quote request")
       formData.set("storeLocation", "Website Quote Form")
-      formData.set("customerName", fullName)
-      formData.set("customerPhone", phoneNumber)
-      formData.set("customerEmail", emailAddress || "")
+      formData.set("customerName", trimmedFullName)
+      formData.set("customerPhone", trimmedPhoneNumber)
+      formData.set("customerEmail", trimmedEmailAddress)
       formData.set("company", "")
       formData.set("issueNotes", issueNotes || "")
 
@@ -667,7 +671,7 @@ export function Contact() {
                             htmlFor="email"
                             className="mb-2 block text-xs font-semibold uppercase tracking-[0.14em] text-zinc-600"
                           >
-                            Email Address (Optional)
+                            Email Address
                           </label>
                           <div className="relative">
                             <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
@@ -676,8 +680,9 @@ export function Contact() {
                               type="email"
                               value={emailAddress}
                               onChange={(event) => setEmailAddress(event.target.value)}
-                              placeholder="john@example.com (optional)"
+                              placeholder="john@example.com"
                               className="h-12 rounded-xl border-zinc-300 bg-white pl-10 text-[15px] text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:ring-zinc-900/10"
+                              required
                             />
                           </div>
                         </div>
