@@ -11,11 +11,27 @@ function getRequiredEnv(name: string) {
 }
 
 function getSupabaseUrl() {
-  return (
+  const explicitUrl =
     process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() ||
     process.env.SUPABASE_URL?.trim() ||
     ""
-  )
+
+  if (explicitUrl) return explicitUrl
+
+  const databaseUrl = process.env.SUPABASE_DB_URL?.trim() || ""
+  if (!databaseUrl) return ""
+
+  try {
+    const parsed = new URL(databaseUrl)
+    const hostname = parsed.hostname.trim().toLowerCase()
+    if (!hostname.startsWith("db.") || !hostname.endsWith(".supabase.co")) {
+      return ""
+    }
+
+    return `https://${hostname.slice(3)}`
+  } catch {
+    return ""
+  }
 }
 
 export function getSupabaseAdminClient() {
@@ -24,7 +40,7 @@ export function getSupabaseAdminClient() {
   const url = getSupabaseUrl()
   if (!url) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL) for Supabase setup."
+      "Missing NEXT_PUBLIC_SUPABASE_URL (or SUPABASE_URL). A valid SUPABASE_DB_URL can also be used to infer the project URL."
     )
   }
 
