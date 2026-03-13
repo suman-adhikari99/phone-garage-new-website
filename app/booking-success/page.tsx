@@ -7,6 +7,10 @@ export const metadata: Metadata = {
   title: "Booking Submitted",
   description:
     "Your booking request has been submitted successfully. View your reference number and booking details.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default function BookingSuccess() {

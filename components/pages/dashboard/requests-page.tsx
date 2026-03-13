@@ -49,6 +49,7 @@ import {
   getNextWorkflowStatus,
   getPipelineProgress,
   getPreviousWorkflowStatus,
+  getRequestChannelLabel,
   getSourceLabel,
   getSourcePillClass,
   STATUS_BADGE_CLASS,
@@ -765,6 +766,7 @@ export function DashboardRequestsPage() {
         booking.customerServiceName,
         booking.inspectionServiceName,
         booking.storeLocation,
+        booking.submissionSource,
         booking.issueNotes,
         booking.inspectionNotes,
         booking.quoteLineItems,
@@ -1214,7 +1216,8 @@ export function DashboardRequestsPage() {
   function renderRequestCard(booking: BookingRecord, compact = false) {
     const active = selectedBooking?.bookingRef === booking.bookingRef
     const status = asStatus(booking.status) || "new"
-    const issues = formatIssueList(booking.serviceName)
+    const issues = formatIssueList(booking.customerServiceName ?? booking.serviceName)
+    const requestChannel = getRequestChannelLabel(booking)
 
     return (
       <button
@@ -1260,6 +1263,14 @@ export function DashboardRequestsPage() {
             </p>
             <p className={cn("truncate text-sm", active ? "text-zinc-300" : "text-zinc-600")}>
               {displayText(booking.brandName)} {displayText(booking.modelName, "")}
+            </p>
+            <p
+              className={cn(
+                "truncate text-xs font-medium uppercase tracking-[0.08em]",
+                active ? "text-zinc-400" : "text-zinc-500"
+              )}
+            >
+              {requestChannel}
             </p>
           </div>
           <p className={cn("shrink-0 text-sm", active ? "text-zinc-300" : "text-zinc-500")}>
@@ -1671,6 +1682,11 @@ export function DashboardRequestsPage() {
               const normalizedIssueNames = new Set(
                 allServices.map((issue) => issue.toLowerCase())
               )
+              const requestChannel = getRequestChannelLabel(selectedBooking)
+              const showStoreLocationDetail =
+                Boolean(selectedBooking.storeLocation.trim()) &&
+                selectedBooking.storeLocation.trim().toLowerCase() !==
+                  requestChannel.trim().toLowerCase()
 
               return (
                 <>
@@ -1926,11 +1942,24 @@ export function DashboardRequestsPage() {
                         <Store className="mt-0.5 h-4 w-4 text-zinc-500" />
                         <div>
                           <p className="text-sm font-semibold uppercase tracking-[0.1em] text-zinc-600">
-                            Store / Source
+                            Request Source
                           </p>
                           <p className="mt-1 text-sm text-zinc-900">
-                            {displayText(selectedBooking.storeLocation)}
+                            {requestChannel}
                           </p>
+                          <p className="text-sm text-zinc-700">
+                            {getSourceLabel(selectedBooking)}
+                          </p>
+                          {showStoreLocationDetail ? (
+                            <p className="text-sm text-zinc-500">
+                              Store: {displayText(selectedBooking.storeLocation)}
+                            </p>
+                          ) : null}
+                          {selectedBooking.submissionSource?.trim() ? (
+                            <p className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
+                              {selectedBooking.submissionSource.replaceAll("_", " ")}
+                            </p>
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -2000,67 +2029,65 @@ export function DashboardRequestsPage() {
                             </div>
                           </div>
                         </div>
+                      </div>
+                    </div>
 
-                        <div className="mt-3 rounded-xl border border-zinc-300 bg-zinc-50 p-2.5">
-                          <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-600">
-                            Inspection Service Manager
-                          </p>
-                          <p className="mt-1 text-xs text-zinc-500">
-                            Add any extra work discovered during inspection.
-                          </p>
+                    <div className="mt-3 rounded-xl border border-zinc-300 bg-zinc-50 p-2.5">
+                      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-600">
+                        Inspection Service Manager
+                      </p>
+                      <p className="mt-1 text-xs text-zinc-500">
+                        Add any extra work discovered during inspection.
+                      </p>
 
-                          <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
-                            <Input
-                              value={inspectionServiceInput}
-                              onChange={(event) =>
-                                setInspectionServiceInput(event.target.value)
-                              }
-                              placeholder="Add service (e.g. Camera Repair)"
-                              className="h-10 rounded-lg border-zinc-300 bg-white text-zinc-900 focus-visible:border-zinc-900 focus-visible:ring-zinc-900/15"
-                            />
-                            <Button
+                      <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_auto]">
+                        <Input
+                          value={inspectionServiceInput}
+                          onChange={(event) =>
+                            setInspectionServiceInput(event.target.value)
+                          }
+                          placeholder="Add service (e.g. Camera Repair)"
+                          className="h-10 rounded-lg border-zinc-300 bg-white text-zinc-900 focus-visible:border-zinc-900 focus-visible:ring-zinc-900/15"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => void addInspectionService(inspectionServiceInput)}
+                          disabled={
+                            isUpdating ||
+                            normalizeServiceLabel(inspectionServiceInput).length === 0
+                          }
+                          className="h-10 rounded-lg border-zinc-300 bg-white text-zinc-900 shadow-none hover:bg-zinc-100 hover:shadow-none hover:text-zinc-900"
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add Service
+                        </Button>
+                      </div>
+
+                      <div className="mt-2 flex flex-wrap gap-1.5">
+                        {INSPECTION_SERVICE_PRESETS.map((service) => {
+                          const alreadyAdded = normalizedIssueNames.has(
+                            service.toLowerCase()
+                          )
+
+                          return (
+                            <button
+                              key={service}
                               type="button"
-                              variant="outline"
-                              onClick={() =>
-                                void addInspectionService(inspectionServiceInput)
-                              }
-                              disabled={
-                                isUpdating ||
-                                normalizeServiceLabel(inspectionServiceInput).length === 0
-                              }
-                              className="h-10 rounded-lg border-zinc-300 bg-white text-zinc-900 shadow-none hover:bg-zinc-100 hover:shadow-none hover:text-zinc-900"
+                              onClick={() => void addInspectionService(service)}
+                              disabled={isUpdating || alreadyAdded}
+                              className={cn(
+                                "rounded-md border px-2 py-1 text-xs font-semibold transition",
+                                alreadyAdded
+                                  ? "cursor-default border-zinc-300 bg-zinc-200 text-zinc-500"
+                                  : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-900 hover:bg-zinc-100",
+                                isUpdating && "cursor-not-allowed opacity-70"
+                              )}
                             >
-                              <Plus className="h-4 w-4" />
-                              Add Service
-                            </Button>
-                          </div>
-
-                          <div className="mt-2 flex flex-wrap gap-1.5">
-                            {INSPECTION_SERVICE_PRESETS.map((service) => {
-                              const alreadyAdded = normalizedIssueNames.has(
-                                service.toLowerCase()
-                              )
-
-                              return (
-                                <button
-                                  key={service}
-                                  type="button"
-                                  onClick={() => void addInspectionService(service)}
-                                  disabled={isUpdating || alreadyAdded}
-                                  className={cn(
-                                    "rounded-md border px-2 py-1 text-xs font-semibold transition",
-                                    alreadyAdded
-                                      ? "cursor-default border-zinc-300 bg-zinc-200 text-zinc-500"
-                                      : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-900 hover:bg-zinc-100",
-                                    isUpdating && "cursor-not-allowed opacity-70"
-                                  )}
-                                >
-                                  + {service}
-                                </button>
-                              )
-                            })}
-                          </div>
-                        </div>
+                              + {service}
+                            </button>
+                          )
+                        })}
                       </div>
                     </div>
                   </div>

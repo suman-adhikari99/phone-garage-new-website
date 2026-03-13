@@ -298,6 +298,29 @@ export function BookingModule({
     setIsSubmitting(true)
 
     try {
+      const submissionSummary = [
+        "Submission source: Website Service Quote Form",
+        displayServiceName ? `Requested service: ${displayServiceName}` : null,
+        selectedDevice
+          ? `Device type: ${
+              deviceTypes.find((device) => device.id === selectedDevice)?.label || selectedDevice
+            }`
+          : null,
+        displayBrandName ? `Brand: ${displayBrandName}` : null,
+        displayModelName ? `Model: ${displayModelName}` : null,
+        selectedStoreObj?.name ? `Preferred store: ${selectedStoreObj.name}` : null,
+        selectedStoreObj?.address ? `Store address: ${selectedStoreObj.address}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n")
+
+      const issueNotes = [
+        submissionSummary || null,
+        formData.notes.trim() ? `Customer notes:\n${formData.notes.trim()}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n\n")
+
       const response = await fetch("/api/bookings", {
         method: "POST",
         headers: {
@@ -317,11 +340,12 @@ export function BookingModule({
           appointmentDate: new Date().toISOString(),
           appointmentTime: "Not specified",
           storeLocation: selectedStoreObj?.address || selectedStoreObj?.name || "Not specified",
+          submissionSource: "website_service_quote_form",
           customerName: formData.name,
           customerPhone: formData.phone,
           customerEmail: formData.email || null,
           company: null,
-          issueNotes: formData.notes || null,
+          issueNotes: issueNotes || null,
         }),
       })
 

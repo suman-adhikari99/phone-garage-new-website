@@ -101,7 +101,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const booking = getRepairBookingByRef(bookingRef)
+    const booking = await getRepairBookingByRef(bookingRef)
     if (!booking) {
       return NextResponse.json(
         {
@@ -138,7 +138,7 @@ export async function POST(request: Request) {
     const services =
       providedServices.length > 0 ? providedServices : dedupedFallbackServices
 
-    const updateResult = updateRepairBooking(bookingRef, {
+    const updateResult = await updateRepairBooking(bookingRef, {
       status: "quote_sent",
       estimatedCost: quoteAmount,
       estimatedTime: quoteEta || null,

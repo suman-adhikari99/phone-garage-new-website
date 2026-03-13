@@ -123,6 +123,7 @@ function parsePayload(body: unknown): CreateRepairBookingInput | null {
     appointmentDate,
     appointmentTime,
     storeLocation,
+    submissionSource: asOptionalString(data.submissionSource),
     customerName,
     customerPhone,
     customerEmail: normalizedCustomerEmail,
@@ -193,12 +194,12 @@ async function deliverOwnerNotificationForBooking(
   bookingRef: string,
   maxAttemptsPerRun = OWNER_EMAIL_ATTEMPTS_PER_RUN
 ): Promise<EmailDeliveryState> {
-  const booking = getRepairBookingByRef(bookingRef)
+  const booking = await getRepairBookingByRef(bookingRef)
   if (!booking) return "booking_not_found"
   const attachments = await getBookingEmailAttachments(bookingRef)
 
-  enqueueBookingOwnerNotification(bookingRef)
-  const existing = getBookingOwnerNotificationByRef(bookingRef)
+  await enqueueBookingOwnerNotification(bookingRef)
+  const existing = await getBookingOwnerNotificationByRef(bookingRef)
   if (existing?.status === "sent") return "sent"
 
   if (!isOwnerBookingEmailConfigured()) {
@@ -208,7 +209,7 @@ async function deliverOwnerNotificationForBooking(
   const safeRunAttempts = Math.max(1, Math.min(5, Math.floor(maxAttemptsPerRun)))
 
   for (let attemptInRun = 0; attemptInRun < safeRunAttempts; attemptInRun += 1) {
-    const current = getBookingOwnerNotificationByRef(bookingRef)
+    const current = await getBookingOwnerNotificationByRef(bookingRef)
     if (!current) break
     if (current.status === "sent") return "sent"
     if (current.attempts >= OWNER_EMAIL_MAX_ATTEMPTS) {
@@ -217,13 +218,13 @@ async function deliverOwnerNotificationForBooking(
 
     const result = await sendBookingOwnerEmail(booking, attachments)
     if (result.ok) {
-      recordBookingOwnerNotificationSent(bookingRef, result.messageId)
+      await recordBookingOwnerNotificationSent(bookingRef, result.messageId)
       return "sent"
     }
 
-    recordBookingOwnerNotificationFailure(bookingRef, result.error)
+    await recordBookingOwnerNotificationFailure(bookingRef, result.error)
 
-    const updated = getBookingOwnerNotificationByRef(bookingRef)
+    const updated = await getBookingOwnerNotificationByRef(bookingRef)
     if ((updated?.attempts || 0) >= OWNER_EMAIL_MAX_ATTEMPTS) {
       return "max_attempts_reached"
     }
@@ -241,7 +242,7 @@ async function deliverOwnerNotificationForBooking(
 }
 
 async function retryPendingOwnerNotifications(limit = 2, skipBookingRef?: string) {
-  const retryable = listRetryableBookingOwnerNotifications(
+  const retryable = await listRetryableBookingOwnerNotifications(
     limit + (skipBookingRef ? 1 : 0),
     OWNER_EMAIL_MAX_ATTEMPTS
   )
@@ -264,7 +265,7 @@ export async function GET(request: Request) {
     const bookingRef = url.searchParams.get("bookingRef")?.trim()
 
     if (bookingRef) {
-      const booking = getRepairBookingByRef(bookingRef)
+      const booking = await getRepairBookingByRef(bookingRef)
       if (!booking) {
         return NextResponse.json(
           { error: "Booking not found", bookingRef },
@@ -279,7 +280,7 @@ export async function GET(request: Request) {
     }
 
     const limit = getSafeLimit(url)
-    const bookings = listRepairBookings(limit)
+    const bookings = await listRepairBookings(limit)
     return NextResponse.json({
       ok: true,
       count: bookings.length,
@@ -330,7 +331,7 @@ export async function POST(request: Request) {
 
     idempotencyKey = parseIdempotencyKey(request, body)
     if (idempotencyKey) {
-      const reservation = reserveBookingSubmissionIdempotencyKey(idempotencyKey)
+      const reservation = await reserveBookingSubmissionIdempotencyKey(idempotencyKey)
 
       if (reservation.status === "in_progress") {
         return NextResponse.json(
@@ -344,7 +345,7 @@ export async function POST(request: Request) {
       }
 
       if (reservation.status === "replay") {
-        const existingBooking = getRepairBookingByRef(reservation.bookingRef)
+        const existingBooking = await getRepairBookingByRef(reservation.bookingRef)
         if (existingBooking) {
           const emailStatus = await deliverOwnerNotificationForBooking(
             existingBooking.bookingRef,
@@ -361,9 +362,9 @@ export async function POST(request: Request) {
         }
 
         // Stale idempotency record without matching booking: release and continue as new.
-        releaseBookingSubmissionIdempotencyKey(idempotencyKey)
+        await releaseBookingSubmissionIdempotencyKey(idempotencyKey)
         const refreshedReservation =
-          reserveBookingSubmissionIdempotencyKey(idempotencyKey)
+          await reserveBookingSubmissionIdempotencyKey(idempotencyKey)
         if (refreshedReservation.status === "in_progress") {
           return NextResponse.json(
             {
@@ -376,7 +377,7 @@ export async function POST(request: Request) {
         }
 
         if (refreshedReservation.status === "replay") {
-          const fallbackReplay = getRepairBookingByRef(
+          const fallbackReplay = await getRepairBookingByRef(
             refreshedReservation.bookingRef
           )
           if (fallbackReplay) {
@@ -400,7 +401,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const booking = saveRepairBooking(payload)
+    const booking = await saveRepairBooking(payload)
     if (uploadedImages.length > 0) {
       try {
         await saveBookingImageUploads(booking.bookingRef, uploadedImages)
@@ -415,11 +416,11 @@ export async function POST(request: Request) {
     }
 
     if (idempotencyKey && idempotencyReserved) {
-      completeBookingSubmissionIdempotencyKey(idempotencyKey, booking.bookingRef)
+      await completeBookingSubmissionIdempotencyKey(idempotencyKey, booking.bookingRef)
       idempotencyReserved = false
     }
 
-    enqueueBookingOwnerNotification(booking.bookingRef)
+    await enqueueBookingOwnerNotification(booking.bookingRef)
     const emailStatus = await deliverOwnerNotificationForBooking(booking.bookingRef)
     await retryPendingOwnerNotifications(2, booking.bookingRef)
 
@@ -433,7 +434,7 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     if (idempotencyKey && idempotencyReserved) {
-      releaseBookingSubmissionIdempotencyKey(idempotencyKey)
+      await releaseBookingSubmissionIdempotencyKey(idempotencyKey)
     }
 
     const message = error instanceof Error ? error.message : "Unexpected error"
@@ -561,7 +562,7 @@ export async function PATCH(request: Request) {
       )
     }
 
-    const result = updateRepairBooking(bookingRef, {
+    const result = await updateRepairBooking(bookingRef, {
       status,
       serviceName,
       customerServiceName,

@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { ReactNode } from "react"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
@@ -7,6 +8,13 @@ import {
   ADMIN_SESSION_COOKIE_NAME,
   isAdminAuthenticatedFromSessionToken,
 } from "@/lib/admin-auth"
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function DashboardLayout({
   children,

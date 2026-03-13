@@ -17,6 +17,7 @@ export type BookingRecord = {
   appointmentDate: string
   appointmentTime: string
   storeLocation: string
+  submissionSource: string | null
   customerName: string
   customerPhone: string
   customerEmail: string
@@ -131,9 +132,14 @@ export function formatIssueList(serviceName: string | null) {
 }
 
 export function isQuoteRequest(booking: BookingRecord) {
+  const submissionSource = booking.submissionSource?.toLowerCase() || ""
   const location = booking.storeLocation.toLowerCase()
   const time = booking.appointmentTime.toLowerCase()
-  return location.includes("quote") || time.includes("quote")
+  return (
+    submissionSource.includes("quote") ||
+    location.includes("quote") ||
+    time.includes("quote")
+  )
 }
 
 export function getSourceLabel(booking: BookingRecord) {
@@ -144,6 +150,35 @@ export function getSourcePillClass(booking: BookingRecord) {
   return isQuoteRequest(booking)
     ? "border-zinc-300 bg-zinc-100 text-zinc-700"
     : "border-zinc-300 bg-zinc-50 text-zinc-700"
+}
+
+function startCase(value: string) {
+  return value.replace(/\b\w/g, (character) => character.toUpperCase())
+}
+
+export function getRequestChannelLabel(booking: BookingRecord) {
+  const normalizedSubmissionSource = booking.submissionSource?.trim().toLowerCase() || ""
+
+  if (normalizedSubmissionSource) {
+    const knownLabels: Record<string, string> = {
+      website_quote_form: "Website Quote Form",
+      website_service_quote_form: "Service Page Quote Form",
+      website_booking_form: "Website Booking Form",
+    }
+
+    if (knownLabels[normalizedSubmissionSource]) {
+      return knownLabels[normalizedSubmissionSource]
+    }
+
+    return startCase(
+      normalizedSubmissionSource.replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim()
+    )
+  }
+
+  const normalizedLocation = booking.storeLocation.trim()
+  if (normalizedLocation) return normalizedLocation
+
+  return isQuoteRequest(booking) ? "Quote Request" : "Direct Booking"
 }
 
 export function toPhoneHref(phone: string) {
@@ -206,6 +241,7 @@ function buildBookingsCsv(bookings: BookingRecord[]) {
   const headers = [
     "Booking Ref",
     "Source",
+    "Request Channel",
     "Status",
     "Created At",
     "Customer Name",
@@ -226,6 +262,7 @@ function buildBookingsCsv(bookings: BookingRecord[]) {
   const rows = bookings.map((booking) => [
     booking.bookingRef,
     getSourceLabel(booking),
+    getRequestChannelLabel(booking),
     STATUS_LABEL[asStatus(booking.status) || "new"],
     formatDateTime(booking.createdAt),
     displayText(booking.customerName),

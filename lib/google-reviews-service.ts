@@ -363,7 +363,7 @@ export async function getGoogleReviews({
   forceRefresh?: boolean
 } = {}): Promise<GoogleReviewsApiPayload> {
   const maxAgeMs = getCacheTtlMs()
-  const cached = getGoogleReviewsSnapshot()
+  const cached = await getGoogleReviewsSnapshot()
 
   if (!forceRefresh && cached && isFresh(cached, maxAgeMs)) {
     return {
@@ -375,7 +375,7 @@ export async function getGoogleReviews({
 
   try {
     const latest = await fetchLatestReviewsFromConfiguredSource()
-    const stored = saveGoogleReviewsSnapshot(latest)
+    const stored = await saveGoogleReviewsSnapshot(latest)
     return {
       ...stored,
       source: "google",

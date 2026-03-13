@@ -876,17 +876,70 @@ function HeroVisual() {
 
                       {/* Phone Garage logo */}
                       <motion.div
-                        className="flex justify-center mb-2"
-                        initial={{ scale: 0, opacity: 0 }}
+                        className="relative mb-2.5 flex justify-center"
+                        initial={{ scale: 0.88, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.9, type: "spring", stiffness: 200, damping: 18 }}
+                        transition={{ delay: 0.9, type: "spring", stiffness: 210, damping: 18 }}
                       >
-                        <img
-                          src="https://www.phonegarage.com.au/headerTop.png"
-                          alt=""
-                          className="h-[22px] w-auto opacity-70"
-                          aria-hidden="true"
-                        />
+                        <svg
+                          viewBox="0 0 220 78"
+                          className="relative block h-[38px] w-full max-w-[198px]"
+                          role="img"
+                          aria-label="Phone Garage"
+                        >
+                          <g transform="translate(4 2)">
+                            <path
+                              d="M8 15 L34 1 L53 12 L53 45 L33 57 L33 30 Z"
+                              fill="#57C462"
+                            />
+                            <path
+                              d="M8 22 L29 35 L29 73 L8 61 Z"
+                              fill="#09090B"
+                            />
+                            <path
+                              d="M32 44 L53 33 L53 63 L32 73 Z"
+                              fill="#09090B"
+                            />
+                          </g>
+                          <g transform="translate(66 8)">
+                            <text
+                              x="0"
+                              y="26"
+                              fill="#09090B"
+                              fontSize="28"
+                              fontWeight="900"
+                              style={{ letterSpacing: "1.2px" }}
+                            >
+                              PH
+                            </text>
+                            <g transform="translate(54 1)">
+                              <rect x="0" y="4" width="24" height="34" rx="8" fill="#09090B" />
+                              <rect x="4.5" y="11" width="15" height="18.5" rx="4" fill="#ffffff" />
+                              <rect x="5.8" y="12.3" width="12.4" height="15.8" rx="3" fill="#57C462" />
+                              <rect x="7.5" y="0" width="9" height="4" rx="2" fill="#09090B" />
+                            </g>
+                            <text
+                              x="84"
+                              y="26"
+                              fill="#09090B"
+                              fontSize="28"
+                              fontWeight="900"
+                              style={{ letterSpacing: "1.2px" }}
+                            >
+                              NE
+                            </text>
+                            <text
+                              x="1"
+                              y="51"
+                              fill="#57C462"
+                              fontSize="15"
+                              fontWeight="800"
+                              style={{ letterSpacing: "5px" }}
+                            >
+                              GARAGE
+                            </text>
+                          </g>
+                        </svg>
                       </motion.div>
 
                       {/* Repair tracker label */}

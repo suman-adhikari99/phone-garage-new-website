@@ -150,6 +150,9 @@ function DashboardFrame({ children }: { children: ReactNode }) {
             <p className="mt-1 text-sm text-zinc-500">
               Data auto-refreshes every 30 seconds.
             </p>
+            <p className="mt-1 text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
+              Live data source: Supabase
+            </p>
           </div>
         </aside>
 

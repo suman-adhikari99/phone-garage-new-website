@@ -16,6 +16,7 @@ import {
   displayText,
   formatDateTime,
   formatIssueList,
+  getRequestChannelLabel,
   getSourceLabel,
   isQuoteRequest,
   toDayKey,
@@ -136,6 +137,9 @@ export function DashboardOverviewPage() {
                       <p className="truncate text-sm text-zinc-600">
                         {displayText(booking.brandName)} {displayText(booking.modelName, "")}
                       </p>
+                      <p className="truncate text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
+                        {getRequestChannelLabel(booking)}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs font-semibold uppercase tracking-[0.08em] text-zinc-700">
@@ -146,7 +150,7 @@ export function DashboardOverviewPage() {
                   </div>
 
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {formatIssueList(booking.serviceName)
+                    {formatIssueList(booking.customerServiceName ?? booking.serviceName)
                       .slice(0, 2)
                       .map((issue) => (
                         <span

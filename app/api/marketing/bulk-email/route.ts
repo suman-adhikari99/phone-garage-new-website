@@ -84,7 +84,7 @@ export async function GET(request: Request) {
 
   try {
     const url = new URL(request.url)
-    const recipients = listMarketingRecipients(getAudienceLimit(url))
+    const recipients = await listMarketingRecipients(getAudienceLimit(url))
 
     return NextResponse.json({
       ok: true,
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const recipients = listMarketingRecipients(DEFAULT_AUDIENCE_LIMIT)
+    const recipients = await listMarketingRecipients(DEFAULT_AUDIENCE_LIMIT)
     let campaignRecipients = recipients
 
     if (selectedEmails.provided) {

@@ -1,21 +1,24 @@
 import React from "react"
 import type { Metadata, Viewport } from 'next'
 import { Analytics } from '@vercel/analytics/next'
+import { getMetadataBase } from "@/lib/site-url"
 import './globals.css'
 
 export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
   title: 'Phone Garage | Expert Mobile Phone Repairs Australia',
   description: 'Professional mobile phone repair services in Australia. Same-day screen replacements, battery repairs, water damage recovery and more. Quality parts, expert technicians, warranty on all repairs.',
   keywords: ['phone repair', 'mobile repair', 'screen replacement', 'battery replacement', 'Australia', 'Phone Garage'],
   icons: {
-    icon: [{ url: '/images/phone-garage-logo.jpg', type: 'image/jpeg' }],
-    shortcut: '/images/phone-garage-logo.jpg',
-    apple: '/images/phone-garage-logo.jpg',
+    icon: [{ url: '/icon', type: 'image/png' }],
+    shortcut: '/icon',
+    apple: '/icon',
   },
   openGraph: {
     title: 'Phone Garage | Expert Mobile Phone Repairs',
     description: 'Professional mobile phone repair services. Same-day repairs with warranty.',
     type: 'website',
+    url: '/',
   },
 }
 

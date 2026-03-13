@@ -255,6 +255,7 @@ export function Contact() {
       formData.set("appointmentDate", new Date().toISOString())
       formData.set("appointmentTime", "Quote request")
       formData.set("storeLocation", "Website Quote Form")
+      formData.set("submissionSource", "website_quote_form")
       formData.set("customerName", trimmedFullName)
       formData.set("customerPhone", trimmedPhoneNumber)
       formData.set("customerEmail", trimmedEmailAddress)

@@ -34,3 +34,6 @@ data/booking-uploads/
 .cursor/rules/seo.mdc
 .cursor/rules/phone-garage-design .code-workspace
 .cursor/rules/phone-garage-design .code-workspace
+data/*.sqlite
+data/*.sqlite-shm
+data/*.sqlite-wal

@@ -28,6 +28,7 @@ import { useDashboardData } from "./dashboard-data-context"
 import {
   asStatus,
   formatIssueList,
+  getRequestChannelLabel,
   STATUS_LABEL,
   STATUS_OPTIONS,
   toDayKey,
@@ -151,7 +152,9 @@ export function DashboardAnalyticsPage() {
   const issueMix = useMemo(() => {
     const counts = new Map<string, number>()
     for (const booking of bookings) {
-      for (const issue of formatIssueList(booking.serviceName)) {
+      for (const issue of formatIssueList(
+        booking.customerServiceName ?? booking.serviceName
+      )) {
         counts.set(issue, (counts.get(issue) || 0) + 1)
       }
     }
@@ -170,11 +173,11 @@ export function DashboardAnalyticsPage() {
     }))
   }, [bookings])
 
-  const locationMix = useMemo(() => {
+  const channelMix = useMemo(() => {
     const counts = new Map<string, number>()
 
     for (const booking of bookings) {
-      const key = booking.storeLocation.trim() || "Unknown"
+      const key = getRequestChannelLabel(booking)
       counts.set(key, (counts.get(key) || 0) + 1)
     }
 
@@ -475,21 +478,21 @@ export function DashboardAnalyticsPage() {
             <MapPin className="mt-0.5 h-5 w-5 text-zinc-700" />
             <div>
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-zinc-600">
-                Store / Source Mix
+                Channel / Source Mix
               </p>
               <h2 className="mt-1 text-lg font-semibold text-zinc-900">
-                Where requests are coming from
+                How requests are entering the pipeline
               </h2>
             </div>
           </div>
 
           <div className="mt-4 space-y-2.5">
-            {locationMix.length === 0 ? (
+            {channelMix.length === 0 ? (
               <p className="rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-4 text-sm text-zinc-600">
-                No location data yet.
+                No source data yet.
               </p>
             ) : (
-              locationMix.map((item, index) => (
+              channelMix.map((item, index) => (
                 <div
                   key={item.name}
                   className="rounded-xl border border-zinc-300 bg-zinc-50 px-3 py-2.5"
