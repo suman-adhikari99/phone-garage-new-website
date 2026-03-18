@@ -848,12 +848,7 @@ export function ServicesPreview() {
             <p className="mb-8 text-center text-lg font-semibold text-foreground">
               Select your brand
             </p>
-            <div
-              className="mx-auto grid max-w-4xl gap-4"
-              style={{
-                gridTemplateColumns: `repeat(${Math.min(currentBrands.length, 5)}, minmax(0, 1fr))`,
-              }}
-            >
+            <div className="mx-auto grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
               {currentBrands.map((brand) => {
                 const LogoComponent = brandLogos[brand.id]
                 const logoSrc = brandLogoCdn[brand.id]
@@ -861,18 +856,25 @@ export function ServicesPreview() {
                   <button
                     key={brand.id}
                     onClick={() => handleBrandSelect(brand.id)}
-                    className="group flex flex-col items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    className="group flex w-full min-w-0 flex-col items-center gap-2 rounded-xl px-2 py-2 transition-all duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-3"
                   >
-                    <div className="flex h-[7.5rem] w-[7.5rem] items-center justify-center rounded-2xl border border-zinc-300 bg-zinc-200 transition-colors duration-200 group-hover:border-zinc-500 group-hover:bg-zinc-200">
+                    <div className="flex h-24 w-24 items-center justify-center rounded-2xl border border-zinc-300 bg-zinc-200 transition-colors duration-200 group-hover:border-zinc-500 group-hover:bg-zinc-200 sm:h-[7.5rem] sm:w-[7.5rem]">
                       {logoSrc ? (
-                        <img src={logoSrc} alt={`${brand.name} logo`} className="h-[5.5rem] w-[5.5rem] object-contain transition-transform duration-200 group-hover:scale-110" loading="lazy" />
+                        <img
+                          src={logoSrc}
+                          alt={`${brand.name} logo`}
+                          className="h-16 w-16 object-contain transition-transform duration-200 group-hover:scale-110 sm:h-[5.5rem] sm:w-[5.5rem]"
+                          loading="lazy"
+                        />
                       ) : LogoComponent ? (
-                        <LogoComponent className="h-[4.75rem] w-[4.75rem] text-black transition-transform duration-200 group-hover:scale-110" />
+                        <LogoComponent className="h-14 w-14 text-black transition-transform duration-200 group-hover:scale-110 sm:h-[4.75rem] sm:w-[4.75rem]" />
                       ) : (
                         <span className="text-lg font-extrabold text-black">{brand.name.charAt(0)}</span>
                       )}
                     </div>
-                    <span className="text-sm font-semibold text-foreground/80 transition-colors group-hover:text-foreground">{brand.name}</span>
+                    <span className="text-center text-sm font-semibold text-foreground/80 transition-colors group-hover:text-foreground">
+                      {brand.name}
+                    </span>
                   </button>
                 )
               })}
