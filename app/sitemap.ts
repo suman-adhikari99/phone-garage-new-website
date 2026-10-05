@@ -18,6 +18,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.95,
     },
     {
+      url: toAbsoluteUrl("/our-services"),
+      lastModified: BUILD_TIME,
+      changeFrequency: "monthly",
+      priority: 0.92,
+    },
+    {
+      url: toAbsoluteUrl("/laptop-repair"),
+      lastModified: BUILD_TIME,
+      changeFrequency: "monthly",
+      priority: 0.91,
+    },
+    {
       url: toAbsoluteUrl("/quote"),
       lastModified: BUILD_TIME,
       changeFrequency: "weekly",

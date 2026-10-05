@@ -138,6 +138,9 @@ export function getBrandsByCategory(category: DeviceCategory): Brand[] {
 
 export const models: Model[] = [
   // ──── Apple iPhone ────
+  { id: "iphone-duo", brandId: "apple", name: "iPhone Duo (Foldable)", image: "", year: "2026" },
+  { id: "iphone-18-pro-max", brandId: "apple", name: "iPhone 18 Pro Max", image: "", year: "2026" },
+  { id: "iphone-18-pro", brandId: "apple", name: "iPhone 18 Pro", image: "", year: "2026" },
   { id: "iphone-17-pro-max", brandId: "apple", name: "iPhone 17 Pro Max", image: "", year: "2025" },
   { id: "iphone-17-pro", brandId: "apple", name: "iPhone 17 Pro", image: "", year: "2025" },
   { id: "iphone-17-plus", brandId: "apple", name: "iPhone 17 Plus", image: "", year: "2025" },
